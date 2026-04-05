@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Documents - Barangay 853</title>
+  <link rel="stylesheet" href="public.css">
+</head>
+<body class="public-page">
+
+  <nav class="navbar">
+    <div class="container">
+      <div class="nav-brand">
+        <img src="assets/logo-brgy.png" alt="Barangay 853 Logo" class="nav-logo">
+        <span class="brand-name">Barangay 853</span>
+      </div>
+      <ul class="nav-menu">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="documents.html" class="active">Documents</a></li>
+        <li><a href="announcements.html">Announcements</a></li>
+        <li><a href="report.html">Report</a></li>
+        <li><a href="about.html">About</a></li>
+        <li id="nav-auth"></li>
+      </ul>
+    </div>
+  </nav>
+
+  <section class="page-header">
+    <div class="container">
+      <h1>Document Services</h1>
+      <p>Request and manage your barangay documents online</p>
+    </div>
+  </section>
+
+  <section class="documents-section">
+    <div class="container">
+      <div class="section-header" style="display:flex;justify-content:space-between;align-items:center;text-align:left">
+        <div>
+          <h2>Available Documents</h2>
+        </div>
+        <a href="login.html" class="btn primary" id="request-btn">Request a Document</a>
+      </div>
+
+      <!-- Barangay Clearances -->
+      <div class="document-category">
+        <h3>Barangay Clearances</h3>
+        <div class="document-grid">
+          <div class="document-card">
+            <div class="document-icon">📄</div>
+            <h4>Barangay Clearance</h4>
+            <p>Required for employment, business permits, and other legal purposes</p>
+            <div class="document-actions">
+              <button class="btn primary" onclick="openModal('clearance-requirements')">View Requirements</button>
+              <button class="btn secondary" onclick="requestDocument('Barangay Clearance')">Apply Now</button>
+            </div>
+          </div>
+          <div class="document-card">
+            <div class="document-icon">🏪</div>
+            <h4>Business Clearance</h4>
+            <p>Needed for business registration and renewal</p>
+            <div class="document-actions">
+              <button class="btn primary" onclick="openModal('business-requirements')">View Requirements</button>
+              <button class="btn secondary" onclick="requestDocument('Business Clearance')">Apply Now</button>
+            </div>
+          </div>
+          <div class="document-card">
+            <div class="document-icon">🏗️</div>
+            <h4>Construction Clearance</h4>
+            <p>Required before starting any construction project</p>
+            <div class="document-actions">
+              <button class="btn primary" onclick="openModal('construction-requirements')">View Requirements</button>
+              <button class="btn secondary" onclick="requestDocument('Construction Clearance')">Apply Now</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Certificates -->
+      <div class="document-category">
+        <h3>Certificates and Endorsements</h3>
+        <div class="document-grid">
+          <div class="document-card">
+            <div class="document-icon">🏠</div>
+            <h4>Certificate of Residency</h4>
+            <p>Proof of residence within the barangay</p>
+            <div class="document-actions">
+              <button class="btn primary" onclick="openModal('residency-requirements')">Learn More</button>
+              <button class="btn secondary" onclick="requestDocument('Certificate of Residency')">Request Certificate</button>
+            </div>
+          </div>
+          <div class="document-card">
+            <div class="document-icon">💰</div>
+            <h4>Certificate of Indigency</h4>
+            <p>For financial assistance and medical purposes</p>
+            <div class="document-actions">
+              <button class="btn primary" onclick="openModal('indigency-requirements')">Learn More</button>
+              <button class="btn secondary" onclick="requestDocument('Certificate of Indigency')">Request Certificate</button>
+            </div>
+          </div>
+          <div class="document-card">
+            <div class="document-icon">👥</div>
+            <h4>Good Moral Certificate</h4>
+            <p>Character reference for employment or school</p>
+            <div class="document-actions">
+              <button class="btn primary" onclick="openModal('moral-requirements')">Learn More</button>
+              <button class="btn secondary" onclick="requestDocument('Good Moral Certificate')">Request Certificate</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Frequently Requested -->
+      <div class="document-category">
+        <h3>Frequently Requested Documents</h3>
+        <div class="document-grid">
+          <div class="document-card">
+            <div class="document-icon">🆔</div>
+            <h4>Barangay ID</h4>
+            <p>Official identification for residents</p>
+            <button class="btn primary" onclick="requestDocument('Barangay ID')">Request Now</button>
+          </div>
+          <div class="document-card">
+            <div class="document-icon">📋</div>
+            <h4>Community Tax Certificate (Cedula)</h4>
+            <p>Annual tax certificate for residents</p>
+            <button class="btn primary" onclick="requestDocument('Community Tax Certificate (Cedula)')">Request Now</button>
+          </div>
+          <div class="document-card">
+            <div class="document-icon">📑</div>
+            <h4>First-Time Jobseeker Certificate</h4>
+            <p>For first-time employment seekers</p>
+            <button class="btn primary" onclick="requestDocument('First-Time Jobseeker Certificate')">Request Now</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Requirements Modal -->
+  <div class="modal-backdrop" id="req-modal" style="display:none" onclick="closeModal()">
+    <div class="modal" onclick="event.stopPropagation()">
+      <button class="modal-close" onclick="closeModal()">&times;</button>
+      <h3 id="modal-title"></h3>
+      <div class="modal-body" id="modal-body"></div>
+      <div class="modal-footer">
+        <button class="btn secondary" onclick="closeModal()">Close</button>
+        <button class="btn primary" onclick="closeModal();showRequestForm()">Apply Now</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Request Form Modal -->
+  <div class="modal-backdrop" id="request-modal" style="display:none" onclick="closeRequestModal()">
+    <div class="modal" style="max-width:600px;width:90%" onclick="event.stopPropagation()">
+      <button class="modal-close" onclick="closeRequestModal()">&times;</button>
+      <h3>Request Document</h3>
+      <div id="request-form-content">
+        <div class="error-msg" id="req-error" style="display:none"></div>
+        <div class="success-msg" id="req-success" style="display:none"></div>
+        <div class="form-group">
+          <label>Full Name *</label>
+          <input type="text" class="input" id="req-name" required>
+        </div>
+        <div class="form-group">
+          <label>Document Type *</label>
+          <input type="text" class="input" id="req-doctype" readonly style="background:#f3f4f6">
+        </div>
+        <div class="form-group">
+          <label>Purpose *</label>
+          <textarea class="input" id="req-purpose" rows="3" placeholder="State the purpose for requesting this document" required></textarea>
+        </div>
+        <div class="form-group">
+          <label>Contact Number *</label>
+          <input type="tel" class="input" id="req-contact" placeholder="0917 123 4567" required>
+        </div>
+        <div class="form-group">
+          <label>Email Address</label>
+          <input type="email" class="input" id="req-email">
+        </div>
+        <div class="form-group">
+          <label>Complete Address *</label>
+          <textarea class="input" id="req-address" rows="2" placeholder="Lot/Block, Street, Zone, Barangay" required></textarea>
+        </div>
+        <div class="modal-footer">
+          <button class="btn secondary" onclick="closeRequestModal()">Cancel</button>
+          <button class="btn primary" id="req-submit-btn" onclick="submitRequest()">Submit Request</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-content">
+        <div class="footer-section"><h4>Barangay 853</h4><p>Serving the community with dedication and transparency</p></div>
+        <div class="footer-section"><h4>Quick Links</h4><ul><li><a href="index.html">Home</a></li><li><a href="documents.html">Documents</a></li><li><a href="announcements.html">Announcements</a></li><li><a href="about.html">About</a></li></ul></div>
+        <div class="footer-section"><h4>Contact Us</h4><p>Email: barangay853@example.com</p><p>Phone: (02) 1234-5678</p></div>
+      </div>
+      <div class="footer-bottom"><p>&copy; 2025 Barangay 853. All rights reserved.</p></div>
+    </div>
+  </footer>
+
+  <script src="public.js"></script>
+  <script>
+    const API = 'http://localhost/Barangay853';
+    const requirements = {
+      'clearance-requirements': { title: 'Barangay Clearance Requirements', content: `<ul class="requirements-list"><li>Valid ID (Government-issued)</li><li>Barangay Residency Certificate or Proof of Address</li><li>1x1 ID Picture (2 copies)</li><li>Cedula or Community Tax Certificate</li><li>Processing Fee: ₱50.00</li></ul><p><strong>Processing Time:</strong> 3-5 working days</p>` },
+      'business-requirements': { title: 'Business Clearance Requirements', content: `<ul class="requirements-list"><li>DTI/SEC Registration</li><li>Valid ID of Business Owner</li><li>Proof of Business Location</li><li>Barangay Clearance (Personal)</li><li>Processing Fee: ₱200.00</li></ul><p><strong>Processing Time:</strong> 5-7 working days</p>` },
+      'construction-requirements': { title: 'Construction Clearance Requirements', content: `<ul class="requirements-list"><li>Building Permit from City Hall</li><li>Approved Building Plans</li><li>Valid ID of Property Owner</li><li>Land Title or Tax Declaration</li><li>Processing Fee: ₱500.00</li></ul><p><strong>Processing Time:</strong> 7-10 working days</p>` },
+      'residency-requirements': { title: 'Certificate of Residency Requirements', content: `<ul class="requirements-list"><li>Valid ID (Government-issued)</li><li>Proof of Address (Utility Bill, Lease Contract)</li><li>1x1 ID Picture (1 copy)</li><li>Processing Fee: ₱30.00</li></ul><p><strong>Processing Time:</strong> 2-3 working days</p>` },
+      'indigency-requirements': { title: 'Certificate of Indigency Requirements', content: `<ul class="requirements-list"><li>Valid ID</li><li>Proof of Income (if employed)</li><li>Medical Certificate (if for medical assistance)</li><li>Barangay Clearance</li><li>Processing Fee: Free</li></ul><p><strong>Processing Time:</strong> 3-5 working days</p>` },
+      'moral-requirements': { title: 'Good Moral Certificate Requirements', content: `<ul class="requirements-list"><li>Valid ID</li><li>Barangay Clearance</li><li>1x1 ID Picture (1 copy)</li><li>Letter of Request stating purpose</li><li>Processing Fee: ₱50.00</li></ul><p><strong>Processing Time:</strong> 3-5 working days</p>` }
+    };
+
+    let selectedDocType = '';
+
+    function openModal(type) {
+      const req = requirements[type];
+      if (!req) return;
+      document.getElementById('modal-title').textContent = req.title;
+      document.getElementById('modal-body').innerHTML = req.content;
+      document.getElementById('req-modal').style.display = 'flex';
+    }
+
+    function closeModal() {
+      document.getElementById('req-modal').style.display = 'none';
+    }
+
+    function requestDocument(docType) {
+      selectedDocType = docType;
+      const user = JSON.parse(localStorage.getItem('user') || 'null');
+      if (!user) { window.location.href = 'login.html'; return; }
+      document.getElementById('req-doctype').value = docType;
+      document.getElementById('req-name').value = user.name || '';
+      document.getElementById('req-email').value = user.email || '';
+      document.getElementById('request-modal').style.display = 'flex';
+    }
+
+    function showRequestForm() {
+      const user = JSON.parse(localStorage.getItem('user') || 'null');
+      if (!user) { window.location.href = 'login.html'; return; }
+      document.getElementById('request-modal').style.display = 'flex';
+    }
+
+    function closeRequestModal() {
+      document.getElementById('request-modal').style.display = 'none';
+      document.getElementById('req-error').style.display = 'none';
+      document.getElementById('req-success').style.display = 'none';
+    }
+
+    async function submitRequest() {
+      const name = document.getElementById('req-name').value;
+      const docType = document.getElementById('req-doctype').value;
+      const purpose = document.getElementById('req-purpose').value;
+      const contact = document.getElementById('req-contact').value;
+      const email = document.getElementById('req-email').value;
+      const address = document.getElementById('req-address').value;
+      const errEl = document.getElementById('req-error');
+      const sucEl = document.getElementById('req-success');
+      const btn = document.getElementById('req-submit-btn');
+
+      errEl.style.display = 'none';
+      if (!name || !docType || !purpose || !contact || !address) {
+        errEl.textContent = 'Please fill in all required fields.';
+        errEl.style.display = 'block';
+        return;
+      }
+
+      btn.disabled = true;
+      btn.textContent = 'Submitting...';
+
+      try {
+        const res = await fetch(`${API}/documents/index.php?public=1`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ requester_name: name, document_type: docType, purpose, contact_number: contact, email, address })
+        });
+        const data = await res.json();
+        if (data.success) {
+          sucEl.textContent = `Request submitted! Reference: ${data.reference_no}`;
+          sucEl.style.display = 'block';
+          setTimeout(() => closeRequestModal(), 3000);
+        } else {
+          errEl.textContent = data.message || 'Submission failed.';
+          errEl.style.display = 'block';
+        }
+      } catch (err) {
+        errEl.textContent = 'Cannot connect to server.';
+        errEl.style.display = 'block';
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Submit Request';
+      }
+    }
+  </script>
+</body>
+</html>

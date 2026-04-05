@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>File a Report - Barangay 853</title>
+  <link rel="stylesheet" href="public.css">
+</head>
+<body class="public-page">
+
+  <nav class="navbar">
+    <div class="container">
+      <div class="nav-brand">
+        <img src="assets/logo-brgy.png" alt="Barangay 853 Logo" class="nav-logo">
+        <span class="brand-name">Barangay 853</span>
+      </div>
+      <ul class="nav-menu">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="documents.html">Documents</a></li>
+        <li><a href="announcements.html">Announcements</a></li>
+        <li><a href="report.html" class="active">Report</a></li>
+        <li><a href="about.html">About</a></li>
+        <li id="nav-auth"></li>
+      </ul>
+    </div>
+  </nav>
+
+  <section class="page-header">
+    <div class="container">
+      <h1>File an Incident Report</h1>
+      <p>Report incidents and concerns to the barangay officials</p>
+    </div>
+  </section>
+
+  <section class="report-section">
+    <div class="container">
+      <div class="report-container">
+
+        <!-- Info side -->
+        <div class="report-info">
+          <h2>Barangay Blotter System</h2>
+          <p>The barangay blotter is an official record of all incidents reported within our jurisdiction. Filing a report helps maintain peace and order in our community.</p>
+
+          <div class="info-box">
+            <h3>What can be reported?</h3>
+            <ul>
+              <li>Noise complaints</li>
+              <li>Disputes between neighbors</li>
+              <li>Theft or robbery</li>
+              <li>Physical altercations</li>
+              <li>Property damage</li>
+              <li>Suspicious activities</li>
+              <li>Other community concerns</li>
+            </ul>
+          </div>
+
+          <div class="info-box">
+            <h3>Important Notes</h3>
+            <ul>
+              <li>All information provided will be kept confidential</li>
+              <li>False reporting is punishable by law</li>
+              <li>For emergencies, please call 911 immediately</li>
+              <li>You may be contacted for follow-up questions</li>
+            </ul>
+          </div>
+
+          <div class="emergency-contact">
+            <h3>Emergency Contacts</h3>
+            <p><strong>Barangay Hotline:</strong> (02) 1234-5678</p>
+            <p><strong>Police Emergency:</strong> 911</p>
+            <p><strong>Fire Department:</strong> (02) 8888-0000</p>
+          </div>
+        </div>
+
+        <!-- Form side -->
+        <div class="report-form-container">
+          <form id="report-form" class="report-form" onsubmit="submitReport(event)">
+            <h3>Incident Report Form</h3>
+            <p class="form-subtitle">Please provide accurate and detailed information</p>
+
+            <div class="error-msg" id="report-error" style="display:none"></div>
+
+            <div class="form-section">
+              <h4>Reporter Information</h4>
+              <div class="form-group">
+                <label>Full Name <span class="required">*</span></label>
+                <input type="text" name="reporterName" class="input" required>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Contact Number <span class="required">*</span></label>
+                  <input type="tel" name="reporterContact" class="input" placeholder="09XX-XXX-XXXX" required>
+                </div>
+                <div class="form-group">
+                  <label>Email Address</label>
+                  <input type="email" name="reporterEmail" class="input">
+                </div>
+              </div>
+              <div class="form-group">
+                <label>Address <span class="required">*</span></label>
+                <input type="text" name="reporterAddress" class="input" required>
+              </div>
+            </div>
+
+            <div class="form-section">
+              <h4>Incident Details</h4>
+              <div class="form-group">
+                <label>Type of Incident <span class="required">*</span></label>
+                <select name="incidentType" class="input" required>
+                  <option value="">Select incident type...</option>
+                  <option value="Noise Complaint">Noise Complaint</option>
+                  <option value="Neighbor Dispute">Neighbor Dispute</option>
+                  <option value="Theft/Robbery">Theft/Robbery</option>
+                  <option value="Physical Altercation/Assault">Physical Altercation/Assault</option>
+                  <option value="Property Damage">Property Damage</option>
+                  <option value="Suspicious Activity">Suspicious Activity</option>
+                  <option value="Harassment">Harassment</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Date of Incident <span class="required">*</span></label>
+                  <input type="date" name="incidentDate" class="input" required id="incident-date">
+                </div>
+                <div class="form-group">
+                  <label>Time of Incident <span class="required">*</span></label>
+                  <input type="time" name="incidentTime" class="input" required>
+                </div>
+              </div>
+              <div class="form-group">
+                <label>Location of Incident <span class="required">*</span></label>
+                <input type="text" name="incidentLocation" class="input" placeholder="Street, House Number, etc." required>
+              </div>
+              <div class="form-group">
+                <label>Persons Involved</label>
+                <textarea name="personsInvolved" class="input" rows="3" placeholder="Name(s) of person(s) involved"></textarea>
+              </div>
+              <div class="form-group">
+                <label>Detailed Description <span class="required">*</span></label>
+                <textarea name="incidentDescription" class="input" rows="6" placeholder="Please provide a detailed account of what happened..." required></textarea>
+              </div>
+              <div class="form-group">
+                <label>Witnesses (if any)</label>
+                <textarea name="witnesses" class="input" rows="2" placeholder="Name(s) and contact information of witnesses"></textarea>
+              </div>
+            </div>
+
+            <div class="form-section">
+              <div class="form-group">
+                <label class="checkbox-label">
+                  <input type="checkbox" name="agreeTerms" required>
+                  <span>I hereby certify that all information provided is true and correct to the best of my knowledge. I understand that providing false information is punishable by law.</span>
+                </label>
+              </div>
+            </div>
+
+            <div class="form-actions">
+              <button type="reset" class="btn secondary">Clear Form</button>
+              <button type="submit" class="btn primary" id="submit-btn">Submit Report</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Confirmation Modal -->
+  <div class="modal-backdrop" id="confirm-modal" style="display:none" onclick="closeConfirmModal()">
+    <div class="modal" onclick="event.stopPropagation()">
+      <div class="modal-success-icon">✓</div>
+      <h3>Report Submitted Successfully</h3>
+      <p>Your incident report has been received. A barangay official will review your report and contact you if additional information is needed.</p>
+      <p><strong>Reference Number:</strong> <span id="ref-number"></span></p>
+      <div class="modal-footer">
+        <button class="btn primary" onclick="closeConfirmModal()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-content">
+        <div class="footer-section"><h4>Barangay 853</h4><p>Serving the community with dedication and transparency</p></div>
+        <div class="footer-section"><h4>Quick Links</h4><ul><li><a href="index.html">Home</a></li><li><a href="documents.html">Documents</a></li><li><a href="announcements.html">Announcements</a></li><li><a href="about.html">About</a></li></ul></div>
+        <div class="footer-section"><h4>Contact Us</h4><p>Email: barangay853@example.com</p><p>Phone: (02) 1234-5678</p></div>
+      </div>
+      <div class="footer-bottom"><p>&copy; 2025 Barangay 853. All rights reserved.</p></div>
+    </div>
+  </footer>
+
+  <script src="public.js"></script>
+  <script>
+    const API = 'http://localhost/Barangay853';
+    document.getElementById('incident-date').max = new Date().toISOString().split('T')[0];
+
+    async function submitReport(e) {
+      e.preventDefault();
+      const form = e.target;
+      const errEl = document.getElementById('report-error');
+      const btn = document.getElementById('submit-btn');
+      errEl.style.display = 'none';
+      btn.disabled = true;
+      btn.textContent = 'Submitting...';
+
+      try {
+        const res = await fetch(`${API}/blotter/index.php?public=1`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            case_title: form.incidentType.value + ' - ' + form.reporterName.value,
+            category: form.incidentType.value,
+            reporter_name: form.reporterName.value,
+            reporter_contact: form.reporterContact.value,
+            reporter_email: form.reporterEmail.value || null,
+            reporter_address: form.reporterAddress.value,
+            incident_date: form.incidentDate.value,
+            incident_time: form.incidentTime.value,
+            location: form.incidentLocation.value,
+            description: form.incidentDescription.value,
+            persons_involved: form.personsInvolved.value || null,
+            witnesses: form.witnesses.value || null,
+            status: 'Pending'
+          })
+        });
+        const data = await res.json();
+        if (data.success) {
+          document.getElementById('ref-number').textContent = data.case_no;
+          document.getElementById('confirm-modal').style.display = 'flex';
+          form.reset();
+        } else {
+          errEl.textContent = data.message || 'Submission failed.';
+          errEl.style.display = 'block';
+        }
+      } catch (err) {
+        errEl.textContent = 'Cannot connect to server. Make sure XAMPP is running.';
+        errEl.style.display = 'block';
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Submit Report';
+      }
+    }
+
+    function closeConfirmModal() {
+      document.getElementById('confirm-modal').style.display = 'none';
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard - Brgy. 853 Zone 93</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    :root { font-family: 'Inter','Segoe UI',system-ui,sans-serif; color: #0f172a; background: #f4f6fb; }
+    body { min-height: 100vh; background: #f4f6fb; }
+    button, input, select, textarea { font: inherit; }
+
+    .dashboard-shell { min-height: 100vh; display: grid; grid-template-columns: 280px 1fr; }
+
+    /* Sidebar */
+    .sidebar { background: #0b2250; color: #e2e8f0; padding: 2rem 1.5rem; display: flex; flex-direction: column; gap: 2rem; position: sticky; top: 0; height: 100vh; overflow-y: auto; }
+    .sidebar-brand { display: flex; align-items: center; gap: 0.85rem; }
+    .sidebar-logo { width: 64px; height: 64px; border-radius: 50%; background: #fff; padding: 0.4rem; object-fit: contain; }
+    .barangay-name { font-size: 1rem; font-weight: 600; color: #fff; }
+    .barangay-motto { font-size: 0.85rem; color: rgba(226,232,240,0.75); margin-top: 0.1rem; }
+    .nav-label { text-transform: uppercase; font-size: 0.7rem; letter-spacing: 0.2rem; color: rgba(226,232,240,0.6); margin-bottom: 0.75rem; }
+    .sidebar-nav ul { list-style: none; display: flex; flex-direction: column; gap: 0.35rem; }
+    .sidebar-nav li { padding: 0.65rem 0.85rem; border-radius: 0.75rem; cursor: pointer; transition: background 0.2s; color: rgba(255,255,255,0.85); display: flex; align-items: center; gap: 0.65rem; }
+    .sidebar-nav li:hover, .sidebar-nav li.active { background: rgba(255,255,255,0.12); }
+    .nav-icon { width: 36px; height: 36px; border-radius: 10px; background: rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; color: #dbeafe; flex-shrink: 0; }
+    .nav-icon svg { width: 18px; height: 18px; }
+
+    /* Main */
+    .main-panel { padding: 2rem clamp(1.5rem,4vw,3rem); display: flex; flex-direction: column; gap: 2rem; overflow-y: auto; }
+    .top-bar { position: sticky; top: 0; z-index: 20; display: flex; flex-wrap: wrap; align-items: center; gap: 1rem; background: #f4f6fb; padding: 1rem 0; border-bottom: 1px solid #e2e8f0; margin-bottom: 0.5rem; }
+    .top-search { flex: 1; }
+    .top-search input { width: 100%; border: 1px solid #d5d8f0; border-radius: 999px; padding: 0.65rem 1.25rem; background: #fff; font-size: 0.95rem; }
+    .top-search input:focus { outline: none; border-color: #0b2250; box-shadow: 0 0 0 3px rgba(11,34,80,0.08); }
+    .header-tools { display: flex; align-items: center; gap: 0.75rem; }
+    .profile-chip { display: flex; align-items: center; gap: 0.75rem; background: #fff; border-radius: 999px; padding: 0.4rem 1rem 0.4rem 0.4rem; box-shadow: 0 5px 18px rgba(15,23,42,0.08); border: 1px solid #e2e8f0; }
+    .avatar-img { width: 42px; height: 42px; border-radius: 50%; background: linear-gradient(135deg,#667eea,#764ba2); display: flex; align-items: center; justify-content: center; font-weight: 700; color: #fff; font-size: 1rem; flex-shrink: 0; }
+    .user-name { font-weight: 600; font-size: 0.95rem; color: #0f172a; line-height: 1.2; }
+    .user-role { color: #64748b; font-size: 0.8rem; line-height: 1.2; }
+    .logout-btn { background: transparent; border: 1px solid #e2e8f0; color: #64748b; padding: 0.4rem 0.85rem; border-radius: 0.5rem; font-size: 0.85rem; cursor: pointer; transition: all 0.2s; margin-left: 0.25rem; }
+    .logout-btn:hover { background: #f1f5f9; color: #475569; border-color: #cbd5e1; }
+
+    /* Stats */
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(200px,1fr)); gap: 1rem; }
+    .stat-card { background: #fff; padding: 1rem 1.25rem; border-radius: 1rem; box-shadow: 0 10px 20px rgba(15,23,42,0.08); display: flex; flex-direction: column; gap: 0.35rem; }
+    .stat-icon { font-size: 1.5rem; }
+    .stat-label { font-size: 0.85rem; color: #64748b; margin: 0; }
+    .stat-value { font-size: 2rem; font-weight: 700; color: #0f172a; margin: 0; }
+
+    /* Content grid */
+    .content-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+    .panel { background: #fff; border-radius: 1.25rem; padding: 1.5rem; box-shadow: 0 10px 30px rgba(15,23,42,0.08); display: flex; flex-direction: column; gap: 1rem; min-height: 300px; }
+    #section-dashboard { display: flex; flex-direction: column; gap: 1.5rem; }
+    .panel-heading { display: flex; justify-content: space-between; align-items: center; gap: 1rem; }
+    .panel-heading h2 { font-size: 1.15rem; font-weight: 700; margin: 0; color: #0f172a; }
+    .muted { color: #94a3b8; font-size: 0.85rem; margin: 0.2rem 0 0; }
+    .text-link { background: none; border: none; color: #2563eb; cursor: pointer; font-size: 0.85rem; font-weight: 600; transition: color 0.2s; }
+    .text-link:hover { color: #1e3a8a; }
+    .notif-btn { width: 42px; height: 42px; border-radius: 50%; background: #fff; border: none; box-shadow: 0 5px 18px rgba(15,23,42,0.1); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.15rem; transition: transform 0.2s; }
+    .notif-btn:hover { transform: scale(1.05); }
+
+    /* Table */
+    .table { display: flex; flex-direction: column; gap: 0.5rem; }
+    .table-row { display: grid; grid-template-columns: 2fr 2fr 1.5fr 1fr; gap: 0.5rem; padding: 0.65rem 0.75rem; border-radius: 0.75rem; background: #f8f9ff; font-size: 0.875rem; align-items: center; }
+    .table-row.head { background: none; font-weight: 600; color: #475569; font-size: 0.8rem; }
+    .empty-state { padding: 2rem; text-align: center; color: #6b7280; font-size: 0.875rem; }
+
+    /* Status badges */
+    .status-badge { padding: 0.25rem 0.65rem; border-radius: 999px; font-size: 0.75rem; font-weight: 600; }
+    .status-badge.pending { background: #fef9c3; color: #854d0e; }
+    .status-badge.review { background: #dbeafe; color: #1e40af; }
+    .status-badge.approved { background: #dcfce7; color: #166534; }
+    .status-badge.released { background: #d1fae5; color: #065f46; }
+    .status-badge.rejected { background: #fee2e2; color: #991b1b; }
+
+    /* Activity log */
+    .log-item { padding: 0.75rem 0; border-bottom: 1px solid #f1f5f9; display: flex; gap: 0.75rem; align-items: flex-start; }
+    .log-icon { font-size: 1.1rem; flex-shrink: 0; }
+    .log-actor { font-weight: 600; color: #1f2937; }
+    .log-action { color: #4b5563; }
+    .log-time { font-size: 0.75rem; color: #9ca3af; margin-top: 0.2rem; }
+
+    /* Section pages */
+    .section-page { display: none; }
+    .section-page.active { display: block; }
+
+    /* Page header */
+    .page-header { margin-bottom: 1.5rem; }
+    .page-header h1 { font-size: 1.5rem; font-weight: 700; }
+    .page-header p { color: #6b7280; margin-top: 0.25rem; }
+
+    /* Buttons */
+    .btn-primary { background: linear-gradient(120deg,#2563eb,#4f46e5); color: #fff; border: none; border-radius: 0.75rem; padding: 0.75rem 1.25rem; font-weight: 600; cursor: pointer; transition: transform 0.2s; }
+    .btn-primary:hover { transform: translateY(-1px); }
+    .btn-secondary { background: #fff; color: #374151; border: 1px solid #e2e8f0; border-radius: 0.75rem; padding: 0.75rem 1.25rem; font-weight: 500; cursor: pointer; transition: background 0.2s; }
+    .btn-secondary:hover { background: #f9fafb; }
+
+    /* Forms */
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .form-group { display: flex; flex-direction: column; gap: 0.5rem; }
+    .form-group label { font-size: 0.85rem; font-weight: 600; color: #475569; }
+    .form-group input, .form-group select, .form-group textarea { border: 1px solid #d5d8f0; border-radius: 0.75rem; padding: 0.75rem 1rem; font-size: 0.9rem; width: 100%; }
+    .form-group input:focus, .form-group select:focus, .form-group textarea:focus { outline: none; border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
+    .form-actions { display: flex; gap: 1rem; margin-top: 1.5rem; }
+
+    /* Data table */
+    .data-table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
+    .data-table th { text-align: left; padding: 0.75rem 1rem; background: #f8fafc; color: #6b7280; font-weight: 600; font-size: 0.8rem; border-bottom: 2px solid #e2e8f0; }
+    .data-table td { padding: 0.75rem 1rem; border-bottom: 1px solid #f1f5f9; color: #374151; }
+    .data-table tr:hover td { background: #f9fafb; }
+    .data-table-wrap { overflow-x: auto; }
+
+    /* Loading */
+    .loading { padding: 3rem; text-align: center; color: #6b7280; }
+
+    @media (max-width: 768px) {
+      .dashboard-shell { grid-template-columns: 1fr; }
+      .sidebar { display: none; }
+      .content-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="dashboard-shell">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <img src="assets/logo-brgy.png" alt="Logo" class="sidebar-logo">
+      <div>
+        <p class="barangay-name">Brgy. 853 Zone 93</p>
+        <p class="barangay-motto">Tulong-Tulong Sama-Sama</p>
+      </div>
+    </div>
+    <nav class="sidebar-nav">
+      <p class="nav-label">Navigation</p>
+      <ul id="nav-list">
+        <li class="active" onclick="switchSection('dashboard', this)">
+          <span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="12" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="18" rx="1.5"/><rect x="3" y="3" width="7" height="7" rx="1.5"/></svg></span>
+          <span>Dashboard</span>
+        </li>
+        <li onclick="switchSection('users', this)">
+          <span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>
+          <span>User Management</span>
+        </li>
+        <li onclick="switchSection('residents', this)">
+          <span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="8" cy="7" r="3.5"/><circle cx="17" cy="10" r="2.5"/><path d="M3.5 19.5c0-2.5 1.5-5 4.5-5s4.5 2.5 4.5 5"/><path d="M14 19.5c0-1.8 1.2-3.5 3.5-3.5 1.4 0 2.7.8 3.5 2"/></svg></span>
+          <span>Resident Management</span>
+        </li>
+        <li onclick="switchSection('documents', this)">
+          <span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M7 3.5h7l4 4v13H7z"/><path d="M14 3.5v4h4"/><path d="M10 12h6"/><path d="M10 16h6"/></svg></span>
+          <span>Document Requests</span>
+        </li>
+        <li onclick="switchSection('blotter', this)">
+          <span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="8" r="3.5"/><path d="M5 20c0-3.9 3.1-7 7-7s7 3.1 7 7"/><path d="M4 8h3"/><path d="M17 8h3"/></svg></span>
+          <span>Blotter & Disputes</span>
+        </li>
+        <li onclick="switchSection('announcements', this)">
+          <span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 10v4"/><path d="M6 8h6l5-3v14l-5-3H6z"/><path d="M10 17v3"/></svg></span>
+          <span>Announcements</span>
+        </li>
+        <li onclick="switchSection('statistics', this)">
+          <span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></span>
+          <span>Reports & Statistics</span>
+        </li>
+        <li onclick="switchSection('auditlog', this)">
+          <span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></span>
+          <span>Audit Log</span>
+        </li>
+        <li onclick="switchSection('settings', this)">
+          <span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="3"/><path d="M12 2v2M12 20v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M2 12h2M20 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg></span>
+          <span>Settings</span>
+        </li>
+      </ul>
+    </nav>
+  </aside>
+
+  <!-- Main Panel -->
+  <main class="main-panel">
+    <!-- Top Bar -->
+    <header class="top-bar">
+      <div class="top-search">
+        <input type="search" placeholder="Search residents, blotters, etc." id="global-search">
+      </div>
+      <div class="header-tools">
+        <button class="notif-btn">🔔</button>
+        <div class="profile-chip">
+          <div class="avatar-img" id="user-avatar">A</div>
+          <div>
+            <p class="user-name" id="user-name">Admin</p>
+            <p class="user-role" id="user-role">admin</p>
+          </div>
+          <button class="logout-btn" onclick="handleLogout()">Logout</button>
+        </div>
+      </div>
+    </header>
+
+    <!-- DASHBOARD SECTION -->
+    <div id="section-dashboard" class="section-page active">
+      <section class="stats-grid" id="stats-grid">
+        <article class="stat-card"><div class="stat-icon">👥</div><p class="stat-label">Total Residents</p><p class="stat-value" id="stat-residents">0</p></article>
+        <article class="stat-card"><div class="stat-icon">📄</div><p class="stat-label">Pending Requests</p><p class="stat-value" id="stat-pending">0</p></article>
+        <article class="stat-card"><div class="stat-icon">⚖️</div><p class="stat-label">Active Blotters</p><p class="stat-value" id="stat-blotters">0</p></article>
+        <article class="stat-card"><div class="stat-icon">🏠</div><p class="stat-label">Households</p><p class="stat-value" id="stat-households">0</p></article>
+      </section>
+      <section class="content-grid">
+        <article class="panel">
+          <header class="panel-heading">
+            <div><h2>Pending Requests</h2><p class="muted">Monitor applications that need review</p></div>
+            <button class="text-link" onclick="switchSection('documents', document.querySelectorAll('.sidebar-nav li')[3])">View all</button>
+          </header>
+          <div class="table">
+            <div class="table-row head"><span>Requester Name</span><span>Document Type</span><span>Date Filed</span><span>Status</span></div>
+            <div id="pending-requests-list"><div class="empty-state">No pending requests</div></div>
+          </div>
+        </article>
+        <article class="panel">
+          <header class="panel-heading">
+            <div><h2>Activity Log</h2><p class="muted">Recent system transactions</p></div>
+            <button class="text-link" onclick="loadDashboard()">Refresh</button>
+          </header>
+          <div id="activity-log-list" style="max-height:400px;overflow-y:auto"><div class="empty-state">No activity logs available</div></div>
+        </article>
+      </section>
+    </div>
+
+    <!-- RESIDENTS SECTION -->
+    <div id="section-residents" class="section-page">
+      <div class="page-header" style="display:flex;justify-content:space-between;align-items:center">
+        <div><h1>Resident Management</h1><p>Manage barangay residents</p></div>
+        <button class="btn-primary" onclick="showAddResident()">+ Add Resident</button>
+      </div>
+      <div class="panel">
+        <div style="margin-bottom:1rem"><input type="search" id="resident-search" placeholder="Search residents..." style="border:1px solid #d5d8f0;border-radius:999px;padding:0.65rem 1.25rem;width:300px" oninput="loadResidents()"></div>
+        <div class="data-table-wrap"><table class="data-table">
+          <thead><tr><th>Name</th><th>Gender</th><th>Contact</th><th>Purok/Sitio</th><th>Senior</th><th>PWD</th></tr></thead>
+          <tbody id="residents-tbody"><tr><td colspan="6" class="loading">Loading...</td></tr></tbody>
+        </table></div>
+      </div>
+    </div>
+
+    <!-- DOCUMENTS SECTION -->
+    <div id="section-documents" class="section-page">
+      <div class="page-header" style="display:flex;justify-content:space-between;align-items:center">
+        <div><h1>Document Requests</h1><p>Manage document requests</p></div>
+      </div>
+      <div class="panel">
+        <div style="margin-bottom:1rem;display:flex;gap:1rem">
+          <select id="doc-status-filter" onchange="loadDocuments()" style="border:1px solid #d5d8f0;border-radius:0.75rem;padding:0.65rem 1rem">
+            <option value="">All Status</option>
+            <option value="Pending">Pending</option>
+            <option value="Review">Review</option>
+            <option value="Approved">Approved</option>
+            <option value="Released">Released</option>
+            <option value="Rejected">Rejected</option>
+          </select>
+        </div>
+        <div class="data-table-wrap"><table class="data-table">
+          <thead><tr><th>Reference No.</th><th>Requester</th><th>Document Type</th><th>Date Filed</th><th>Status</th><th>Action</th></tr></thead>
+          <tbody id="documents-tbody"><tr><td colspan="6" class="loading">Loading...</td></tr></tbody>
+        </table></div>
+      </div>
+    </div>
+
+    <!-- BLOTTER SECTION -->
+    <div id="section-blotter" class="section-page">
+      <div class="page-header" style="display:flex;justify-content:space-between;align-items:center">
+        <div><h1>Blotter & Disputes</h1><p>Manage blotter cases</p></div>
+        <button class="btn-primary" onclick="showAddBlotter()">+ New Case</button>
+      </div>
+      <div class="panel">
+        <div class="data-table-wrap"><table class="data-table">
+          <thead><tr><th>Case No.</th><th>Title</th><th>Category</th><th>Priority</th><th>Status</th><th>Date Reported</th></tr></thead>
+          <tbody id="blotter-tbody"><tr><td colspan="6" class="loading">Loading...</td></tr></tbody>
+        </table></div>
+      </div>
+    </div>
+
+    <!-- ANNOUNCEMENTS SECTION -->
+    <div id="section-announcements" class="section-page">
+      <div class="page-header" style="display:flex;justify-content:space-between;align-items:center">
+        <div><h1>Announcements</h1><p>Manage announcements</p></div>
+        <button class="btn-primary" onclick="showAddAnnouncement()">+ New Announcement</button>
+      </div>
+      <div class="panel">
+        <div class="data-table-wrap"><table class="data-table">
+          <thead><tr><th>Reference No.</th><th>Title</th><th>Category</th><th>Status</th><th>Published On</th></tr></thead>
+          <tbody id="announcements-tbody"><tr><td colspan="5" class="loading">Loading...</td></tr></tbody>
+        </table></div>
+      </div>
+    </div>
+
+    <!-- USERS SECTION -->
+    <div id="section-users" class="section-page">
+      <div class="page-header"><h1>User Management</h1><p>Manage system users</p></div>
+      <div class="panel"><p class="muted" style="padding:2rem;text-align:center">User management coming soon.</p></div>
+    </div>
+
+    <!-- STATISTICS SECTION -->
+    <div id="section-statistics" class="section-page">
+      <div class="page-header"><h1>Reports & Statistics</h1><p>View system statistics</p></div>
+      <div class="panel"><p class="muted" style="padding:2rem;text-align:center">Statistics section coming soon.</p></div>
+    </div>
+
+    <!-- AUDIT LOG SECTION -->
+    <div id="section-auditlog" class="section-page">
+      <div class="page-header"><h1>Audit Log</h1><p>View system activity</p></div>
+      <div class="panel">
+        <div id="audit-log-list" class="loading">Loading...</div>
+      </div>
+    </div>
+
+    <!-- SETTINGS SECTION -->
+    <div id="section-settings" class="section-page">
+      <div class="page-header"><h1>Settings</h1><p>System settings</p></div>
+      <div class="panel"><p class="muted" style="padding:2rem;text-align:center">Settings coming soon.</p></div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+  const API = 'http://localhost/Barangay853';
+  const token = localStorage.getItem('auth_token');
+  const user = JSON.parse(localStorage.getItem('user') || '{}');
+
+  // Redirect if not logged in
+  if (!token) window.location.href = 'login.html';
+
+  // Set user info
+  document.getElementById('user-name').textContent = user.name || 'Admin';
+  document.getElementById('user-role').textContent = user.role || 'admin';
+  document.getElementById('user-avatar').textContent = (user.name || 'A').charAt(0).toUpperCase();
+
+  function authHeaders() {
+    return { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' };
+  }
+
+  function formatDate(d) {
+    if (!d) return 'N/A';
+    return new Date(d).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+  }
+
+  function timeAgo(d) {
+    if (!d) return 'N/A';
+    const diff = Date.now() - new Date(d).getTime();
+    const mins = Math.floor(diff / 60000);
+    const hrs = Math.floor(diff / 3600000);
+    const days = Math.floor(diff / 86400000);
+    if (mins < 1) return 'Just now';
+    if (mins < 60) return `${mins}m ago`;
+    if (hrs < 24) return `${hrs}h ago`;
+    return `${days}d ago`;
+  }
+
+  function statusBadge(status) {
+    const s = (status || 'pending').toLowerCase();
+    return `<span class="status-badge ${s}">${status || 'Pending'}</span>`;
+  }
+
+  // Switch sections
+  function switchSection(name, el) {
+    document.querySelectorAll('.section-page').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.sidebar-nav li').forEach(l => l.classList.remove('active'));
+    document.getElementById(`section-${name}`).classList.add('active');
+    if (el) el.classList.add('active');
+
+    if (name === 'dashboard') loadDashboard();
+    if (name === 'residents') loadResidents();
+    if (name === 'documents') loadDocuments();
+    if (name === 'blotter') loadBlotter();
+    if (name === 'announcements') loadAnnouncements();
+    if (name === 'auditlog') loadAuditLog();
+  }
+
+  // DASHBOARD
+  async function loadDashboard() {
+    try {
+      const res = await fetch(`${API}/statistics/index.php`, { headers: authHeaders() });
+      const data = await res.json();
+      if (data.success) {
+        document.getElementById('stat-residents').textContent = data.data.total_residents;
+        document.getElementById('stat-pending').textContent = data.data.pending_requests;
+        document.getElementById('stat-blotters').textContent = data.data.active_blotters;
+        document.getElementById('stat-households').textContent = data.data.total_households;
+
+        // Recent requests
+        const reqList = document.getElementById('pending-requests-list');
+        if (data.data.recent_requests.length === 0) {
+          reqList.innerHTML = '<div class="empty-state">No pending requests</div>';
+        } else {
+          reqList.innerHTML = data.data.recent_requests.map(r => `
+            <div class="table-row">
+              <span>${r.requester_name}</span>
+              <span>${r.document_type}</span>
+              <span>${formatDate(r.date_filed)}</span>
+              <span>${statusBadge(r.status)}</span>
+            </div>`).join('');
+        }
+
+        // Activity logs
+        const logList = document.getElementById('activity-log-list');
+        if (data.data.recent_logs.length === 0) {
+          logList.innerHTML = '<div class="empty-state">No activity logs available</div>';
+        } else {
+          logList.innerHTML = data.data.recent_logs.map(l => `
+            <div class="log-item">
+              <div class="log-icon">📋</div>
+              <div>
+                <div><span class="log-actor">${l.actor_name || 'System'}</span> <span class="log-action">${l.action}</span></div>
+                <div class="log-time">${timeAgo(l.logged_at)}</div>
+              </div>
+            </div>`).join('');
+        }
+      }
+    } catch (err) { console.error(err); }
+  }
+
+  // RESIDENTS
+  async function loadResidents() {
+    const search = document.getElementById('resident-search')?.value || '';
+    try {
+      const res = await fetch(`${API}/residents/index.php?search=${encodeURIComponent(search)}`, { headers: authHeaders() });
+      const data = await res.json();
+      const tbody = document.getElementById('residents-tbody');
+      if (!data.success || data.data.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" class="empty-state">No residents found</td></tr>';
+        return;
+      }
+      tbody.innerHTML = data.data.map(r => `
+        <tr>
+          <td>${r.full_name}</td>
+          <td>${r.gender || '-'}</td>
+          <td>${r.contact_mobile || '-'}</td>
+          <td>${r.purok_sitio || '-'}</td>
+          <td>${r.is_senior_citizen ? '✅' : '-'}</td>
+          <td>${r.is_pwd ? '✅' : '-'}</td>
+        </tr>`).join('');
+    } catch (err) { console.error(err); }
+  }
+
+  // DOCUMENTS
+  async function loadDocuments() {
+    const status = document.getElementById('doc-status-filter')?.value || '';
+    try {
+      const res = await fetch(`${API}/documents/index.php${status ? '?status=' + status : ''}`, { headers: authHeaders() });
+      const data = await res.json();
+      const tbody = document.getElementById('documents-tbody');
+      if (!data.success || data.data.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" class="empty-state">No document requests found</td></tr>';
+        return;
+      }
+      tbody.innerHTML = data.data.map(d => `
+        <tr>
+          <td><code>${d.reference_no}</code></td>
+          <td>${d.requester_name}</td>
+          <td>${d.document_type}</td>
+          <td>${formatDate(d.date_filed)}</td>
+          <td>${statusBadge(d.status)}</td>
+          <td><button class="btn-secondary" style="padding:0.35rem 0.75rem;font-size:0.8rem" onclick="updateDocStatus(${d.id})">Update</button></td>
+        </tr>`).join('');
+    } catch (err) { console.error(err); }
+  }
+
+  async function updateDocStatus(id) {
+    const status = prompt('Enter new status:\nPending, Review, Approved, Released, Rejected');
+    if (!status) return;
+    await fetch(`${API}/documents/index.php?id=${id}`, {
+      method: 'PUT',
+      headers: authHeaders(),
+      body: JSON.stringify({ status })
+    });
+    loadDocuments();
+  }
+
+  // BLOTTER
+  async function loadBlotter() {
+    try {
+      const res = await fetch(`${API}/blotter/index.php`, { headers: authHeaders() });
+      const data = await res.json();
+      const tbody = document.getElementById('blotter-tbody');
+      if (!data.success || data.data.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" class="empty-state">No blotter cases found</td></tr>';
+        return;
+      }
+      tbody.innerHTML = data.data.map(b => `
+        <tr>
+          <td><code>${b.case_no}</code></td>
+          <td>${b.case_title}</td>
+          <td>${b.category || '-'}</td>
+          <td>${statusBadge(b.priority)}</td>
+          <td>${statusBadge(b.status)}</td>
+          <td>${formatDate(b.date_reported)}</td>
+        </tr>`).join('');
+    } catch (err) { console.error(err); }
+  }
+
+  // ANNOUNCEMENTS
+  async function loadAnnouncements() {
+    try {
+      const res = await fetch(`${API}/announcements/index.php`, { headers: authHeaders() });
+      const data = await res.json();
+      const tbody = document.getElementById('announcements-tbody');
+      if (!data.success || data.data.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" class="empty-state">No announcements found</td></tr>';
+        return;
+      }
+      tbody.innerHTML = data.data.map(a => `
+        <tr>
+          <td><code>${a.reference_no}</code></td>
+          <td>${a.title}</td>
+          <td>${a.category || '-'}</td>
+          <td>${statusBadge(a.status)}</td>
+          <td>${formatDate(a.published_on)}</td>
+        </tr>`).join('');
+    } catch (err) { console.error(err); }
+  }
+
+  // AUDIT LOG
+  async function loadAuditLog() {
+    try {
+      const res = await fetch(`${API}/logs/index.php`, { headers: authHeaders() });
+      const data = await res.json();
+      const el = document.getElementById('audit-log-list');
+      if (!data.success || data.data.length === 0) {
+        el.innerHTML = '<div class="empty-state">No activity logs available</div>';
+        return;
+      }
+      el.innerHTML = data.data.map(l => `
+        <div class="log-item">
+          <div class="log-icon">📋</div>
+          <div>
+            <div><span class="log-actor">${l.actor_name || 'System'}</span> <span class="log-action">${l.action}</span> <span style="color:#6b7280;font-size:0.85rem">${l.module || ''}</span></div>
+            <div class="log-time">${timeAgo(l.logged_at)}</div>
+          </div>
+        </div>`).join('');
+    } catch (err) { console.error(err); }
+  }
+
+  // LOGOUT
+  async function handleLogout() {
+    await fetch(`${API}/auth/logout.php`, { method: 'POST', headers: authHeaders() });
+    localStorage.removeItem('auth_token');
+    localStorage.removeItem('user');
+    window.location.href = 'login.html';
+  }
+
+  // Placeholder functions
+  function showAddResident() { alert('Add Resident form coming soon!'); }
+  function showAddBlotter() { alert('Add Blotter Case form coming soon!'); }
+  function showAddAnnouncement() { alert('Add Announcement form coming soon!'); }
+
+  // Load dashboard on start
+  loadDashboard();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Dashboard - Brgy. 853 Zone 93</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Inter','Segoe UI',system-ui,sans-serif; min-height: 100vh; background: linear-gradient(135deg,#667eea 0%,#764ba2 100%); display: flex; flex-direction: column; }
+    button, input { font: inherit; }
+
+    /* Header */
+    .dashboard-header { background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 100; }
+    .header-container { max-width: 1400px; margin: 0 auto; padding: 1rem 1.5rem; display: flex; justify-content: space-between; align-items: center; gap: 1.5rem; }
+    .header-brand { display: flex; align-items: center; gap: 1rem; }
+    .header-logo { width: 48px; height: 48px; object-fit: contain; border-radius: 0.5rem; }
+    .brand-text h1 { font-size: 1.25rem; font-weight: 700; color: #1f2937; }
+    .motto { font-size: 0.75rem; color: #6b7280; }
+    .header-right { display: flex; align-items: center; gap: 1.5rem; }
+    .user-profile { display: flex; align-items: center; gap: 0.75rem; padding: 0.5rem 1rem; background: #f9fafb; border-radius: 2rem; }
+    .user-avatar { width: 48px; height: 48px; border-radius: 50%; background: linear-gradient(135deg,#667eea,#764ba2); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 1.25rem; flex-shrink: 0; }
+    .user-name { font-size: 0.875rem; font-weight: 600; color: #1f2937; }
+    .user-role { font-size: 0.75rem; color: #6b7280; }
+    .header-buttons { display: flex; gap: 0.75rem; }
+    .btn-home, .btn-logout { display: flex; align-items: center; gap: 0.5rem; padding: 0.625rem 1.25rem; border-radius: 0.5rem; font-weight: 500; font-size: 0.875rem; border: none; cursor: pointer; text-decoration: none; transition: all 0.2s; }
+    .btn-home { background: #3b82f6; color: #fff; }
+    .btn-home:hover { background: #2563eb; transform: translateY(-1px); }
+    .btn-logout { background: #ef4444; color: #fff; }
+    .btn-logout:hover { background: #dc2626; transform: translateY(-1px); }
+
+    /* Nav tabs */
+    .dashboard-nav { background: rgba(255,255,255,0.98); border-bottom: 1px solid rgba(0,0,0,0.05); box-shadow: 0 2px 4px -1px rgba(0,0,0,0.06); }
+    .nav-container { max-width: 1400px; margin: 0 auto; padding: 0 1.5rem; display: flex; gap: 0.5rem; overflow-x: auto; scrollbar-width: none; }
+    .nav-tab { display: flex; align-items: center; gap: 0.5rem; padding: 1rem 1.5rem; background: none; border: none; border-bottom: 3px solid transparent; cursor: pointer; font-size: 0.875rem; font-weight: 500; color: #6b7280; transition: all 0.2s; white-space: nowrap; }
+    .nav-tab:hover { color: #3b82f6; background: rgba(59,130,246,0.05); }
+    .nav-tab.active { color: #3b82f6; border-bottom-color: #3b82f6; background: rgba(59,130,246,0.08); }
+    .tab-badge { background: #3b82f6; color: #fff; font-size: 0.75rem; padding: 0.125rem 0.5rem; border-radius: 9999px; font-weight: 600; }
+
+    /* Main */
+    .dashboard-main { flex: 1; padding: 2rem 1.5rem; }
+    .main-container { max-width: 1400px; margin: 0 auto; }
+    .content-section { animation: fadeIn 0.3s ease-in; }
+    @keyframes fadeIn { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+    .section-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 2rem; gap: 1.5rem; }
+    .section-header h2 { font-size: 1.875rem; font-weight: 700; color: #fff; text-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+    .section-subtitle { font-size: 0.875rem; color: rgba(255,255,255,0.9); margin-top: 0.25rem; }
+    .btn-action { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.625rem 1.25rem; background: #fff; color: #3b82f6; text-decoration: none; border-radius: 0.5rem; font-weight: 600; font-size: 0.875rem; border: none; cursor: pointer; transition: all 0.2s; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+    .btn-action:hover { background: #f9fafb; transform: translateY(-1px); }
+
+    /* Table */
+    .table-container { background: #fff; border-radius: 1rem; padding: 1.5rem; box-shadow: 0 4px 6px rgba(0,0,0,0.1); overflow-x: auto; }
+    .documents-table { width: 100%; border-collapse: collapse; min-width: 700px; }
+    .documents-table thead { background: #f9fafb; border-bottom: 2px solid #e5e7eb; }
+    .documents-table th { padding: 1rem; text-align: left; font-size: 0.75rem; font-weight: 600; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap; }
+    .documents-table tbody tr { border-bottom: 1px solid #e5e7eb; transition: background 0.2s; }
+    .documents-table tbody tr:hover { background: #f9fafb; }
+    .documents-table td { padding: 1rem; font-size: 0.875rem; color: #1f2937; vertical-align: middle; }
+    .ref-number { font-weight: 600; color: #3b82f6; font-family: monospace; }
+    .btn-view { display: inline-flex; align-items: center; gap: 0.375rem; padding: 0.5rem 1rem; background: #3b82f6; color: #fff; border: none; border-radius: 0.5rem; font-size: 0.8rem; font-weight: 500; cursor: pointer; transition: all 0.2s; }
+    .btn-view:hover { background: #2563eb; transform: translateY(-1px); }
+
+    /* Cards */
+    .cards-grid { display: grid; grid-template-columns: repeat(auto-fill,minmax(320px,1fr)); gap: 1.5rem; }
+    .card { background: #fff; border-radius: 1rem; padding: 1.5rem; box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: all 0.3s; }
+    .card:hover { transform: translateY(-4px); box-shadow: 0 10px 15px rgba(0,0,0,0.1); }
+    .card-header { margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: 1px solid #e5e7eb; }
+    .card-title-group { display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; margin-bottom: 0.5rem; }
+    .card-title { font-size: 1.1rem; font-weight: 600; color: #1f2937; flex: 1; }
+    .card-reference { font-size: 0.75rem; color: #6b7280; }
+    .info-label { font-size: 0.75rem; color: #6b7280; font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em; }
+    .info-value { font-size: 0.875rem; color: #1f2937; font-weight: 500; margin-top: 0.2rem; }
+
+    /* Announcements */
+    .announcements-grid { display: grid; grid-template-columns: repeat(auto-fill,minmax(320px,1fr)); gap: 1.5rem; }
+    .announcement-card { background: #fff; border-radius: 1rem; padding: 1.5rem; box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: all 0.3s; }
+    .announcement-card:hover { transform: translateY(-4px); }
+    .announcement-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+    .announcement-badge { padding: 0.375rem 0.75rem; background: #dbeafe; color: #1e40af; border-radius: 9999px; font-size: 0.75rem; font-weight: 600; }
+    .announcement-date { font-size: 0.75rem; color: #6b7280; }
+    .announcement-title { font-size: 1.1rem; font-weight: 600; color: #1f2937; margin-bottom: 0.75rem; }
+    .announcement-summary { color: #4b5563; font-size: 0.875rem; line-height: 1.6; }
+
+    /* Status badges */
+    .status-badge { display: inline-block; padding: 0.375rem 0.75rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 600; white-space: nowrap; }
+    .status-approved { background: #d1fae5; color: #065f46; }
+    .status-pending { background: #fef3c7; color: #92400e; }
+    .status-rejected { background: #fee2e2; color: #991b1b; }
+    .status-default { background: #e5e7eb; color: #374151; }
+
+    /* Empty state */
+    .empty-state { background: #fff; border-radius: 1rem; padding: 3rem 2rem; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+    .empty-icon { margin: 0 auto 1.5rem; width: 64px; height: 64px; color: #9ca3af; }
+    .empty-state h3 { font-size: 1.25rem; font-weight: 600; color: #1f2937; margin-bottom: 0.5rem; }
+    .empty-state p { color: #6b7280; font-size: 0.875rem; margin-bottom: 1.5rem; }
+
+    /* Loading skeleton */
+    .loading-skeleton { display: grid; grid-template-columns: repeat(auto-fill,minmax(320px,1fr)); gap: 1.5rem; }
+    .skeleton-item { background: #fff; border-radius: 1rem; padding: 1.5rem; box-shadow: 0 4px 6px rgba(0,0,0,0.1); animation: pulse 2s cubic-bezier(0.4,0,0.6,1) infinite; height: 120px; }
+    @keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:0.5; } }
+
+    /* Alert */
+    .alert-error { display: flex; align-items: center; gap: 0.75rem; padding: 1rem 1.5rem; border-radius: 0.75rem; margin-bottom: 1.5rem; font-size: 0.875rem; background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
+
+    .hidden { display: none; }
+
+    @media (max-width: 768px) {
+      .user-profile { display: none; }
+      .btn-home span, .btn-logout span { display: none; }
+      .btn-home, .btn-logout { padding: 0.625rem; }
+      .cards-grid, .announcements-grid { grid-template-columns: 1fr; }
+      .section-header { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="dashboard-header">
+    <div class="header-container">
+      <div class="header-brand">
+        <img src="assets/logo-brgy.png" alt="Brgy. 853 Zone 93" class="header-logo">
+        <div class="brand-text">
+          <h1>Brgy. 853 Zone 93</h1>
+          <p class="motto">Tulong-Tulong Sama-Sama</p>
+        </div>
+      </div>
+      <div class="header-right">
+        <div class="user-profile">
+          <div class="user-avatar" id="user-avatar">R</div>
+          <div>
+            <p class="user-name" id="user-name">Resident</p>
+            <p class="user-role">Resident Account</p>
+          </div>
+        </div>
+        <div class="header-buttons">
+          <a href="index.html" class="btn-home">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+            <span>Home</span>
+          </a>
+          <button class="btn-logout" onclick="handleLogout()">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+            <span>Logout</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Nav Tabs -->
+  <nav class="dashboard-nav">
+    <div class="nav-container">
+      <button class="nav-tab active" onclick="switchTab('documents', this)">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        <span>My Documents</span>
+        <span class="tab-badge hidden" id="docs-badge">0</span>
+      </button>
+      <button class="nav-tab" onclick="switchTab('blotter', this)">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        <span>My Cases</span>
+        <span class="tab-badge hidden" id="cases-badge">0</span>
+      </button>
+      <button class="nav-tab" onclick="switchTab('announcements', this)">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+        <span>Announcements</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <main class="dashboard-main">
+    <div class="main-container">
+      <div class="alert-error hidden" id="error-msg"></div>
+
+      <!-- Documents Tab -->
+      <div id="tab-documents" class="content-section">
+        <div class="section-header">
+          <div>
+            <h2>My Document Requests</h2>
+            <p class="section-subtitle">Track the status of your document applications</p>
+          </div>
+          <a href="documents.html" class="btn-action">+ Request New Document</a>
+        </div>
+        <div id="documents-content"><div class="loading-skeleton"><div class="skeleton-item"></div><div class="skeleton-item"></div></div></div>
+      </div>
+
+      <!-- Blotter Tab -->
+      <div id="tab-blotter" class="content-section hidden">
+        <div class="section-header">
+          <div>
+            <h2>My Blotter Cases</h2>
+            <p class="section-subtitle">View the status of your reported cases</p>
+          </div>
+          <a href="report.html" class="btn-action">+ File New Report</a>
+        </div>
+        <div id="blotter-content"><div class="loading-skeleton"><div class="skeleton-item"></div><div class="skeleton-item"></div></div></div>
+      </div>
+
+      <!-- Announcements Tab -->
+      <div id="tab-announcements" class="content-section hidden">
+        <div class="section-header">
+          <div>
+            <h2>Announcements</h2>
+            <p class="section-subtitle">Stay updated with the latest barangay news</p>
+          </div>
+        </div>
+        <div id="announcements-content"><div class="loading-skeleton"><div class="skeleton-item"></div><div class="skeleton-item"></div></div></div>
+      </div>
+    </div>
+  </main>
+
+<script>
+  const API = 'http://localhost/Barangay853';
+  const token = localStorage.getItem('auth_token');
+  const user = JSON.parse(localStorage.getItem('user') || '{}');
+
+  if (!token) window.location.href = 'login.html';
+
+  document.getElementById('user-name').textContent = user.name || 'Resident';
+  document.getElementById('user-avatar').textContent = (user.name || 'R').charAt(0).toUpperCase();
+
+  function authHeaders() {
+    return { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' };
+  }
+
+  function formatDate(d) {
+    if (!d) return 'N/A';
+    return new Date(d).toLocaleDateString('en-US', { year:'numeric', month:'short', day:'numeric' });
+  }
+
+  function getStatusClass(status) {
+    const s = (status || '').toLowerCase();
+    if (['approved','completed','resolved','released'].includes(s)) return 'status-approved';
+    if (['pending','in review','processing','review'].includes(s)) return 'status-pending';
+    if (['rejected','cancelled','closed'].includes(s)) return 'status-rejected';
+    return 'status-default';
+  }
+
+  function switchTab(name, el) {
+    document.querySelectorAll('.content-section').forEach(s => s.classList.add('hidden'));
+    document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+    document.getElementById(`tab-${name}`).classList.remove('hidden');
+    el.classList.add('active');
+    if (name === 'announcements') loadAnnouncements();
+  }
+
+  async function loadDocuments() {
+    try {
+      const res = await fetch(`${API}/documents/index.php`, { headers: authHeaders() });
+      const data = await res.json();
+      const el = document.getElementById('documents-content');
+      if (!data.success || data.data.length === 0) {
+        el.innerHTML = `<div class="empty-state"><div class="empty-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="64" height="64"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div><h3>No Document Requests</h3><p>You haven't requested any documents yet.</p><a href="documents.html" class="btn-action">Request a Document</a></div>`;
+        return;
+      }
+      const badge = document.getElementById('docs-badge');
+      badge.textContent = data.data.length;
+      badge.classList.remove('hidden');
+      el.innerHTML = `<div class="table-container"><table class="documents-table"><thead><tr><th>Reference No.</th><th>Document Type</th><th>Purpose</th><th>Date Filed</th><th>Status</th></tr></thead><tbody>${data.data.map(d => `<tr><td><span class="ref-number">${d.reference_no}</span></td><td><strong>${d.document_type}</strong></td><td>${d.purpose || 'N/A'}</td><td>${formatDate(d.date_filed || d.created_at)}</td><td><span class="status-badge ${getStatusClass(d.status)}">${d.status || 'Pending'}</span></td></tr>`).join('')}</tbody></table></div>`;
+    } catch (err) {
+      document.getElementById('documents-content').innerHTML = `<div class="alert-error">Failed to load documents.</div>`;
+    }
+  }
+
+  async function loadBlotter() {
+    try {
+      const res = await fetch(`${API}/blotter/index.php`, { headers: authHeaders() });
+      const data = await res.json();
+      const el = document.getElementById('blotter-content');
+      if (!data.success || data.data.length === 0) {
+        el.innerHTML = `<div class="empty-state"><div class="empty-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="64" height="64"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div><h3>No Blotter Cases</h3><p>You haven't filed any blotter cases yet.</p><a href="report.html" class="btn-action">File a Report</a></div>`;
+        return;
+      }
+      const badge = document.getElementById('cases-badge');
+      badge.textContent = data.data.length;
+      badge.classList.remove('hidden');
+      el.innerHTML = `<div class="cards-grid">${data.data.map(c => `<div class="card"><div class="card-header"><div class="card-title-group"><p class="card-title">${c.case_title}</p><span class="status-badge ${getStatusClass(c.status)}">${c.status || 'Pending'}</span></div><p class="card-reference">Case: ${c.case_no}</p></div><div class="card-body"><p class="info-label">Date Reported</p><p class="info-value">${formatDate(c.date_reported)}</p>${c.location ? `<p class="info-label" style="margin-top:0.5rem">Location</p><p class="info-value">${c.location}</p>` : ''}</div></div>`).join('')}</div>`;
+    } catch (err) {
+      document.getElementById('blotter-content').innerHTML = `<div class="alert-error">Failed to load cases.</div>`;
+    }
+  }
+
+  async function loadAnnouncements() {
+    try {
+      const res = await fetch(`${API}/announcements/index.php?public=1`);
+      const data = await res.json();
+      const el = document.getElementById('announcements-content');
+      if (!data.success || data.data.length === 0) {
+        el.innerHTML = `<div class="empty-state"><h3>No Announcements</h3><p>There are no announcements available at the moment.</p></div>`;
+        return;
+      }
+      el.innerHTML = `<div class="announcements-grid">${data.data.map(a => `<article class="announcement-card"><div class="announcement-header"><span class="announcement-badge">${a.category || 'Announcement'}</span><span class="announcement-date">${formatDate(a.published_on)}</span></div><h3 class="announcement-title">${a.title}</h3><p class="announcement-summary">${a.summary || ''}</p></article>`).join('')}</div>`;
+    } catch (err) {
+      document.getElementById('announcements-content').innerHTML = `<div class="alert-error">Failed to load announcements.</div>`;
+    }
+  }
+
+  async function handleLogout() {
+    await fetch(`${API}/auth/logout.php`, { method:'POST', headers: authHeaders() }).catch(() => {});
+    localStorage.removeItem('auth_token');
+    localStorage.removeItem('user');
+    window.location.href = 'login.html';
+  }
+
+  // Load documents on start
+  loadDocuments();
+  loadBlotter();
+</script>
+</body>
+</html>

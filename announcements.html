@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Announcements - Barangay 853</title>
+  <link rel="stylesheet" href="public.css">
+</head>
+<body class="public-page">
+
+  <nav class="navbar">
+    <div class="container">
+      <div class="nav-brand">
+        <img src="assets/logo-brgy.png" alt="Barangay 853 Logo" class="nav-logo">
+        <span class="brand-name">Barangay 853</span>
+      </div>
+      <ul class="nav-menu">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="documents.html">Documents</a></li>
+        <li><a href="announcements.html" class="active">Announcements</a></li>
+        <li><a href="report.html">Report</a></li>
+        <li><a href="about.html">About</a></li>
+        <li id="nav-auth"></li>
+      </ul>
+    </div>
+  </nav>
+
+  <section class="page-header">
+    <div class="container">
+      <h1>Announcements & Services</h1>
+      <p>Stay updated with the latest news, events, and services</p>
+    </div>
+  </section>
+
+  <section class="filter-section">
+    <div class="container">
+      <div class="filter-tabs">
+        <button class="filter-tab active" onclick="filterAnnouncements('all', this)">All</button>
+        <button class="filter-tab" onclick="filterAnnouncements('services', this)">Services Offered</button>
+        <button class="filter-tab" onclick="filterAnnouncements('announcements', this)">Announcements</button>
+        <button class="filter-tab" onclick="filterAnnouncements('events', this)">Events</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="announcements-section">
+    <div class="container">
+      <div id="announcements-container">
+        <div class="empty-state"><div style="font-size:48px;margin-bottom:16px">⏳</div><h3>Loading announcements...</h3></div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-content">
+        <div class="footer-section"><h4>Barangay 853</h4><p>Serving the community with dedication and transparency</p></div>
+        <div class="footer-section"><h4>Quick Links</h4><ul><li><a href="index.html">Home</a></li><li><a href="documents.html">Documents</a></li><li><a href="announcements.html">Announcements</a></li><li><a href="about.html">About</a></li></ul></div>
+        <div class="footer-section"><h4>Contact Us</h4><p>Email: barangay853@example.com</p><p>Phone: (02) 1234-5678</p></div>
+      </div>
+      <div class="footer-bottom"><p>&copy; 2025 Barangay 853. All rights reserved.</p></div>
+    </div>
+  </footer>
+
+  <script src="public.js"></script>
+  <script>
+    const API = 'http://localhost/Barangay853';
+    let allAnnouncements = [];
+
+    const staticAnnouncements = [
+      { id:1, category:'services', title:'Document Processing Services', published_on:'Available Daily', summary:'Get your barangay documents processed quickly and efficiently.', items:['Barangay Clearance','Certificate of Residency','Certificate of Indigency','Barangay ID'], link:'documents.html' },
+      { id:2, category:'services', title:'Health & Wellness Programs', published_on:'Every Tuesday & Thursday', summary:'Free health check-ups, immunization programs, and wellness consultations for all residents.', items:['Blood pressure monitoring','Child immunization','Prenatal check-ups','Health consultations'], info:'Time: 9:00 AM - 3:00 PM\nLocation: Barangay Health Center' },
+      { id:3, category:'services', title:'Free Legal Assistance', published_on:'Every Monday & Wednesday', summary:'Consult with our legal advisors for free legal advice and assistance in resolving disputes.', items:['Legal consultations','Mediation services','Document preparation','Referral services'], info:'Time: 10:00 AM - 4:00 PM\nLocation: Barangay Hall, 2nd Floor' },
+      { id:4, category:'announcements', title:'Barangay Assembly Meeting', published_on:'Posted: November 25, 2025', summary:'All residents are invited to attend the quarterly barangay assembly.', info:'Date: December 15, 2025\nTime: 2:00 PM - 5:00 PM\nVenue: Barangay Covered Court', note:'Light snacks will be served. Please bring valid ID.' },
+      { id:5, category:'announcements', title:'Updated Garbage Collection Schedule', published_on:'Posted: November 20, 2025', summary:'Please take note of the new garbage collection schedule effective December 1, 2025.', schedule:[{label:'Biodegradable:',value:'Monday, Wednesday, Friday'},{label:'Non-biodegradable:',value:'Tuesday, Thursday, Saturday'},{label:'Collection Time:',value:'6:00 AM - 10:00 AM'}], note:'Segregate your waste properly. Penalties apply for violations.' },
+      { id:6, category:'events', title:'Barangay Christmas Celebration', published_on:'Event Date: December 20, 2025', summary:"Join us for a night of fun, games, and fellowship!", highlights:['Christmas Caroling Competition','Gift-giving for children and senior citizens','Raffle draws with exciting prizes','Free food and refreshments','Live entertainment'], info:'Time: 5:00 PM onwards\nVenue: Barangay Plaza' },
+      { id:7, category:'events', title:'Barangay Sports Festival', published_on:'Event Date: January 15-20, 2026', summary:'Show your barangay pride! Register now for our annual sports festival.', highlights:["Basketball (Men's & Women's)",'Volleyball (Mixed)','Chess Tournament','Table Tennis','Badminton Singles & Doubles'], info:'Registration Deadline: January 5, 2026\nVenue: Barangay Sports Complex' },
+      { id:8, category:'announcements', title:'Scheduled Water Interruption', published_on:'Posted: November 28, 2025', summary:'Manila Water will conduct maintenance work that will temporarily affect water supply.', info:'Date: December 5, 2025\nTime: 10:00 PM - 6:00 AM (next day)\nAffected Areas: Zones 94-96', note:'Please store adequate water supply. Water tankers will be available during interruption.' }
+    ];
+
+    function badgeLabel(cat) {
+      return cat === 'services' ? 'Service' : cat === 'events' ? 'Event' : 'Announcement';
+    }
+
+    function renderCard(item) {
+      const items = item.items ? (typeof item.items === 'string' ? JSON.parse(item.items) : item.items) : null;
+      const highlights = item.highlights ? (typeof item.highlights === 'string' ? JSON.parse(item.highlights) : item.highlights) : null;
+      const schedule = item.schedule ? (typeof item.schedule === 'string' ? JSON.parse(item.schedule) : item.schedule) : null;
+      const info = item.info;
+      const note = item.note;
+      const link = item.link;
+
+      return `
+        <div class="announcement-card">
+          <span class="card-badge ${item.category}">${badgeLabel(item.category)}</span>
+          <div class="card-image"><div style="color:#7f8c8d">${badgeLabel(item.category)} Image</div></div>
+          <div class="card-content">
+            <h3>${item.title}</h3>
+            <p class="card-date">${item.published_on || ''}</p>
+            <p>${item.summary || item.body || ''}</p>
+            ${items ? `<ul class="service-list">${items.map(i => `<li>${i}</li>`).join('')}</ul>` : ''}
+            ${highlights ? `<div class="event-highlights"><h4>Highlights:</h4><ul>${highlights.map(h => `<li>${h}</li>`).join('')}</ul></div>` : ''}
+            ${schedule ? `<div class="schedule-table">${schedule.map(r => `<div class="schedule-row"><strong>${r.label}</strong> ${r.value}</div>`).join('')}</div>` : ''}
+            ${info ? `<div class="card-info">${info.split('\n').map(l => `<div>${l}</div>`).join('')}</div>` : ''}
+            ${note ? `<p class="card-note"><strong>Note:</strong> ${note}</p>` : ''}
+            ${link ? `<a href="${link}" class="btn primary" style="margin-top:1rem;display:inline-block">Learn More</a>` : ''}
+          </div>
+        </div>`;
+    }
+
+    function renderAnnouncements(data) {
+      const container = document.getElementById('announcements-container');
+      if (!data || data.length === 0) {
+        container.innerHTML = `<div class="empty-state"><div style="font-size:48px;margin-bottom:16px">📢</div><h3>No announcements found</h3><p>There are no announcements in this category at the moment.</p></div>`;
+        return;
+      }
+      container.innerHTML = `<div class="announcements-grid">${data.map(renderCard).join('')}</div>`;
+    }
+
+    function filterAnnouncements(cat, el) {
+      document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+      el.classList.add('active');
+      const filtered = cat === 'all' ? allAnnouncements : allAnnouncements.filter(a => a.category === cat);
+      renderAnnouncements(filtered);
+    }
+
+    async function loadAnnouncements() {
+      try {
+        const res = await fetch(`${API}/announcements/index.php?public=1`);
+        const data = await res.json();
+        if (data.success && data.data.length > 0) {
+          allAnnouncements = data.data;
+        } else {
+          allAnnouncements = staticAnnouncements;
+        }
+      } catch (err) {
+        allAnnouncements = staticAnnouncements;
+      }
+      renderAnnouncements(allAnnouncements);
+    }
+
+    loadAnnouncements();
+  </script>
+</body>
+</html>
