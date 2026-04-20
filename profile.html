@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Profile — Brgy. 853</title>
+  <link rel="icon" href="assets/logo-brgy.png">
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    :root{font-family:'Inter','Segoe UI',system-ui,sans-serif;color:#0f172a;background:#f4f6fb}
+    body{min-height:100vh;background:#f4f6fb;display:flex;flex-direction:column}
+    .topbar{background:#0b2250;color:#fff;padding:.85rem 2rem;display:flex;align-items:center;justify-content:space-between;gap:1rem}
+    .topbar-brand{display:flex;align-items:center;gap:.65rem;font-weight:700;font-size:1.05rem;color:#fff;text-decoration:none}
+    .topbar-brand img{width:36px;height:36px;border-radius:50%;background:#fff;object-fit:contain;padding:2px}
+    .topbar-actions{display:flex;gap:.75rem}
+    .btn{padding:.5rem 1.1rem;border-radius:.65rem;font-size:.88rem;font-weight:600;cursor:pointer;border:none;transition:all .2s}
+    .btn-ghost{background:rgba(255,255,255,.12);color:#fff}.btn-ghost:hover{background:rgba(255,255,255,.22)}
+    .btn-primary{background:#fff;color:#0b2250}.btn-primary:hover{background:#e2e8f0}
+    .btn-blue{background:#0b2250;color:#fff}.btn-blue:hover{background:#1e3a8a}
+    .btn-danger{background:#fee2e2;color:#dc2626;border:1px solid #fca5a5}.btn-danger:hover{background:#fecaca}
+
+    .page-wrap{max-width:900px;margin:2.5rem auto;padding:0 1.25rem;display:flex;flex-direction:column;gap:1.5rem;width:100%}
+    .page-title{font-size:1.5rem;font-weight:800;color:#0f172a}
+    .page-subtitle{color:#64748b;font-size:.9rem;margin-top:.2rem}
+
+    .card{background:#fff;border-radius:1.25rem;box-shadow:0 4px 20px rgba(15,23,42,.07);overflow:hidden}
+    .card-header{padding:1.25rem 1.5rem;border-bottom:1px solid #f1f5f9;display:flex;align-items:center;justify-content:space-between}
+    .card-title{font-size:1rem;font-weight:700;color:#0f172a}
+    .card-body{padding:1.5rem}
+
+    /* Avatar section */
+    .avatar-section{display:flex;align-items:center;gap:1.5rem;flex-wrap:wrap}
+    .avatar-big{width:96px;height:96px;border-radius:50%;background:linear-gradient(135deg,#667eea,#764ba2);display:flex;align-items:center;justify-content:center;font-size:2.25rem;font-weight:800;color:#fff;flex-shrink:0;overflow:hidden;border:3px solid #e2e8f0}
+    .avatar-big img{width:100%;height:100%;object-fit:cover}
+    .avatar-info h3{font-size:1.2rem;font-weight:700;color:#0f172a}
+    .avatar-info p{color:#64748b;font-size:.88rem;margin-top:.2rem}
+    .avatar-info .role-badge{display:inline-block;padding:.2rem .75rem;border-radius:999px;font-size:.75rem;font-weight:700;background:#dbeafe;color:#1e40af;margin-top:.4rem}
+    .upload-label{display:inline-flex;align-items:center;gap:.4rem;padding:.5rem 1rem;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:.65rem;font-size:.85rem;font-weight:600;color:#475569;cursor:pointer;transition:all .2s;margin-top:.75rem}
+    .upload-label:hover{background:#e2e8f0}
+    #avatar-file-input{display:none}
+
+    /* Form */
+    .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.1rem}
+    @media(max-width:560px){.form-grid{grid-template-columns:1fr}}
+    .form-group{display:flex;flex-direction:column;gap:.4rem}
+    .form-group.full{grid-column:1/-1}
+    label.field-label{font-size:.8rem;font-weight:600;color:#374151;text-transform:uppercase;letter-spacing:.04em}
+    input.field-input,textarea.field-input,select.field-input{padding:.7rem .95rem;border:1.5px solid #e2e8f0;border-radius:.7rem;font-size:.93rem;color:#0f172a;transition:border .2s;background:#fff;resize:vertical}
+    input.field-input:focus,textarea.field-input:focus{outline:none;border-color:#0b2250;box-shadow:0 0 0 3px rgba(11,34,80,.08)}
+    .form-actions{display:flex;justify-content:flex-end;gap:.75rem;margin-top:1rem;padding-top:1rem;border-top:1px solid #f1f5f9}
+
+    /* Divider */
+    .section-divider{border:none;border-top:1px solid #f1f5f9;margin:1rem 0}
+
+    /* Alert */
+    .alert{padding:.85rem 1.1rem;border-radius:.75rem;font-size:.88rem;font-weight:500;display:none}
+    .alert.success{background:#f0fdf4;border:1px solid #bbf7d0;color:#166534}
+    .alert.error{background:#fef2f2;border:1px solid #fecaca;color:#991b1b}
+
+    /* Info row */
+    .info-row{display:flex;gap:1rem;align-items:center;padding:.6rem 0;border-bottom:1px solid #f8fafc}
+    .info-row:last-child{border-bottom:none}
+    .info-row label{font-size:.78rem;color:#94a3b8;font-weight:600;width:120px;flex-shrink:0;text-transform:uppercase}
+    .info-row span{color:#0f172a;font-size:.9rem}
+  </style>
+</head>
+<body>
+
+<div class="topbar">
+  <a href="dashboard.html" class="topbar-brand">
+    <img src="assets/logo-brgy.png" alt="Logo">
+    Barangay 853
+  </a>
+  <div class="topbar-actions">
+    <button class="btn btn-ghost" onclick="window.location.href='dashboard.html'">← Back to Dashboard</button>
+    <button class="btn btn-ghost" onclick="handleLogout()">Logout</button>
+  </div>
+</div>
+
+<div class="page-wrap">
+  <div>
+    <h1 class="page-title">My Profile</h1>
+    <p class="page-subtitle">Manage your account info, avatar, and password.</p>
+  </div>
+
+  <!-- Avatar Card -->
+  <div class="card">
+    <div class="card-header"><span class="card-title">Profile Photo</span></div>
+    <div class="card-body">
+      <div class="avatar-section">
+        <div class="avatar-big" id="avatar-display"><span id="avatar-initials">?</span></div>
+        <div class="avatar-info">
+          <h3 id="display-name">Loading...</h3>
+          <p id="display-email"></p>
+          <span class="role-badge" id="display-role"></span>
+          <br>
+          <label class="upload-label" for="avatar-file-input">📷 Change Photo</label>
+          <input type="file" id="avatar-file-input" accept="image/jpeg,image/png,image/webp" onchange="uploadAvatar(this)">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Profile Info Card -->
+  <div class="card">
+    <div class="card-header"><span class="card-title">Personal Information</span></div>
+    <div class="card-body">
+      <div id="profile-alert" class="alert"></div>
+      <div style="margin-bottom:1rem"></div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="field-label">Full Name *</label>
+          <input class="field-input" id="field-name" type="text" placeholder="Your full name">
+        </div>
+        <div class="form-group">
+          <label class="field-label">Email</label>
+          <input class="field-input" id="field-email" type="email" disabled style="background:#f8fafc;color:#94a3b8">
+        </div>
+        <div class="form-group">
+          <label class="field-label">Phone Number</label>
+          <input class="field-input" id="field-phone" type="text" placeholder="09XXXXXXXXX">
+        </div>
+        <div class="form-group">
+          <label class="field-label">Address</label>
+          <input class="field-input" id="field-address" type="text" placeholder="Your address">
+        </div>
+        <div class="form-group full">
+          <label class="field-label">Bio / Notes</label>
+          <textarea class="field-input" id="field-bio" rows="3" placeholder="Short bio or notes..."></textarea>
+        </div>
+      </div>
+      <div class="form-actions">
+        <button class="btn btn-blue" onclick="saveProfile()">💾 Save Changes</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Change Password Card -->
+  <div class="card">
+    <div class="card-header"><span class="card-title">Change Password</span></div>
+    <div class="card-body">
+      <div id="password-alert" class="alert"></div>
+      <div style="margin-bottom:1rem"></div>
+      <div class="form-grid">
+        <div class="form-group full">
+          <label class="field-label">Current Password</label>
+          <input class="field-input" id="field-current-pw" type="password" placeholder="Enter current password">
+        </div>
+        <div class="form-group">
+          <label class="field-label">New Password</label>
+          <input class="field-input" id="field-new-pw" type="password" placeholder="Min. 6 characters">
+        </div>
+        <div class="form-group">
+          <label class="field-label">Confirm New Password</label>
+          <input class="field-input" id="field-confirm-pw" type="password" placeholder="Repeat new password">
+        </div>
+      </div>
+      <div class="form-actions">
+        <button class="btn btn-blue" onclick="changePassword()">🔒 Update Password</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Account Info -->
+  <div class="card">
+    <div class="card-header"><span class="card-title">Account Details</span></div>
+    <div class="card-body">
+      <div class="info-row"><label>Role</label><span id="info-role">—</span></div>
+      <div class="info-row"><label>Email</label><span id="info-email">—</span></div>
+      <div class="info-row"><label>Member Since</label><span id="info-joined">—</span></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const API = window.location.origin + '/Barangay853';
+const token = localStorage.getItem('auth_token');
+const user  = JSON.parse(localStorage.getItem('user') || '{}');
+
+if (!token) window.location.href = 'login.html';
+
+function authHeaders() {
+  return { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' };
+}
+
+function showAlert(id, type, msg) {
+  const el = document.getElementById(id);
+  el.className = `alert ${type}`;
+  el.textContent = msg;
+  el.style.display = 'block';
+  setTimeout(() => el.style.display = 'none', 4000);
+}
+
+function formatDate(d) {
+  if (!d) return '—';
+  return new Date(d).toLocaleDateString('en-PH', { year:'numeric', month:'long', day:'numeric' });
+}
+
+function renderAvatar(avatarUrl, name) {
+  const display = document.getElementById('avatar-display');
+  if (avatarUrl) {
+    display.innerHTML = `<img src="${API}/${avatarUrl}" alt="avatar" onerror="this.parentElement.innerHTML='<span id=avatar-initials>${(name||'?')[0].toUpperCase()}</span>'">`;
+  } else {
+    display.innerHTML = `<span id="avatar-initials">${(name||'?')[0].toUpperCase()}</span>`;
+  }
+}
+
+async function loadProfile() {
+  try {
+    const res = await fetch(`${API}/profile/index.php`, { headers: { 'Authorization': `Bearer ${token}` } });
+    const data = await res.json();
+    if (!data.success) { window.location.href = 'login.html'; return; }
+    const u = data.data;
+
+    renderAvatar(u.avatar_url, u.name);
+    document.getElementById('display-name').textContent = u.name || '—';
+    document.getElementById('display-email').textContent = u.email || '—';
+    document.getElementById('display-role').textContent = (u.role || 'user').charAt(0).toUpperCase() + (u.role||'user').slice(1);
+    document.getElementById('field-name').value    = u.name    || '';
+    document.getElementById('field-email').value   = u.email   || '';
+    document.getElementById('field-phone').value   = u.phone   || '';
+    document.getElementById('field-address').value = u.address || '';
+    document.getElementById('field-bio').value     = u.bio     || '';
+    document.getElementById('info-role').textContent   = u.role || '—';
+    document.getElementById('info-email').textContent  = u.email || '—';
+    document.getElementById('info-joined').textContent = formatDate(u.created_at);
+  } catch(e) {
+    console.error(e);
+  }
+}
+
+async function refreshStoredUser() {
+  try {
+    const res = await fetch(`${API}/profile/index.php`, { headers: { 'Authorization': `Bearer ${token}` } });
+    const data = await res.json();
+    if (data.success) {
+      const u = data.data;
+      localStorage.setItem('user', JSON.stringify({
+        name:       u.name,
+        email:      u.email,
+        role:       u.role,
+        avatar:     u.avatar_url,
+        phone:      u.phone,
+        address:    u.address,
+        bio:        u.bio,
+        created_at: u.created_at
+      }));
+    }
+  } catch(e) { console.error('Failed to refresh stored user', e); }
+}
+
+async function saveProfile() {
+  const payload = {
+    name:    document.getElementById('field-name').value.trim(),
+    phone:   document.getElementById('field-phone').value.trim(),
+    address: document.getElementById('field-address').value.trim(),
+    bio:     document.getElementById('field-bio').value.trim(),
+  };
+  if (!payload.name) { showAlert('profile-alert','error','Name is required.'); return; }
+  try {
+    const res = await fetch(`${API}/profile/index.php`, {
+      method: 'POST',
+      headers: authHeaders(),
+      body: JSON.stringify(payload)
+    });
+    const data = await res.json();
+    if (data.success) {
+      showAlert('profile-alert','success','✅ Profile updated successfully!');
+      await refreshStoredUser();
+      document.getElementById('display-name').textContent = payload.name;
+    } else {
+      showAlert('profile-alert','error', data.message || 'Update failed.');
+    }
+  } catch(e) {
+    showAlert('profile-alert','error','Server error. Try again.');
+  }
+}
+
+async function changePassword() {
+  const current  = document.getElementById('field-current-pw').value;
+  const newPw    = document.getElementById('field-new-pw').value;
+  const confirm  = document.getElementById('field-confirm-pw').value;
+  if (!current || !newPw || !confirm) { showAlert('password-alert','error','All password fields are required.'); return; }
+  if (newPw.length < 6)              { showAlert('password-alert','error','New password must be at least 6 characters.'); return; }
+  if (newPw !== confirm)             { showAlert('password-alert','error','Passwords do not match.'); return; }
+  try {
+    const res = await fetch(`${API}/profile/index.php`, {
+      method: 'POST',
+      headers: authHeaders(),
+      body: JSON.stringify({ name: document.getElementById('field-name').value, current_password: current, new_password: newPw })
+    });
+    const data = await res.json();
+    if (data.success) {
+      showAlert('password-alert','success','✅ Password changed successfully!');
+      document.getElementById('field-current-pw').value = '';
+      document.getElementById('field-new-pw').value = '';
+      document.getElementById('field-confirm-pw').value = '';
+    } else {
+      showAlert('password-alert','error', data.message || 'Password update failed.');
+    }
+  } catch(e) {
+    showAlert('password-alert','error','Server error. Try again.');
+  }
+}
+
+async function uploadAvatar(input) {
+  if (!input.files[0]) return;
+  const formData = new FormData();
+  formData.append('avatar', input.files[0]);
+  try {
+    const res = await fetch(`${API}/profile/index.php`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${token}` },
+      body: formData
+    });
+    const data = await res.json();
+    if (data.success) {
+      renderAvatar(data.avatar_url, document.getElementById('field-name').value);
+      await refreshStoredUser();
+      showAlert('profile-alert','success','✅ Photo updated!');
+    } else {
+      showAlert('profile-alert','error', data.message || 'Upload failed.');
+    }
+  } catch(e) {
+    showAlert('profile-alert','error','Upload error. Try again.');
+  }
+}
+
+function handleLogout() {
+  fetch(`${API}/auth/logout.php`, { method:'POST', headers:{ 'Authorization':`Bearer ${token}` } }).catch(()=>{});
+  localStorage.removeItem('auth_token');
+  localStorage.removeItem('user');
+  window.location.href = 'login.html';
+}
+
+loadProfile();
+</script>
+</body>
+</html>

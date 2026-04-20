@@ -15,18 +15,30 @@ if (!$isPublic) {
     }
     $token = substr($authHeader, 7);
     $conn = getConnection();
-    $stmt = $conn->prepare('SELECT u.id FROM users u 
+    $stmt = $conn->prepare('SELECT u.id, u.name FROM users u 
         INNER JOIN personal_access_tokens t ON t.tokenable_id = u.id 
         WHERE t.token = ?');
     $stmt->bind_param('s', $token);
     $stmt->execute();
-    if (!$stmt->get_result()->fetch_assoc()) {
+    $authUser = $stmt->get_result()->fetch_assoc();
+    if (!$authUser) {
         http_response_code(401);
         echo json_encode(['success' => false, 'message' => 'Invalid token']);
         exit();
     }
+    $actorName = $authUser['name'];
 } else {
     $conn = getConnection();
+    $actorName = 'Public';
+}
+
+// Helper: write to activity_logs
+function logActivity($conn, $actorName, $action, $module, $referenceId) {
+    $stmt = $conn->prepare('INSERT INTO activity_logs 
+        (actor_name, action, module, reference_id, logged_at, created_at, updated_at) 
+        VALUES (?, ?, ?, ?, NOW(), NOW(), NOW())');
+    $stmt->bind_param('ssss', $actorName, $action, $module, $referenceId);
+    $stmt->execute();
 }
 
 $id = isset($_GET['id']) ? intval($_GET['id']) : null;
@@ -46,7 +58,6 @@ switch ($method) {
             }
         } else {
             if ($isPublic) {
-                // Public: only published and not expired
                 $category = isset($_GET['category']) ? $_GET['category'] : null;
                 if ($category) {
                     $stmt = $conn->prepare('SELECT * FROM announcements 
@@ -62,7 +73,6 @@ switch ($method) {
                         ORDER BY published_on DESC');
                 }
             } else {
-                // Admin: all announcements
                 $stmt = $conn->prepare('SELECT * FROM announcements ORDER BY created_at DESC');
             }
             $stmt->execute();
@@ -71,64 +81,113 @@ switch ($method) {
         }
         break;
 
-    case 'POST':
-        $data = json_decode(file_get_contents('php://input'), true);
-        if (!isset($data['title'])) {
-            http_response_code(400);
-            echo json_encode(['success' => false, 'message' => 'Title is required']);
-            exit();
-        }
-        $refNo = 'ANN-' . date('Y') . '-' . str_pad(rand(1, 999), 3, '0', STR_PAD_LEFT);
-        $items = isset($data['items']) ? json_encode($data['items']) : null;
-        $highlights = isset($data['highlights']) ? json_encode($data['highlights']) : null;
-        $schedule = isset($data['schedule']) ? json_encode($data['schedule']) : null;
-
-        $stmt = $conn->prepare('INSERT INTO announcements 
-            (reference_no, title, summary, body, items, info, note, link, highlights, schedule,
-            priority, status, category, target_audience, posted_by, published_on, expires_on,
-            created_at, updated_at) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())');
-        $stmt->bind_param('sssssssssssssssss',
-            $refNo, $data['title'], $data['summary'], $data['body'],
-            $items, $data['info'], $data['note'], $data['link'],
-            $highlights, $schedule,
-            $data['priority'] ?? 'Normal', $data['status'] ?? 'Draft',
-            $data['category'], $data['target_audience'], $data['posted_by'],
-            $data['published_on'], $data['expires_on']
-        );
-        $stmt->execute();
-        $newId = $conn->insert_id;
-        echo json_encode(['success' => true, 'message' => 'Announcement created successfully',
-            'id' => $newId, 'reference_no' => $refNo]);
-        break;
-
-    case 'PUT':
-        if (!$id) {
-            http_response_code(400);
-            echo json_encode(['success' => false, 'message' => 'ID is required']);
-            exit();
-        }
-        $data = json_decode(file_get_contents('php://input'), true);
-        $items = isset($data['items']) ? json_encode($data['items']) : null;
-        $highlights = isset($data['highlights']) ? json_encode($data['highlights']) : null;
-        $schedule = isset($data['schedule']) ? json_encode($data['schedule']) : null;
-
-        $stmt = $conn->prepare('UPDATE announcements SET 
-            title=?, summary=?, body=?, items=?, info=?, note=?, link=?,
-            highlights=?, schedule=?, priority=?, status=?, category=?,
-            target_audience=?, posted_by=?, published_on=?, expires_on=?,
-            updated_at=NOW() WHERE id=?');
-        $stmt->bind_param('ssssssssssssssssi',
-            $data['title'], $data['summary'], $data['body'],
-            $items, $data['info'], $data['note'], $data['link'],
-            $highlights, $schedule,
-            $data['priority'], $data['status'], $data['category'],
-            $data['target_audience'], $data['posted_by'],
-            $data['published_on'], $data['expires_on'], $id
-        );
-        $stmt->execute();
-        echo json_encode(['success' => true, 'message' => 'Announcement updated successfully']);
-        break;
+        case 'POST':
+            $data = json_decode(file_get_contents('php://input'), true);
+            if (!isset($data['title'])) {
+                http_response_code(400);
+                echo json_encode(['success' => false, 'message' => 'Title is required']);
+                exit();
+            }
+            $refNo = 'ANN-' . date('Y') . '-' . str_pad(rand(1, 999), 3, '0', STR_PAD_LEFT);
+            
+            $title          = $data['title'] ?? '';
+            $summary        = $data['summary'] ?? null;
+            $body           = $data['body'] ?? null;
+            $items          = isset($data['items']) ? json_encode($data['items']) : null;
+            $info           = $data['info'] ?? null;
+            $note           = $data['note'] ?? null;
+            $link           = $data['link'] ?? null;
+            $highlights     = isset($data['highlights']) ? json_encode($data['highlights']) : null;
+            $schedule       = isset($data['schedule']) ? json_encode($data['schedule']) : null;
+            $priority       = $data['priority'] ?? 'Normal';
+            $status         = $data['status'] ?? 'Draft';
+            $category       = $data['category'] ?? null;
+            $targetAudience = $data['target_audience'] ?? null;
+            $postedBy       = $data['posted_by'] ?? 'Admin';
+            $expiresOn      = $data['expires_on'] ?? null;
+            
+            // FIX: Auto-fill published_on if status is Published and no date is provided
+            $publishedOn    = $data['published_on'] ?? null;
+            if ($status === 'Published' && empty($publishedOn)) {
+                $publishedOn = date('Y-m-d H:i:s');
+            }
+    
+            $stmt = $conn->prepare('INSERT INTO announcements 
+                (reference_no, title, summary, body, items, info, note, link, highlights, schedule,
+                priority, status, category, target_audience, posted_by, published_on, expires_on,
+                created_at, updated_at) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())');
+                
+            $stmt->bind_param('sssssssssssssssss',
+                $refNo, $title, $summary, $body, $items, $info, $note, $link,
+                $highlights, $schedule, $priority, $status, $category,
+                $targetAudience, $postedBy, $publishedOn, $expiresOn
+            );
+            $stmt->execute();
+            $newId = $conn->insert_id;
+            logActivity($conn, $actorName, 'Created', 'Announcement', $refNo . ' — ' . $title);
+            echo json_encode(['success' => true, 'message' => 'Announcement created successfully',
+                'id' => $newId, 'reference_no' => $refNo]);
+            break;
+    
+        case 'PUT':
+            if (!$id) {
+                http_response_code(400);
+                echo json_encode(['success' => false, 'message' => 'ID is required']);
+                exit();
+            }
+            $data = json_decode(file_get_contents('php://input'), true);
+            
+            // FIX: Fetch the existing record first so we don't overwrite untouched fields with NULL
+            $fetchStmt = $conn->prepare('SELECT * FROM announcements WHERE id = ?');
+            $fetchStmt->bind_param('i', $id);
+            $fetchStmt->execute();
+            $current = $fetchStmt->get_result()->fetch_assoc();
+            
+            if (!$current) {
+                http_response_code(404);
+                echo json_encode(['success' => false, 'message' => 'Announcement not found']);
+                exit();
+            }
+            
+            // Use incoming data if it exists, otherwise keep existing data
+            $title          = isset($data['title']) ? $data['title'] : $current['title'];
+            $summary        = isset($data['summary']) ? $data['summary'] : $current['summary'];
+            $body           = isset($data['body']) ? $data['body'] : $current['body'];
+            $items          = isset($data['items']) ? json_encode($data['items']) : $current['items'];
+            $info           = isset($data['info']) ? $data['info'] : $current['info'];
+            $note           = isset($data['note']) ? $data['note'] : $current['note'];
+            $link           = isset($data['link']) ? $data['link'] : $current['link'];
+            $highlights     = isset($data['highlights']) ? json_encode($data['highlights']) : $current['highlights'];
+            $schedule       = isset($data['schedule']) ? json_encode($data['schedule']) : $current['schedule'];
+            $priority       = isset($data['priority']) ? $data['priority'] : $current['priority'];
+            $status         = isset($data['status']) ? $data['status'] : $current['status'];
+            $category       = isset($data['category']) ? $data['category'] : $current['category'];
+            $targetAudience = isset($data['target_audience']) ? $data['target_audience'] : $current['target_audience'];
+            $postedBy       = isset($data['posted_by']) ? $data['posted_by'] : $current['posted_by'];
+            $expiresOn      = isset($data['expires_on']) ? $data['expires_on'] : $current['expires_on'];
+            
+            // FIX: Auto-fill published_on if changed to Published and no existing date is set
+            $publishedOn    = isset($data['published_on']) ? $data['published_on'] : $current['published_on'];
+            if ($status === 'Published' && empty($publishedOn)) {
+                $publishedOn = date('Y-m-d H:i:s');
+            }
+    
+            $stmt = $conn->prepare('UPDATE announcements SET 
+                title=?, summary=?, body=?, items=?, info=?, note=?, link=?,
+                highlights=?, schedule=?, priority=?, status=?, category=?,
+                target_audience=?, posted_by=?, published_on=?, expires_on=?,
+                updated_at=NOW() WHERE id=?');
+                
+            $stmt->bind_param('ssssssssssssssssi',
+                $title, $summary, $body, $items, $info, $note, $link,
+                $highlights, $schedule, $priority, $status, $category,
+                $targetAudience, $postedBy, $publishedOn, $expiresOn, $id
+            );
+            $stmt->execute();
+            logActivity($conn, $actorName, 'Updated', 'Announcement', 'ANN-' . $id . ' — ' . $title);
+            echo json_encode(['success' => true, 'message' => 'Announcement updated successfully']);
+            break;
 
     case 'DELETE':
         if (!$id) {
@@ -136,9 +195,16 @@ switch ($method) {
             echo json_encode(['success' => false, 'message' => 'ID is required']);
             exit();
         }
+        // Grab title before deleting for the log
+        $titleStmt = $conn->prepare('SELECT title FROM announcements WHERE id = ?');
+        $titleStmt->bind_param('i', $id);
+        $titleStmt->execute();
+        $annTitle = $titleStmt->get_result()->fetch_assoc()['title'] ?? 'Unknown';
+
         $stmt = $conn->prepare('DELETE FROM announcements WHERE id = ?');
         $stmt->bind_param('i', $id);
         $stmt->execute();
+        logActivity($conn, $actorName, 'Deleted', 'Announcement', 'ANN-' . $id . ' — ' . $annTitle);
         echo json_encode(['success' => true, 'message' => 'Announcement deleted successfully']);
         break;
 

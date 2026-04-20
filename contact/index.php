@@ -7,7 +7,10 @@ $headers = getallheaders();
 $authHeader = isset($headers['Authorization']) ? $headers['Authorization'] : '';
 $isPublic = isset($_GET['public']);
 
-if (!$isPublic) {
+// POST (public contact form) does NOT require auth
+$isPublicPost = ($method === 'POST' && !$isPublic);
+
+if (!$isPublic && !$isPublicPost) {
     if (!$authHeader || !str_starts_with($authHeader, 'Bearer ')) {
         http_response_code(401);
         echo json_encode(['success' => false, 'message' => 'Unauthorized']);

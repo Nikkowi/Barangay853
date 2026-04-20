@@ -51,6 +51,14 @@
     </div>
   </section>
 
+  <div id="modal-public-announcement" class="modal-backdrop" style="display:none; z-index:9999;">
+    <div class="modal" style="max-width: 650px; padding-bottom: 2.5rem;">
+      <button class="modal-close" onclick="closePublicAnnouncement()">&times;</button>
+      <div id="public-announcement-content" style="display:flex;flex-direction:column;">
+        </div>
+    </div>
+  </div>
+
   <footer class="footer">
     <div class="container">
       <div class="footer-content">
@@ -64,7 +72,6 @@
 
   <script src="public.js"></script>
   <script>
-    const API = 'http://localhost/Barangay853';
     let allAnnouncements = [];
 
     const staticAnnouncements = [
@@ -90,10 +97,16 @@
       const note = item.note;
       const link = item.link;
 
+      // Ensure API variable is defined for the image path
+      const BASE_URL = window.API || 'http://localhost/Barangay853';
+      const imageDisplay = item.image_url 
+        ? `<img src="${BASE_URL}/${item.image_url}" style="width:100%; height:100%; object-fit:cover;">` 
+        : `<div style="color:#7f8c8d">${badgeLabel(item.category)} Image</div>`;
+
       return `
-        <div class="announcement-card">
+        <div class="announcement-card" onclick="viewPublicAnnouncement(${item.id})" style="cursor:pointer;">
           <span class="card-badge ${item.category}">${badgeLabel(item.category)}</span>
-          <div class="card-image"><div style="color:#7f8c8d">${badgeLabel(item.category)} Image</div></div>
+          <div class="card-image" style="overflow:hidden;">${imageDisplay}</div>
           <div class="card-content">
             <h3>${item.title}</h3>
             <p class="card-date">${item.published_on || ''}</p>
@@ -122,6 +135,57 @@
       el.classList.add('active');
       const filtered = cat === 'all' ? allAnnouncements : allAnnouncements.filter(a => a.category === cat);
       renderAnnouncements(filtered);
+    }
+
+    async function viewPublicAnnouncement(id) {
+      try {
+        const BASE_URL = window.API || 'http://localhost/Barangay853';
+        
+        // Grab the item from the current list
+        let a = allAnnouncements.find(item => item.id === id);
+        if (!a) return;
+
+        // Try to fetch the absolute latest data from DB (in case they have more text body)
+        try {
+            const res = await fetch(`${BASE_URL}/announcements/index.php?public=1&id=${id}`);
+            const data = await res.json();
+            if (data.success && data.data) {
+                a = Array.isArray(data.data) ? data.data[0] : data.data;
+            }
+        } catch(err) { console.log("Using cached data"); }
+
+        const imgHtml = a.image_url
+          ? `<img src="${BASE_URL}/${a.image_url}" style="width:100%; max-height:350px; object-fit:cover; border-radius:8px; margin-bottom:1.5rem; border:1px solid #e2e8f0;">`
+          : ``;
+
+        // Default badge color mapping based on your CSS
+        let badgeColor = '#e74c3c'; // red (announcements)
+        if (a.category === 'services') badgeColor = '#3498db'; // blue
+        if (a.category === 'events') badgeColor = '#f39c12'; // orange
+
+        const pubDate = a.published_on && a.published_on !== 'N/A' 
+          ? new Date(a.published_on).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) 
+          : 'N/A';
+
+        document.getElementById('public-announcement-content').innerHTML = `
+          ${imgHtml}
+          <span style="display:inline-block; padding: 0.25rem 0.75rem; border-radius: 4px; font-size: 0.875rem; font-weight: 500; background: ${badgeColor}; color: #fff; margin-bottom: 1rem;">${badgeLabel(a.category)}</span>
+          <h2 style="color:#2c3e50; margin-bottom: 0.5rem; font-size: 1.6rem; font-weight:700;">${a.title}</h2>
+          <p style="color:#7f8c8d; font-size:0.9rem; margin-bottom: 1.5rem;">Published on ${pubDate}</p>
+          
+          <div style="color:#374151; line-height:1.7; white-space:pre-wrap; font-size:1rem; border-top: 1px solid #f1f5f9; padding-top: 1.5rem;">${a.body || a.summary || 'No additional details provided.'}</div>
+          
+          ${a.link ? `<div style="margin-top:2rem;"><a href="${a.link}" target="_blank" class="btn primary">View External Link</a></div>` : ''}
+        `;
+        
+        document.getElementById('modal-public-announcement').style.display = 'flex';
+      } catch(e) {
+        console.error("Error loading announcement:", e);
+      }
+    }
+
+    function closePublicAnnouncement() {
+      document.getElementById('modal-public-announcement').style.display = 'none';
     }
 
     async function loadAnnouncements() {

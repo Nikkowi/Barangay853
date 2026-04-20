@@ -4,15 +4,13 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dashboard - Brgy. 853 Zone 93</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     :root { font-family: 'Inter','Segoe UI',system-ui,sans-serif; color: #0f172a; background: #f4f6fb; }
     body { min-height: 100vh; background: #f4f6fb; }
     button, input, select, textarea { font: inherit; }
-
     .dashboard-shell { min-height: 100vh; display: grid; grid-template-columns: 280px 1fr; }
-
-    /* Sidebar */
     .sidebar { background: #0b2250; color: #e2e8f0; padding: 2rem 1.5rem; display: flex; flex-direction: column; gap: 2rem; position: sticky; top: 0; height: 100vh; overflow-y: auto; }
     .sidebar-brand { display: flex; align-items: center; gap: 0.85rem; }
     .sidebar-logo { width: 64px; height: 64px; border-radius: 50%; background: #fff; padding: 0.4rem; object-fit: contain; }
@@ -24,105 +22,127 @@
     .sidebar-nav li:hover, .sidebar-nav li.active { background: rgba(255,255,255,0.12); }
     .nav-icon { width: 36px; height: 36px; border-radius: 10px; background: rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; color: #dbeafe; flex-shrink: 0; }
     .nav-icon svg { width: 18px; height: 18px; }
-
-    /* Main */
     .main-panel { padding: 2rem clamp(1.5rem,4vw,3rem); display: flex; flex-direction: column; gap: 2rem; overflow-y: auto; }
     .top-bar { position: sticky; top: 0; z-index: 20; display: flex; flex-wrap: wrap; align-items: center; gap: 1rem; background: #f4f6fb; padding: 1rem 0; border-bottom: 1px solid #e2e8f0; margin-bottom: 0.5rem; }
-    .top-search { flex: 1; }
+    .top-search { flex: 1; position: relative; }
     .top-search input { width: 100%; border: 1px solid #d5d8f0; border-radius: 999px; padding: 0.65rem 1.25rem; background: #fff; font-size: 0.95rem; }
     .top-search input:focus { outline: none; border-color: #0b2250; box-shadow: 0 0 0 3px rgba(11,34,80,0.08); }
+    .search-dropdown { position: absolute; top: calc(100% + 6px); left: 0; right: 0; background: #fff; border: 1px solid #e2e8f0; border-radius: 1rem; box-shadow: 0 10px 30px rgba(15,23,42,.12); z-index: 100; overflow: hidden; display: none; }
+    .search-item { padding: .65rem 1.1rem; cursor: pointer; display: flex; align-items: center; gap: .75rem; transition: background .15s; border-bottom: 1px solid #f8fafc; }
+    .search-item:last-child { border-bottom: none; }
+    .search-item:hover { background: #f1f5f9; }
+    .search-item-icon { font-size: 1rem; width: 28px; text-align: center; flex-shrink: 0; }
+    .search-item-label { font-size: .88rem; font-weight: 600; color: #0f172a; }
+    .search-item-sub { font-size: .75rem; color: #94a3b8; }
+    .search-no-results { padding: 1rem; text-align: center; color: #94a3b8; font-size: .88rem; }
     .header-tools { display: flex; align-items: center; gap: 0.75rem; }
-    .profile-chip { display: flex; align-items: center; gap: 0.75rem; background: #fff; border-radius: 999px; padding: 0.4rem 1rem 0.4rem 0.4rem; box-shadow: 0 5px 18px rgba(15,23,42,0.08); border: 1px solid #e2e8f0; }
-    .avatar-img { width: 42px; height: 42px; border-radius: 50%; background: linear-gradient(135deg,#667eea,#764ba2); display: flex; align-items: center; justify-content: center; font-weight: 700; color: #fff; font-size: 1rem; flex-shrink: 0; }
+    .profile-chip { display: flex; align-items: center; gap: 0.75rem; background: #fff; border-radius: 999px; padding: 0.4rem 1rem 0.4rem 0.4rem; box-shadow: 0 5px 18px rgba(15,23,42,0.08); border: 1px solid #e2e8f0; cursor: pointer; }
+    .profile-chip:hover { box-shadow: 0 5px 24px rgba(15,23,42,.14); }
+    .avatar-img { width: 42px; height: 42px; border-radius: 50%; background: linear-gradient(135deg,#667eea,#764ba2); display: flex; align-items: center; justify-content: center; font-weight: 700; color: #fff; font-size: 1rem; flex-shrink: 0; overflow: hidden; }
+    .avatar-img img { width: 100%; height: 100%; object-fit: cover; }
     .user-name { font-weight: 600; font-size: 0.95rem; color: #0f172a; line-height: 1.2; }
     .user-role { color: #64748b; font-size: 0.8rem; line-height: 1.2; }
     .logout-btn { background: transparent; border: 1px solid #e2e8f0; color: #64748b; padding: 0.4rem 0.85rem; border-radius: 0.5rem; font-size: 0.85rem; cursor: pointer; transition: all 0.2s; margin-left: 0.25rem; }
-    .logout-btn:hover { background: #f1f5f9; color: #475569; border-color: #cbd5e1; }
-
-    /* Stats */
+    .logout-btn:hover { background: #f1f5f9; }
+    .session-warning { position: fixed; bottom: 1.5rem; right: 1.5rem; background: #fff; border: 1px solid #fca5a5; border-radius: 1rem; padding: 1.1rem 1.5rem; box-shadow: 0 10px 30px rgba(15,23,42,.15); z-index: 9999; display: none; max-width: 340px; }
+    .session-warning h4 { color: #dc2626; font-size: .95rem; margin-bottom: .35rem; }
+    .session-warning p { font-size: .82rem; color: #6b7280; margin-bottom: .75rem; }
+    .session-warning-btns { display: flex; gap: .5rem; }
+    .session-warning-btns button { flex: 1; padding: .45rem; border-radius: .5rem; font-size: .82rem; font-weight: 600; cursor: pointer; border: none; }
+    .btn-stay { background: #0b2250; color: #fff; }
+    .btn-logout-now { background: #f1f5f9; color: #374151; }
     .stats-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(200px,1fr)); gap: 1rem; }
     .stat-card { background: #fff; padding: 1rem 1.25rem; border-radius: 1rem; box-shadow: 0 10px 20px rgba(15,23,42,0.08); display: flex; flex-direction: column; gap: 0.35rem; }
     .stat-icon { font-size: 1.5rem; }
     .stat-label { font-size: 0.85rem; color: #64748b; margin: 0; }
     .stat-value { font-size: 2rem; font-weight: 700; color: #0f172a; margin: 0; }
-
-    /* Content grid */
+    .stat-sub { font-size: .75rem; color: #22c55e; font-weight: 600; }
     .content-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
     .panel { background: #fff; border-radius: 1.25rem; padding: 1.5rem; box-shadow: 0 10px 30px rgba(15,23,42,0.08); display: flex; flex-direction: column; gap: 1rem; min-height: 300px; }
-    #section-dashboard { display: flex; flex-direction: column; gap: 1.5rem; }
+    #section-dashboard { flex-direction: column; gap: 1.5rem; }
+    #section-dashboard.active { display: flex; }
     .panel-heading { display: flex; justify-content: space-between; align-items: center; gap: 1rem; }
     .panel-heading h2 { font-size: 1.15rem; font-weight: 700; margin: 0; color: #0f172a; }
     .muted { color: #94a3b8; font-size: 0.85rem; margin: 0.2rem 0 0; }
-    .text-link { background: none; border: none; color: #2563eb; cursor: pointer; font-size: 0.85rem; font-weight: 600; transition: color 0.2s; }
+    .text-link { background: none; border: none; color: #2563eb; cursor: pointer; font-size: 0.85rem; font-weight: 600; }
     .text-link:hover { color: #1e3a8a; }
-    .notif-btn { width: 42px; height: 42px; border-radius: 50%; background: #fff; border: none; box-shadow: 0 5px 18px rgba(15,23,42,0.1); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.15rem; transition: transform 0.2s; }
-    .notif-btn:hover { transform: scale(1.05); }
-
-    /* Table */
     .table { display: flex; flex-direction: column; gap: 0.5rem; }
     .table-row { display: grid; grid-template-columns: 2fr 2fr 1.5fr 1fr; gap: 0.5rem; padding: 0.65rem 0.75rem; border-radius: 0.75rem; background: #f8f9ff; font-size: 0.875rem; align-items: center; }
     .table-row.head { background: none; font-weight: 600; color: #475569; font-size: 0.8rem; }
     .empty-state { padding: 2rem; text-align: center; color: #6b7280; font-size: 0.875rem; }
-
-    /* Status badges */
     .status-badge { padding: 0.25rem 0.65rem; border-radius: 999px; font-size: 0.75rem; font-weight: 600; }
-    .status-badge.pending { background: #fef9c3; color: #854d0e; }
-    .status-badge.review { background: #dbeafe; color: #1e40af; }
+    .status-badge.pending  { background: #fef9c3; color: #854d0e; }
+    .status-badge.review   { background: #dbeafe; color: #1e40af; }
     .status-badge.approved { background: #dcfce7; color: #166534; }
     .status-badge.released { background: #d1fae5; color: #065f46; }
     .status-badge.rejected { background: #fee2e2; color: #991b1b; }
-
-    /* Activity log */
+    .status-badge.admin    { background: #dcfce7; color: #166534; }
+    .status-badge.staff    { background: #fef3c7; color: #92400e; }
+    .status-badge.resident { background: #f1f5f9; color: #475569; }
+    .status-badge.high     { background: #fef3c7; color: #92400e; }
+    .status-badge.urgent   { background: #fee2e2; color: #991b1b; }
+    .status-badge.published{ background: #dcfce7; color: #166534; }
+    .status-badge.draft    { background: #f1f5f9; color: #64748b; }
     .log-item { padding: 0.75rem 0; border-bottom: 1px solid #f1f5f9; display: flex; gap: 0.75rem; align-items: flex-start; }
     .log-icon { font-size: 1.1rem; flex-shrink: 0; }
     .log-actor { font-weight: 600; color: #1f2937; }
     .log-action { color: #4b5563; }
     .log-time { font-size: 0.75rem; color: #9ca3af; margin-top: 0.2rem; }
-
-    /* Section pages */
     .section-page { display: none; }
     .section-page.active { display: block; }
-
-    /* Page header */
     .page-header { margin-bottom: 1.5rem; }
     .page-header h1 { font-size: 1.5rem; font-weight: 700; }
     .page-header p { color: #6b7280; margin-top: 0.25rem; }
-
-    /* Buttons */
-    .btn-primary { background: linear-gradient(120deg,#2563eb,#4f46e5); color: #fff; border: none; border-radius: 0.75rem; padding: 0.75rem 1.25rem; font-weight: 600; cursor: pointer; transition: transform 0.2s; }
-    .btn-primary:hover { transform: translateY(-1px); }
-    .btn-secondary { background: #fff; color: #374151; border: 1px solid #e2e8f0; border-radius: 0.75rem; padding: 0.75rem 1.25rem; font-weight: 500; cursor: pointer; transition: background 0.2s; }
+    .btn-primary { background: linear-gradient(120deg,#0b2250,#1e3a8a); color: #fff; border: none; border-radius: 0.75rem; padding: 0.75rem 1.25rem; font-weight: 600; cursor: pointer; transition: opacity .2s; }
+    .btn-primary:hover { opacity: .88; }
+    .btn-secondary { background: #fff; color: #374151; border: 1px solid #e2e8f0; border-radius: 0.75rem; padding: 0.75rem 1.25rem; font-weight: 500; cursor: pointer; }
     .btn-secondary:hover { background: #f9fafb; }
-
-    /* Forms */
     .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
     .form-group { display: flex; flex-direction: column; gap: 0.5rem; }
     .form-group label { font-size: 0.85rem; font-weight: 600; color: #475569; }
-    .form-group input, .form-group select, .form-group textarea { border: 1px solid #d5d8f0; border-radius: 0.75rem; padding: 0.75rem 1rem; font-size: 0.9rem; width: 100%; }
-    .form-group input:focus, .form-group select:focus, .form-group textarea:focus { outline: none; border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
-    .form-actions { display: flex; gap: 1rem; margin-top: 1.5rem; }
-
-    /* Data table */
+    .form-group input, .form-group select, .form-group textarea { border: 1px solid #d5d8f0; border-radius: 0.75rem; padding: 0.75rem 1rem; font-size: 0.9rem; width: 100%; transition: all 0.2s; }
+    .form-group input:focus, .form-group select:focus { outline: none; border-color: #0b2250; box-shadow: 0 0 0 3px rgba(11,34,80,0.1); }
+    .input-error { border-color: #ef4444 !important; }
+    .input-success { border-color: #22c55e !important; }
+    .validation-warning { color: #ef4444; font-size: 0.75rem; margin-top: 0.25rem; display: none; }
     .data-table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
     .data-table th { text-align: left; padding: 0.75rem 1rem; background: #f8fafc; color: #6b7280; font-weight: 600; font-size: 0.8rem; border-bottom: 2px solid #e2e8f0; }
+    /* Target the last column (Action) to center it */
+    .data-table th:last-child { text-align: center; }
     .data-table td { padding: 0.75rem 1rem; border-bottom: 1px solid #f1f5f9; color: #374151; }
+    .data-table td:last-child { text-align: center; vertical-align: middle; }
     .data-table tr:hover td { background: #f9fafb; }
     .data-table-wrap { overflow-x: auto; }
-
-    /* Loading */
     .loading { padding: 3rem; text-align: center; color: #6b7280; }
-
-    @media (max-width: 768px) {
-      .dashboard-shell { grid-template-columns: 1fr; }
-      .sidebar { display: none; }
-      .content-grid { grid-template-columns: 1fr; }
-    }
+    .modal-backdrop { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15,23,42,0.6); display: flex; align-items: center; justify-content: center; z-index: 2000; padding: 1rem; }
+    .modal { background: #fff; border-radius: 1.25rem; padding: 2rem; width: 100%; max-width: 450px; position: relative; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); max-height: 90vh; overflow-y: auto; }
+    .modal-close { position: absolute; top: 1.5rem; right: 1.5rem; background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #64748b; line-height: 1; }
+    .modal-close:hover { color: #0f172a; }
+    .charts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-top: 1.5rem; }
+    .chart-card { background: #fff; border-radius: 1.25rem; padding: 1.5rem; box-shadow: 0 10px 30px rgba(15,23,42,.08); }
+    .chart-card h3 { font-size: .95rem; font-weight: 700; color: #0f172a; margin-bottom: 1.25rem; }
+    .chart-card canvas { max-height: 220px; }
+    .stat-pills { display: flex; flex-wrap: wrap; gap: .65rem; }
+    .stat-pill { padding: .45rem 1rem; border-radius: 999px; font-size: .8rem; font-weight: 600; background: #f1f5f9; color: #374151; }
+    .stat-pill span { color: #0b2250; font-weight: 800; }
+    .upload-photo-btn { padding: .3rem .7rem; border: 1px solid #d1d5db; border-radius: .5rem; background: #f8fafc; color: #374151; font-size: .78rem; font-weight: 600; cursor: pointer; }
+    .upload-photo-btn:hover { background: #e2e8f0; }
+    @media (max-width: 900px) { .charts-grid, .content-grid { grid-template-columns: 1fr; } }
+    @media (max-width: 768px) { .dashboard-shell { grid-template-columns: 1fr; } .sidebar { display: none; } }
   </style>
 </head>
 <body>
 
+<div class="session-warning" id="session-warning">
+  <h4>Session Expiring Soon</h4>
+  <p>You will be logged out in <strong id="session-countdown">60</strong> seconds due to inactivity.</p>
+  <div class="session-warning-btns">
+    <button class="btn-stay" onclick="resetSessionTimer()">Stay Logged In</button>
+    <button class="btn-logout-now" onclick="handleLogout()">Logout Now</button>
+  </div>
+</div>
+
 <div class="dashboard-shell">
-  <!-- Sidebar -->
   <aside class="sidebar">
     <div class="sidebar-brand">
       <img src="assets/logo-brgy.png" alt="Logo" class="sidebar-logo">
@@ -134,134 +154,112 @@
     <nav class="sidebar-nav">
       <p class="nav-label">Navigation</p>
       <ul id="nav-list">
-        <li class="active" onclick="switchSection('dashboard', this)">
-          <span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="12" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="18" rx="1.5"/><rect x="3" y="3" width="7" height="7" rx="1.5"/></svg></span>
-          <span>Dashboard</span>
-        </li>
-        <li onclick="switchSection('users', this)">
-          <span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>
-          <span>User Management</span>
-        </li>
-        <li onclick="switchSection('residents', this)">
-          <span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="8" cy="7" r="3.5"/><circle cx="17" cy="10" r="2.5"/><path d="M3.5 19.5c0-2.5 1.5-5 4.5-5s4.5 2.5 4.5 5"/><path d="M14 19.5c0-1.8 1.2-3.5 3.5-3.5 1.4 0 2.7.8 3.5 2"/></svg></span>
-          <span>Resident Management</span>
-        </li>
-        <li onclick="switchSection('documents', this)">
-          <span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M7 3.5h7l4 4v13H7z"/><path d="M14 3.5v4h4"/><path d="M10 12h6"/><path d="M10 16h6"/></svg></span>
-          <span>Document Requests</span>
-        </li>
-        <li onclick="switchSection('blotter', this)">
-          <span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="8" r="3.5"/><path d="M5 20c0-3.9 3.1-7 7-7s7 3.1 7 7"/><path d="M4 8h3"/><path d="M17 8h3"/></svg></span>
-          <span>Blotter & Disputes</span>
-        </li>
-        <li onclick="switchSection('announcements', this)">
-          <span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 10v4"/><path d="M6 8h6l5-3v14l-5-3H6z"/><path d="M10 17v3"/></svg></span>
-          <span>Announcements</span>
-        </li>
-        <li onclick="switchSection('statistics', this)">
-          <span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></span>
-          <span>Reports & Statistics</span>
-        </li>
-        <li onclick="switchSection('auditlog', this)">
-          <span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></span>
-          <span>Audit Log</span>
-        </li>
-        <li onclick="switchSection('settings', this)">
-          <span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="3"/><path d="M12 2v2M12 20v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M2 12h2M20 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg></span>
-          <span>Settings</span>
-        </li>
+        <li class="active" onclick="switchSection('dashboard',this)"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="12" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="18" rx="1.5"/><rect x="3" y="3" width="7" height="7" rx="1.5"/></svg></span><span>Dashboard</span></li>
+        <li id="nav-users" onclick="switchSection('users',this)"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span><span>User Management</span></li>
+        <li onclick="switchSection('residents',this)"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="8" cy="7" r="3.5"/><path d="M3.5 19.5c0-2.5 1.5-5 4.5-5s4.5 2.5 4.5 5"/></svg></span><span>Resident Management</span></li>
+        <li onclick="switchSection('documents',this)"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M7 3.5h7l4 4v13H7z"/><path d="M14 3.5v4h4"/><path d="M10 12h6"/><path d="M10 16h6"/></svg></span><span>Document Requests</span></li>
+        <li onclick="switchSection('blotter',this)"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="8" r="3.5"/><path d="M5 20c0-3.9 3.1-7 7-7s7 3.1 7 7"/></svg></span><span>Blotter & Disputes</span></li>
+        <li onclick="switchSection('announcements',this)"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 10v4"/><path d="M6 8h6l5-3v14l-5-3H6z"/></svg></span><span>Announcements</span></li>
+        <li onclick="switchSection('statistics',this)"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></span><span>Reports & Statistics</span></li>
+        <li id="nav-audit" onclick="switchSection('auditlog',this)"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/></svg></span><span>Audit Log</span></li>
+        <li onclick="switchSection('settings',this)"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span><span>Settings</span></li>
+
       </ul>
     </nav>
   </aside>
 
-  <!-- Main Panel -->
   <main class="main-panel">
-    <!-- Top Bar -->
     <header class="top-bar">
       <div class="top-search">
-        <input type="search" placeholder="Search residents, blotters, etc." id="global-search">
+        <input type="search" placeholder="🔍  Search residents, documents, blotters..." id="global-search" autocomplete="off">
+        <div class="search-dropdown" id="search-dropdown"></div>
       </div>
       <div class="header-tools">
-        <button class="notif-btn">🔔</button>
-        <div class="profile-chip">
-          <div class="avatar-img" id="user-avatar">A</div>
-          <div>
-            <p class="user-name" id="user-name">Admin</p>
-            <p class="user-role" id="user-role">admin</p>
+        <a href="index.html" class="btn-secondary" style="text-decoration: none; display: flex; align-items: center; gap: 0.4rem; padding: 0.4rem 0.85rem; font-size: 0.85rem; margin-right: 0.5rem;">
+          🏠 <span style="font-weight: 600;">Home</span>
+        </a>
+
+        <div style="position:relative" id="notif-wrapper">
+          <button id="notif-bell" onclick="toggleNotifDropdown()" title="Notifications"
+            style="background:none;border:none;cursor:pointer;position:relative;padding:.4rem;border-radius:50%;transition:background .2s"
+            onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='none'">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#475569" stroke-width="1.8" width="22" height="22">
+              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+              <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+            </svg>
+            <span id="notif-badge" style="display:none;position:absolute;top:2px;right:2px;background:#ef4444;color:#fff;font-size:.65rem;font-weight:700;min-width:16px;height:16px;border-radius:8px;display:flex;align-items:center;justify-content:center;padding:0 3px">0</span>
+          </button>
+          <div id="notif-dropdown" style="display:none;position:absolute;right:0;top:calc(100% + 8px);width:320px;background:#fff;border:1px solid #e2e8f0;border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.12);z-index:999;overflow:hidden">
+            <div style="padding:.85rem 1rem;border-bottom:1px solid #f1f5f9;display:flex;justify-content:space-between;align-items:center">
+              <strong style="font-size:.9rem">Notifications</strong>
+              <button onclick="markAllNotifsRead()" style="background:none;border:none;font-size:.78rem;color:#3b82f6;cursor:pointer">Mark all read</button>
+            </div>
+            <div id="notif-list" style="max-height:320px;overflow-y:auto;padding:.5rem 0">
+              <div style="padding:1.5rem;text-align:center;color:#94a3b8;font-size:.85rem">Loading...</div>
+            </div>
           </div>
-          <button class="logout-btn" onclick="handleLogout()">Logout</button>
+        </div>
+        <div class="profile-chip" onclick="window.location.href='profile.html'" title="My Profile">
+          <div class="avatar-img" id="user-avatar">A</div>
+          <div><p class="user-name" id="user-name">Admin</p><p class="user-role" id="user-role">admin</p></div>
+          <button class="logout-btn" onclick="event.stopPropagation();handleLogout()">Logout</button>
         </div>
       </div>
     </header>
 
-    <!-- DASHBOARD SECTION -->
     <div id="section-dashboard" class="section-page active">
-      <section class="stats-grid" id="stats-grid">
-        <article class="stat-card"><div class="stat-icon">👥</div><p class="stat-label">Total Residents</p><p class="stat-value" id="stat-residents">0</p></article>
-        <article class="stat-card"><div class="stat-icon">📄</div><p class="stat-label">Pending Requests</p><p class="stat-value" id="stat-pending">0</p></article>
-        <article class="stat-card"><div class="stat-icon">⚖️</div><p class="stat-label">Active Blotters</p><p class="stat-value" id="stat-blotters">0</p></article>
-        <article class="stat-card"><div class="stat-icon">🏠</div><p class="stat-label">Households</p><p class="stat-value" id="stat-households">0</p></article>
+      <section class="stats-grid">
+        <article class="stat-card"><div class="stat-icon">👥</div><p class="stat-label">Total Residents</p><p class="stat-value" id="stat-residents">—</p><p class="stat-sub" id="stat-residents-new"></p></article>
+        <article class="stat-card"><div class="stat-icon">📄</div><p class="stat-label">Pending Requests</p><p class="stat-value" id="stat-pending">—</p></article>
+        <article class="stat-card"><div class="stat-icon">⚖️</div><p class="stat-label">Active Blotters</p><p class="stat-value" id="stat-blotters">—</p></article>
+        <article class="stat-card"><div class="stat-icon">🏠</div><p class="stat-label">Households</p><p class="stat-value" id="stat-households">—</p></article>
       </section>
       <section class="content-grid">
         <article class="panel">
-          <header class="panel-heading">
-            <div><h2>Pending Requests</h2><p class="muted">Monitor applications that need review</p></div>
-            <button class="text-link" onclick="switchSection('documents', document.querySelectorAll('.sidebar-nav li')[3])">View all</button>
-          </header>
+          <header class="panel-heading"><div><h2>Pending Requests</h2><p class="muted">Applications needing review</p></div><button class="text-link" onclick="switchSection('documents',document.querySelectorAll('.sidebar-nav li')[3])">View all</button></header>
           <div class="table">
-            <div class="table-row head"><span>Requester Name</span><span>Document Type</span><span>Date Filed</span><span>Status</span></div>
+            <div class="table-row head"><span>Requester</span><span>Document</span><span>Date</span><span>Status</span></div>
             <div id="pending-requests-list"><div class="empty-state">No pending requests</div></div>
           </div>
         </article>
         <article class="panel">
-          <header class="panel-heading">
-            <div><h2>Activity Log</h2><p class="muted">Recent system transactions</p></div>
-            <button class="text-link" onclick="loadDashboard()">Refresh</button>
-          </header>
-          <div id="activity-log-list" style="max-height:400px;overflow-y:auto"><div class="empty-state">No activity logs available</div></div>
+          <header class="panel-heading"><div><h2>Activity Log</h2><p class="muted">Recent system transactions</p></div><button class="text-link" onclick="loadDashboard()">Refresh</button></header>
+          <div id="activity-log-list" style="max-height:400px;overflow-y:auto"><div class="empty-state">No activity logs</div></div>
         </article>
       </section>
     </div>
 
-    <!-- RESIDENTS SECTION -->
     <div id="section-residents" class="section-page">
       <div class="page-header" style="display:flex;justify-content:space-between;align-items:center">
-        <div><h1>Resident Management</h1><p>Manage barangay residents</p></div>
+        <div><h1>Resident Management</h1><p>Manage residents and upload profile photos</p></div>
         <button class="btn-primary" onclick="showAddResident()">+ Add Resident</button>
       </div>
       <div class="panel">
-        <div style="margin-bottom:1rem"><input type="search" id="resident-search" placeholder="Search residents..." style="border:1px solid #d5d8f0;border-radius:999px;padding:0.65rem 1.25rem;width:300px" oninput="loadResidents()"></div>
+        <div style="margin-bottom:1rem"><input type="search" id="resident-search" placeholder="Search residents..." style="border:1px solid #d5d8f0;border-radius:999px;padding:.65rem 1.25rem;width:300px" oninput="loadResidents()"></div>
         <div class="data-table-wrap"><table class="data-table">
-          <thead><tr><th>Name</th><th>Gender</th><th>Contact</th><th>Purok/Sitio</th><th>Senior</th><th>PWD</th></tr></thead>
-          <tbody id="residents-tbody"><tr><td colspan="6" class="loading">Loading...</td></tr></tbody>
+          <thead><tr><th style="width:60px; text-align:center;">Profile</th><th>Name</th><th>Gender</th><th>Contact</th><th>DOB</th><th>Civil Status</th><th>Type</th><th style="text-align:center;">Action</th><th style="text-align:center;">Upload Photo</th></tr></thead>
+          <tbody id="residents-tbody"><tr><td colspan="9" class="loading">Loading...</td></tr></tbody>
         </table></div>
       </div>
     </div>
 
-    <!-- DOCUMENTS SECTION -->
     <div id="section-documents" class="section-page">
       <div class="page-header" style="display:flex;justify-content:space-between;align-items:center">
-        <div><h1>Document Requests</h1><p>Manage document requests</p></div>
+        <div><h1>Document Requests</h1><p>Residents receive automatic email updates when status changes</p></div>
       </div>
       <div class="panel">
-        <div style="margin-bottom:1rem;display:flex;gap:1rem">
-          <select id="doc-status-filter" onchange="loadDocuments()" style="border:1px solid #d5d8f0;border-radius:0.75rem;padding:0.65rem 1rem">
-            <option value="">All Status</option>
-            <option value="Pending">Pending</option>
-            <option value="Review">Review</option>
-            <option value="Approved">Approved</option>
-            <option value="Released">Released</option>
-            <option value="Rejected">Rejected</option>
+        <div style="margin-bottom:1rem;display:flex;gap:1rem;align-items:center">
+          <select id="doc-status-filter" onchange="loadDocuments()" style="border:1px solid #d5d8f0;border-radius:.75rem;padding:.65rem 1rem">
+            <option value="">All Status</option><option value="Pending">Pending</option><option value="Review">Review</option><option value="Approved">Approved</option><option value="Released">Released</option><option value="Rejected">Rejected</option>
           </select>
         </div>
         <div class="data-table-wrap"><table class="data-table">
-          <thead><tr><th>Reference No.</th><th>Requester</th><th>Document Type</th><th>Date Filed</th><th>Status</th><th>Action</th></tr></thead>
-          <tbody id="documents-tbody"><tr><td colspan="6" class="loading">Loading...</td></tr></tbody>
+          <thead><tr><th>Ref No.</th><th>Requester</th><th>Document Type</th><th>Date Filed</th><th>Email</th><th>Status</th><th>Action</th></tr></thead>
+          <tbody id="documents-tbody"><tr><td colspan="7" class="loading">Loading...</td></tr></tbody>
         </table></div>
       </div>
     </div>
 
-    <!-- BLOTTER SECTION -->
     <div id="section-blotter" class="section-page">
       <div class="page-header" style="display:flex;justify-content:space-between;align-items:center">
         <div><h1>Blotter & Disputes</h1><p>Manage blotter cases</p></div>
@@ -269,289 +267,2094 @@
       </div>
       <div class="panel">
         <div class="data-table-wrap"><table class="data-table">
-          <thead><tr><th>Case No.</th><th>Title</th><th>Category</th><th>Priority</th><th>Status</th><th>Date Reported</th></tr></thead>
+          <thead><tr><th>Case No.</th><th>Title</th><th>Category</th><th>Priority</th><th>Status</th><th>Date Reported</th><th>Action</th></tr></thead>
           <tbody id="blotter-tbody"><tr><td colspan="6" class="loading">Loading...</td></tr></tbody>
         </table></div>
       </div>
     </div>
 
-    <!-- ANNOUNCEMENTS SECTION -->
     <div id="section-announcements" class="section-page">
       <div class="page-header" style="display:flex;justify-content:space-between;align-items:center">
-        <div><h1>Announcements</h1><p>Manage announcements</p></div>
+        <div><h1>Announcements</h1><p>Manage barangay announcements</p></div>
         <button class="btn-primary" onclick="showAddAnnouncement()">+ New Announcement</button>
       </div>
       <div class="panel">
         <div class="data-table-wrap"><table class="data-table">
-          <thead><tr><th>Reference No.</th><th>Title</th><th>Category</th><th>Status</th><th>Published On</th></tr></thead>
+          <thead><tr><th>Ref No.</th><th>Title</th><th>Category</th><th>Status</th><th>Published On</th><th style="text-align:center">Action</th></tr></thead>
           <tbody id="announcements-tbody"><tr><td colspan="5" class="loading">Loading...</td></tr></tbody>
         </table></div>
       </div>
     </div>
 
-    <!-- USERS SECTION -->
     <div id="section-users" class="section-page">
-      <div class="page-header"><h1>User Management</h1><p>Manage system users</p></div>
-      <div class="panel"><p class="muted" style="padding:2rem;text-align:center">User management coming soon.</p></div>
-    </div>
-
-    <!-- STATISTICS SECTION -->
-    <div id="section-statistics" class="section-page">
-      <div class="page-header"><h1>Reports & Statistics</h1><p>View system statistics</p></div>
-      <div class="panel"><p class="muted" style="padding:2rem;text-align:center">Statistics section coming soon.</p></div>
-    </div>
-
-    <!-- AUDIT LOG SECTION -->
-    <div id="section-auditlog" class="section-page">
-      <div class="page-header"><h1>Audit Log</h1><p>View system activity</p></div>
+      <div class="page-header" style="display:flex;justify-content:space-between;align-items:center">
+        <div><h1>User Management</h1><p>Create and manage staff and admin accounts</p></div>
+        <button class="btn-primary" onclick="showAddUserModal()">+ Create User</button>
+      </div>
       <div class="panel">
-        <div id="audit-log-list" class="loading">Loading...</div>
+        <div style="display:flex;gap:1.5rem;margin-bottom:1.5rem;align-items:flex-end">
+          <div class="form-group" style="flex:1"><label>Search users</label><input type="search" id="user-search" placeholder="Search by name or email" oninput="loadUsers()"></div>
+          <div class="form-group" style="width:200px"><label>Role</label><select id="user-role-filter" onchange="loadUsers()"><option value="">All Roles</option><option value="admin">Admin</option><option value="staff">Staff</option><option value="resident">Resident</option></select></div>
+        </div>
+        <div class="data-table-wrap"><table class="data-table">
+          <thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Created</th><th>Action</th></tr></thead>
+          <tbody id="users-tbody"><tr><td colspan="5" class="loading">Loading users...</td></tr></tbody>
+        </table></div>
       </div>
     </div>
 
-    <!-- SETTINGS SECTION -->
-    <div id="section-settings" class="section-page">
-      <div class="page-header"><h1>Settings</h1><p>System settings</p></div>
-      <div class="panel"><p class="muted" style="padding:2rem;text-align:center">Settings coming soon.</p></div>
+    <div id="section-statistics" class="section-page">
+      <div class="page-header"><h1>Reports & Statistics</h1><p>Live data visualizations and demographic breakdown</p></div>
+      <div class="stat-pills" id="stats-pills"></div>
+      <div class="charts-grid">
+        <div class="chart-card"><h3>📄 Document Requests by Status</h3><canvas id="chart-doc-status"></canvas></div>
+        <div class="chart-card"><h3>⚖️ Blotter Cases by Status</h3><canvas id="chart-blotter-status"></canvas></div>
+        <div class="chart-card"><h3>📈 6-Month Trends</h3><canvas id="chart-trends"></canvas></div>
+        <div class="chart-card"><h3>👥 Residents by Gender</h3><canvas id="chart-residents"></canvas></div>
+        <div class="chart-card"><h3>📋 Documents by Type</h3><canvas id="chart-doc-types"></canvas></div>
+        <div class="chart-card"><h3>🗂️ Blotter by Category</h3><canvas id="chart-blotter-cat"></canvas></div>
+      </div>
     </div>
 
+    <div id="section-auditlog" class="section-page">
+      <div class="page-header"><h1>Audit Log</h1><p>All system activity records</p></div>
+      <div class="panel">
+        <div style="display:flex;gap:1rem;flex-wrap:wrap;margin-bottom:1.25rem;align-items:flex-end">
+          <div><label style="font-size:.8rem;font-weight:600;color:#64748b;display:block;margin-bottom:.3rem">Search Actor</label>
+            <input id="log-filter-actor" type="text" placeholder="Name or email..." style="padding:.5rem .75rem;border:1px solid #e2e8f0;border-radius:8px;font-size:.88rem" oninput="loadAuditLog()">
+          </div>
+          <div><label style="font-size:.8rem;font-weight:600;color:#64748b;display:block;margin-bottom:.3rem">Module</label>
+            <select id="log-filter-module" style="padding:.5rem .75rem;border:1px solid #e2e8f0;border-radius:8px;font-size:.88rem" onchange="loadAuditLog()">
+              <option value="">All Modules</option>
+              <option>User</option><option>Resident</option><option>Document</option>
+              <option>Blotter</option><option>Announcement</option><option>System</option>
+            </select>
+          </div>
+          <div><label style="font-size:.8rem;font-weight:600;color:#64748b;display:block;margin-bottom:.3rem">Date From</label>
+            <input id="log-filter-from" type="date" style="padding:.5rem .75rem;border:1px solid #e2e8f0;border-radius:8px;font-size:.88rem" onchange="loadAuditLog()">
+          </div>
+          <div><label style="font-size:.8rem;font-weight:600;color:#64748b;display:block;margin-bottom:.3rem">Date To</label>
+            <input id="log-filter-to" type="date" style="padding:.5rem .75rem;border:1px solid #e2e8f0;border-radius:8px;font-size:.88rem" onchange="loadAuditLog()">
+          </div>
+          <button class="btn-secondary" onclick="document.getElementById('log-filter-actor').value='';document.getElementById('log-filter-module').value='';document.getElementById('log-filter-from').value='';document.getElementById('log-filter-to').value='';loadAuditLog()">Reset</button>
+        </div>
+        <div class="data-table-wrap">
+          <table class="data-table" id="audit-log-table" style="display:none">
+            <thead>
+              <tr>
+                <th style="width:170px">Time</th>
+                <th style="width:180px">User</th>
+                <th>Action</th>
+                <th style="width:130px">Module</th>
+                <th style="width:130px">Reference</th>
+              </tr>
+            </thead>
+            <tbody id="audit-log-tbody"></tbody>
+          </table>
+          <div id="audit-log-list" class="loading">Loading...</div>
+        </div>
+      </div>
+    </div>
   </main>
 </div>
 
-<script>
-  const API = 'http://localhost/Barangay853';
-  const token = localStorage.getItem('auth_token');
-  const user = JSON.parse(localStorage.getItem('user') || '{}');
+<template id="tpl-section-contact">
+  <div id="section-contact" class="section-page">
+    <div class="page-header"><h1>Contact Messages</h1><p>Messages submitted through the public contact form</p></div>
+    <div class="panel">
+      <div style="display:flex;gap:1rem;flex-wrap:wrap;margin-bottom:1.25rem;align-items:flex-end">
+        <div><label style="font-size:.8rem;font-weight:600;color:#64748b;display:block;margin-bottom:.3rem">Status</label>
+          <select id="contact-filter-status" style="padding:.5rem .75rem;border:1px solid #e2e8f0;border-radius:8px;font-size:.88rem" onchange="loadContactMessages()">
+            <option value="">All</option><option value="new">Unread</option><option value="read">Read</option>
+          </select>
+        </div>
+      </div>
+      <div id="contact-messages-list" class="loading">Loading...</div>
+    </div>
+  </div>
+</template>
 
-  // Redirect if not logged in
-  if (!token) window.location.href = 'login.html';
+<template id="tpl-section-settings">
+  <div id="section-settings" class="section-page">
+    <div class="page-header"><h1>Settings</h1><p>System configuration and preferences</p></div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:1.5rem">
 
-  // Set user info
-  document.getElementById('user-name').textContent = user.name || 'Admin';
-  document.getElementById('user-role').textContent = user.role || 'admin';
-  document.getElementById('user-avatar').textContent = (user.name || 'A').charAt(0).toUpperCase();
-
-  function authHeaders() {
-    return { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' };
-  }
-
-  function formatDate(d) {
-    if (!d) return 'N/A';
-    return new Date(d).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
-  }
-
-  function timeAgo(d) {
-    if (!d) return 'N/A';
-    const diff = Date.now() - new Date(d).getTime();
-    const mins = Math.floor(diff / 60000);
-    const hrs = Math.floor(diff / 3600000);
-    const days = Math.floor(diff / 86400000);
-    if (mins < 1) return 'Just now';
-    if (mins < 60) return `${mins}m ago`;
-    if (hrs < 24) return `${hrs}h ago`;
-    return `${days}d ago`;
-  }
-
-  function statusBadge(status) {
-    const s = (status || 'pending').toLowerCase();
-    return `<span class="status-badge ${s}">${status || 'Pending'}</span>`;
-  }
-
-  // Switch sections
-  function switchSection(name, el) {
-    document.querySelectorAll('.section-page').forEach(s => s.classList.remove('active'));
-    document.querySelectorAll('.sidebar-nav li').forEach(l => l.classList.remove('active'));
-    document.getElementById(`section-${name}`).classList.add('active');
-    if (el) el.classList.add('active');
-
-    if (name === 'dashboard') loadDashboard();
-    if (name === 'residents') loadResidents();
-    if (name === 'documents') loadDocuments();
-    if (name === 'blotter') loadBlotter();
-    if (name === 'announcements') loadAnnouncements();
-    if (name === 'auditlog') loadAuditLog();
-  }
-
-  // DASHBOARD
-  async function loadDashboard() {
-    try {
-      const res = await fetch(`${API}/statistics/index.php`, { headers: authHeaders() });
-      const data = await res.json();
-      if (data.success) {
-        document.getElementById('stat-residents').textContent = data.data.total_residents;
-        document.getElementById('stat-pending').textContent = data.data.pending_requests;
-        document.getElementById('stat-blotters').textContent = data.data.active_blotters;
-        document.getElementById('stat-households').textContent = data.data.total_households;
-
-        // Recent requests
-        const reqList = document.getElementById('pending-requests-list');
-        if (data.data.recent_requests.length === 0) {
-          reqList.innerHTML = '<div class="empty-state">No pending requests</div>';
-        } else {
-          reqList.innerHTML = data.data.recent_requests.map(r => `
-            <div class="table-row">
-              <span>${r.requester_name}</span>
-              <span>${r.document_type}</span>
-              <span>${formatDate(r.date_filed)}</span>
-              <span>${statusBadge(r.status)}</span>
-            </div>`).join('');
-        }
-
-        // Activity logs
-        const logList = document.getElementById('activity-log-list');
-        if (data.data.recent_logs.length === 0) {
-          logList.innerHTML = '<div class="empty-state">No activity logs available</div>';
-        } else {
-          logList.innerHTML = data.data.recent_logs.map(l => `
-            <div class="log-item">
-              <div class="log-icon">📋</div>
-              <div>
-                <div><span class="log-actor">${l.actor_name || 'System'}</span> <span class="log-action">${l.action}</span></div>
-                <div class="log-time">${timeAgo(l.logged_at)}</div>
-              </div>
-            </div>`).join('');
-        }
-      }
-    } catch (err) { console.error(err); }
-  }
-
-  // RESIDENTS
-  async function loadResidents() {
-    const search = document.getElementById('resident-search')?.value || '';
-    try {
-      const res = await fetch(`${API}/residents/index.php?search=${encodeURIComponent(search)}`, { headers: authHeaders() });
-      const data = await res.json();
-      const tbody = document.getElementById('residents-tbody');
-      if (!data.success || data.data.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6" class="empty-state">No residents found</td></tr>';
-        return;
-      }
-      tbody.innerHTML = data.data.map(r => `
-        <tr>
-          <td>${r.full_name}</td>
-          <td>${r.gender || '-'}</td>
-          <td>${r.contact_mobile || '-'}</td>
-          <td>${r.purok_sitio || '-'}</td>
-          <td>${r.is_senior_citizen ? '✅' : '-'}</td>
-          <td>${r.is_pwd ? '✅' : '-'}</td>
-        </tr>`).join('');
-    } catch (err) { console.error(err); }
-  }
-
-  // DOCUMENTS
-  async function loadDocuments() {
-    const status = document.getElementById('doc-status-filter')?.value || '';
-    try {
-      const res = await fetch(`${API}/documents/index.php${status ? '?status=' + status : ''}`, { headers: authHeaders() });
-      const data = await res.json();
-      const tbody = document.getElementById('documents-tbody');
-      if (!data.success || data.data.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6" class="empty-state">No document requests found</td></tr>';
-        return;
-      }
-      tbody.innerHTML = data.data.map(d => `
-        <tr>
-          <td><code>${d.reference_no}</code></td>
-          <td>${d.requester_name}</td>
-          <td>${d.document_type}</td>
-          <td>${formatDate(d.date_filed)}</td>
-          <td>${statusBadge(d.status)}</td>
-          <td><button class="btn-secondary" style="padding:0.35rem 0.75rem;font-size:0.8rem" onclick="updateDocStatus(${d.id})">Update</button></td>
-        </tr>`).join('');
-    } catch (err) { console.error(err); }
-  }
-
-  async function updateDocStatus(id) {
-    const status = prompt('Enter new status:\nPending, Review, Approved, Released, Rejected');
-    if (!status) return;
-    await fetch(`${API}/documents/index.php?id=${id}`, {
-      method: 'PUT',
-      headers: authHeaders(),
-      body: JSON.stringify({ status })
-    });
-    loadDocuments();
-  }
-
-  // BLOTTER
-  async function loadBlotter() {
-    try {
-      const res = await fetch(`${API}/blotter/index.php`, { headers: authHeaders() });
-      const data = await res.json();
-      const tbody = document.getElementById('blotter-tbody');
-      if (!data.success || data.data.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6" class="empty-state">No blotter cases found</td></tr>';
-        return;
-      }
-      tbody.innerHTML = data.data.map(b => `
-        <tr>
-          <td><code>${b.case_no}</code></td>
-          <td>${b.case_title}</td>
-          <td>${b.category || '-'}</td>
-          <td>${statusBadge(b.priority)}</td>
-          <td>${statusBadge(b.status)}</td>
-          <td>${formatDate(b.date_reported)}</td>
-        </tr>`).join('');
-    } catch (err) { console.error(err); }
-  }
-
-  // ANNOUNCEMENTS
-  async function loadAnnouncements() {
-    try {
-      const res = await fetch(`${API}/announcements/index.php`, { headers: authHeaders() });
-      const data = await res.json();
-      const tbody = document.getElementById('announcements-tbody');
-      if (!data.success || data.data.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="5" class="empty-state">No announcements found</td></tr>';
-        return;
-      }
-      tbody.innerHTML = data.data.map(a => `
-        <tr>
-          <td><code>${a.reference_no}</code></td>
-          <td>${a.title}</td>
-          <td>${a.category || '-'}</td>
-          <td>${statusBadge(a.status)}</td>
-          <td>${formatDate(a.published_on)}</td>
-        </tr>`).join('');
-    } catch (err) { console.error(err); }
-  }
-
-  // AUDIT LOG
-  async function loadAuditLog() {
-    try {
-      const res = await fetch(`${API}/logs/index.php`, { headers: authHeaders() });
-      const data = await res.json();
-      const el = document.getElementById('audit-log-list');
-      if (!data.success || data.data.length === 0) {
-        el.innerHTML = '<div class="empty-state">No activity logs available</div>';
-        return;
-      }
-      el.innerHTML = data.data.map(l => `
-        <div class="log-item">
-          <div class="log-icon">📋</div>
-          <div>
-            <div><span class="log-actor">${l.actor_name || 'System'}</span> <span class="log-action">${l.action}</span> <span style="color:#6b7280;font-size:0.85rem">${l.module || ''}</span></div>
-            <div class="log-time">${timeAgo(l.logged_at)}</div>
+      <div class="panel">
+        <h3 style="font-size:1rem;font-weight:600;margin-bottom:1.25rem;color:#0f172a">🔒 Change Password</h3>
+        <form id="settings-pw-form" onsubmit="handleChangePassword(event)">
+          <div class="form-group" style="margin-bottom:1rem">
+            <label style="font-size:.85rem;font-weight:500;color:#374151;display:block;margin-bottom:.35rem">Current Password</label>
+            <input type="password" id="settings-pw-current" placeholder="Current password" style="width:100%;padding:.55rem .75rem;border:1px solid #e2e8f0;border-radius:8px;font-size:.9rem">
           </div>
+          <div class="form-group" style="margin-bottom:1rem">
+            <label style="font-size:.85rem;font-weight:500;color:#374151;display:block;margin-bottom:.35rem">New Password</label>
+            <input type="password" id="settings-pw-new" placeholder="At least 6 characters" style="width:100%;padding:.55rem .75rem;border:1px solid #e2e8f0;border-radius:8px;font-size:.9rem">
+          </div>
+          <div class="form-group" style="margin-bottom:1.25rem">
+            <label style="font-size:.85rem;font-weight:500;color:#374151;display:block;margin-bottom:.35rem">Confirm New Password</label>
+            <input type="password" id="settings-pw-confirm" placeholder="Repeat new password" style="width:100%;padding:.55rem .75rem;border:1px solid #e2e8f0;border-radius:8px;font-size:.9rem">
+          </div>
+          <div id="settings-pw-msg" style="margin-bottom:.75rem;font-size:.85rem"></div>
+          <button type="submit" class="btn-primary" style="width:100%">Update Password</button>
+        </form>
+      </div>
+
+      <div class="panel">
+        <h3 style="font-size:1rem;font-weight:600;margin-bottom:1.25rem;color:#0f172a">ℹ️ System Information</h3>
+        <table style="width:100%;font-size:.88rem;border-collapse:collapse">
+          <tr><td style="color:#64748b;padding:.5rem 0">System Name</td><td style="font-weight:500">Barangay 853 Management System</td></tr>
+          <tr><td style="color:#64748b;padding:.5rem 0">Barangay</td><td>Brgy. 853, Zone 93, Manila</td></tr>
+          <tr><td style="color:#64748b;padding:.5rem 0">Version</td><td>1.0.0 (PHP Edition)</td></tr>
+          <tr><td style="color:#64748b;padding:.5rem 0">Logged in as</td><td id="settings-user-info">—</td></tr>
+          <tr><td style="color:#64748b;padding:.5rem 0">Role</td><td id="settings-user-role">—</td></tr>
+        </table>
+        <hr style="border:none;border-top:1px solid #f1f5f9;margin:1.25rem 0">
+        <button class="btn-secondary" style="width:100%" onclick="if(confirm('Log out?')) handleLogout()">🚪 Logout</button>
+      </div>
+
+    </div>
+  </div>
+</template>
+
+<div id="modal-add-user" class="modal-backdrop" style="display:none">
+  <div class="modal">
+    <button class="modal-close" onclick="closeAddUserModal()">&times;</button>
+    <h2 style="margin-bottom:1.5rem;font-size:1.25rem">Create New User</h2>
+    <form id="form-create-user" onsubmit="handleCreateUser(event)">
+      <div class="form-group" style="margin-bottom:1rem"><label>Name *</label><input type="text" name="name" placeholder="Full name" required></div>
+      <div class="form-group" style="margin-bottom:1rem"><label>Email *</label><input type="email" name="email" id="user-email-input" placeholder="user@example.com" required><span class="validation-warning" id="email-warning">Invalid email format.</span></div>
+      
+      <div class="form-group" style="margin-bottom:1rem">
+        <label>Password *</label>
+        <input type="password" name="password" placeholder="At least 6 characters" required minlength="6">
+      </div>
+      
+      <div class="form-group" style="margin-bottom:1rem">
+        <label>Confirm Password *</label>
+        <input type="password" id="confirm_password" placeholder="Repeat password" required>
+      </div>
+
+      <div class="form-group" style="margin-bottom:1.5rem">
+  <label>Role *</label>
+  <select name="role" id="user-role-select" required>
+    <option value="staff">Staff</option>
+    <option value="admin">Admin</option>
+    <option value="resident">Resident</option>
+  </select>
+   </div>
+      <button type="submit" class="btn-primary" style="width:100%;padding:1rem" id="btn-submit-user">Create Account</button>
+      </form>
+     </div>
+    </div>
+    
+    <div id="modal-delete-user" class="modal-backdrop" style="display:none">
+  <div class="modal" style="max-width:400px; text-align:center;">
+    <button class="modal-close" onclick="closeDeleteUserModal()">&times;</button>
+    <div style="font-size:3rem; margin-bottom:1rem;">⚠️</div>
+    <h2 style="margin-bottom:0.5rem;font-size:1.25rem">Delete User?</h2>
+    <p style="color:#64748b;font-size:0.9rem;margin-bottom:1.5rem">Are you sure you want to delete this account? This action cannot be undone.</p>
+    <input type="hidden" id="delete-user-id">
+    <div style="display:flex;gap:1rem;">
+      <button type="button" class="btn-secondary" style="flex:1" onclick="closeDeleteUserModal()">Cancel</button>
+      <button type="button" class="btn-primary" id="btn-confirm-delete-user" style="flex:1; background:#dc2626;" onclick="executeDeleteUser()">Delete User</button>
+    </div>
+   </div>
+  </div>
+
+
+  <div id="modal-toggle-status" class="modal-backdrop" style="display:none">
+  <div class="modal" style="max-width:400px; text-align:center;">
+    <button class="modal-close" onclick="closeStatusModal()">&times;</button>
+    <div id="status-icon" style="font-size:3rem; margin-bottom:1rem;">ℹ️</div>
+    <h2 id="status-modal-title" style="margin-bottom:0.5rem;font-size:1.25rem">Toggle Status?</h2>
+    <p id="status-modal-msg" style="color:#64748b;font-size:0.9rem;margin-bottom:1.5rem"></p>
+    <input type="hidden" id="status-user-id">
+    <input type="hidden" id="status-next-val">
+    <div style="display:flex;gap:1rem;">
+      <button type="button" class="btn-secondary" style="flex:1" onclick="closeStatusModal()">Cancel</button>
+      <button type="button" class="btn-primary" id="btn-confirm-status" style="flex:1;" onclick="executeStatusToggle()">Confirm</button>
+    </div>
+  </div>
+</div>
+
+<div id="modal-upload-photo" class="modal-backdrop" style="display:none">
+  <div class="modal" style="max-width:380px">
+    <button class="modal-close" onclick="closePhotoModal()">&times;</button>
+    <h2 style="margin-bottom:.35rem;font-size:1.1rem">Upload Resident Photo</h2>
+    <p style="color:#64748b;font-size:.85rem;margin-bottom:1.25rem" id="photo-modal-name"></p>
+    <input type="hidden" id="photo-resident-id">
+    <div style="border:2px dashed #d1d5db;border-radius:.75rem;padding:1.5rem;text-align:center;cursor:pointer" onclick="document.getElementById('photo-file-input').click()">
+      <div style="font-size:2rem;margin-bottom:.5rem">📷</div>
+      <p style="font-size:.85rem;color:#6b7280">Click to select photo<br><span style="font-size:.75rem;color:#94a3b8">JPG, PNG, WEBP · max 5MB</span></p>
+    </div>
+    <input type="file" id="photo-file-input" accept="image/jpeg,image/png,image/webp" style="display:none" onchange="uploadResidentPhoto(this)">
+    <div id="photo-upload-msg" style="margin-top:.75rem;font-size:.85rem;text-align:center"></div>
+  </div>
+</div>
+
+<script>
+window.API = window.location.origin + '/Barangay853'; const API = window.API;
+const token = localStorage.getItem('auth_token');
+const user  = JSON.parse(localStorage.getItem('user') || '{}');
+if (!token) window.location.href = 'login.html';
+
+async function logActivity(action, module, referenceId) {
+  try {
+    await fetch(`${API}/logs/index.php`, {
+      method: 'POST',
+      headers: authHeaders(),
+      body: JSON.stringify({
+        actor_name: user.name || user.email || 'Admin',
+        action,
+        module,
+        reference_id: referenceId || ''
+      })
+    });
+  } catch(e) { /* non-critical */ }
+}
+
+function renderProfileChip() {
+  const u = JSON.parse(localStorage.getItem('user') || '{}');
+  document.getElementById('user-name').textContent = u.name || 'Admin';
+  document.getElementById('user-role').textContent = u.role || 'admin';
+  const el = document.getElementById('user-avatar');
+  const uInitial = (u.name || 'A').charAt(0).toUpperCase();
+  
+  const uImg = u.avatar || u.avatar_url || u.photo_url || u.photo || u.profile_pic;
+  if (uImg) {
+    const avatarPath = uImg.startsWith('http') ? uImg : `${API}/${uImg}`;
+    el.innerHTML = `<img src="${avatarPath}?t=${Date.now()}" alt="avatar" style="width:100%;height:100%;object-fit:cover;border-radius:50%;background:#fff;" onerror="this.style.display='none'; this.parentElement.textContent='${uInitial}';">`;
+  } else {
+    el.textContent = uInitial;
+  }
+}
+
+// 1. Render immediately using whatever is in memory
+renderProfileChip();
+window.addEventListener('focus', renderProfileChip);
+
+// 2. BACKGROUND SYNC: Always fetch the absolute latest profile data from DB
+async function syncProfileData() {
+  try {
+    const res = await fetch(`${API}/profile/index.php`, { headers: { 'Authorization': `Bearer ${token}` } });
+    const data = await res.json();
+    if (data.success && data.data) {
+      const u = data.data;
+      const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+      
+      // Update browser memory with fresh DB data
+      currentUser.avatar = u.avatar_url || u.photo_url || u.avatar;
+      currentUser.name = u.name;
+      localStorage.setItem('user', JSON.stringify(currentUser));
+      
+      // Re-render the chip so the photo pops in instantly
+      renderProfileChip();
+    }
+  } catch(e) { console.log('Sync profile failed', e); }
+}
+syncProfileData();
+
+function authHeaders() { return { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }; }
+function formatDate(d) { if (!d) return 'N/A'; return new Date(d).toLocaleDateString('en-US', { year:'numeric', month:'short', day:'numeric' }); }
+function timeAgo(d) {
+  if (!d) return 'N/A';
+  const diff = Date.now() - new Date(d).getTime();
+  const mins = Math.floor(diff/60000), hrs = Math.floor(diff/3600000), days = Math.floor(diff/86400000);
+  if (mins < 1) return 'Just now'; if (mins < 60) return `${mins}m ago`;
+  if (hrs < 24) return `${hrs}h ago`; return `${days}d ago`;
+}
+function statusBadge(s) { const k=(s||'').toLowerCase(); return `<span class="status-badge ${k}">${s||'—'}</span>`; }
+
+// ── SESSION TIMEOUT ──────────────────────────────────────────────────────────
+const SESSION_IDLE_MINS = 30, WARN_SECS = 60;
+let sessionTimer, countdownTimer, countdownSecs;
+function resetSessionTimer() {
+  clearTimeout(sessionTimer); clearInterval(countdownTimer);
+  document.getElementById('session-warning').style.display = 'none';
+  sessionTimer = setTimeout(showSessionWarning, (SESSION_IDLE_MINS * 60 - WARN_SECS) * 1000);
+}
+function showSessionWarning() {
+  countdownSecs = WARN_SECS;
+  document.getElementById('session-countdown').textContent = countdownSecs;
+  document.getElementById('session-warning').style.display = 'block';
+  countdownTimer = setInterval(() => {
+    countdownSecs--;
+    document.getElementById('session-countdown').textContent = countdownSecs;
+    if (countdownSecs <= 0) { clearInterval(countdownTimer); handleLogout(); }
+  }, 1000);
+}
+['click','mousemove','keypress','scroll','touchstart'].forEach(e => document.addEventListener(e, resetSessionTimer, { passive:true }));
+resetSessionTimer();
+
+// RBAC Enforcement Logic
+function enforceRBAC() {
+  const userRole = (user.role || '').toLowerCase();
+
+  if (userRole === 'staff') {
+    // 1. Hide Admin-only sidebar items
+    if (document.getElementById('nav-audit')) document.getElementById('nav-audit').style.display = 'none';
+    
+    // 2. Modify User Management Modal for Staff
+    const roleSelect = document.getElementById('user-role-select');
+    if (roleSelect) {
+      // Clear options and only allow 'Resident'
+      roleSelect.innerHTML = '<option value="resident">Resident</option>';
+      roleSelect.value = 'resident';
+      // Optional: Make it look disabled/read-only so they know they can't change it
+      roleSelect.style.background = '#f1f5f9';
+      roleSelect.style.cursor = 'not-allowed';
+    }
+  }
+}
+enforceRBAC();
+
+// ── GLOBAL SEARCH ────────────────────────────────────────────────────────────
+const searchInput = document.getElementById('global-search');
+const searchDrop  = document.getElementById('search-dropdown');
+const typeIcons   = { resident:'👤', document:'📄', blotter:'⚖️', announcement:'📢' }; //make this realistic - realistic icons
+let searchTmo;
+searchInput.addEventListener('input', () => {
+  clearTimeout(searchTmo);
+  const q = searchInput.value.trim();
+  if (q.length < 2) { searchDrop.style.display = 'none'; return; }
+  searchTmo = setTimeout(() => doSearch(q), 300);
+});
+searchInput.addEventListener('blur', () => setTimeout(() => searchDrop.style.display='none', 200));
+searchInput.addEventListener('focus', () => { if (searchInput.value.trim().length >= 2) searchDrop.style.display='block'; });
+async function doSearch(q) {
+  try {
+    const res  = await fetch(`${API}/search/index.php?q=${encodeURIComponent(q)}`, { headers:{ 'Authorization':`Bearer ${token}` } });
+    const data = await res.json();
+    if (!data.success || !data.results.length) {
+      searchDrop.innerHTML = `<div class="search-no-results">No results for "<strong>${q}</strong>"</div>`;
+    } else {
+      searchDrop.innerHTML = data.results.map(r => `
+        <div class="search-item" onclick="jumpToResult('${r.type}',${r.id})">
+          <span class="search-item-icon">${typeIcons[r.type]||'🔍'}</span>
+          <div><div class="search-item-label">${r.label}</div><div class="search-item-sub">${r.sub||r.type}</div></div>
         </div>`).join('');
-    } catch (err) { console.error(err); }
+    }
+    searchDrop.style.display = 'block';
+  } catch(e) { searchDrop.style.display='none'; }
+}
+function jumpToResult(type, id) {
+  searchDrop.style.display='none'; searchInput.value='';
+  const sMap = { resident:'residents', document:'documents', blotter:'blotter', announcement:'announcements' };
+  const nIdx = { residents:2, documents:3, blotter:4, announcements:5 };
+  const sec  = sMap[type];
+  if (sec) switchSection(sec, document.querySelectorAll('.sidebar-nav li')[nIdx[sec]]);
+}
+
+// ── LOGOUT ───────────────────────────────────────────────────────────────────
+function handleLogout() {
+  fetch(`${API}/auth/logout.php`, { method:'POST', headers:{ 'Authorization':`Bearer ${token}` } }).catch(()=>{});
+  localStorage.removeItem('auth_token'); localStorage.removeItem('user');
+  window.location.href = 'login.html';
+}
+
+// ── SECTION SWITCHING ────────────────────────────────────────────────────────
+function switchSection(name, el) {
+  // Contact messages are now modal-only, no section injection needed.
+  // Inject settings section from template if not yet in DOM
+  if (name === 'settings' && !document.getElementById('section-settings')) {
+    const tpl = document.getElementById('tpl-section-settings');
+    document.querySelector('main').appendChild(tpl.content.cloneNode(true));
+    // Populate system info
+    document.getElementById('settings-user-info').textContent = user.name || user.email || '—';
+    document.getElementById('settings-user-role').textContent = user.role || '—';
+  }
+  document.querySelectorAll('.section-page').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.sidebar-nav li').forEach(l => l.classList.remove('active'));
+  document.getElementById(`section-${name}`).classList.add('active');
+  if (el) el.classList.add('active');
+  const loaders = { dashboard:loadDashboard, residents:loadResidents, documents:loadDocuments, blotter:loadBlotter, announcements:loadAnnouncements, auditlog:loadAuditLog, users:loadUsers, statistics:loadStatistics };
+  if (loaders[name]) loaders[name]();
+}
+
+// ── DASHBOARD ────────────────────────────────────────────────────────────────
+async function loadDashboard() {
+  try {
+    const res = await fetch(`${API}/statistics/index.php`, { headers: authHeaders() });
+    const data = await res.json();
+    if (!data.success) return;
+    const d = data.data;
+    document.getElementById('stat-residents').textContent  = d.overview.total_residents;
+    document.getElementById('stat-pending').textContent    = d.overview.pending_requests;
+    document.getElementById('stat-blotters').textContent   = d.overview.active_blotters;
+    document.getElementById('stat-households').textContent = d.overview.total_households;
+    if (d.recent_7days.residents > 0)
+      document.getElementById('stat-residents-new').textContent = `+${d.recent_7days.residents} this week`;
+    document.getElementById('pending-requests-list').innerHTML = d.recent_requests.length === 0
+      ? '<div class="empty-state">No pending requests</div>'
+      : d.recent_requests.map(r => `<div class="table-row"><span>${r.requester_name}</span><span>${r.document_type}</span><span>${formatDate(r.date_filed)}</span><span>${statusBadge(r.status)}</span></div>`).join('');
+    document.getElementById('activity-log-list').innerHTML = d.recent_logs.length === 0
+      ? '<div class="empty-state">No activity logs</div>'
+      : d.recent_logs.map(l => `<div class="log-item"><div class="log-icon">📋</div><div><div><span class="log-actor">${l.actor_name||'System'}</span> <span class="log-action">${l.action}</span></div><div class="log-time">${timeAgo(l.logged_at)}</div></div></div>`).join('');
+  } catch(e) { console.error(e); }
+}
+
+// ── STATISTICS & CHARTS ──────────────────────────────────────────────────────
+const chartInst = {};
+function destroyChart(id) { if (chartInst[id]) { chartInst[id].destroy(); delete chartInst[id]; } }
+const COLORS = ['#0b2250','#2563eb','#16a34a','#dc2626','#f59e0b','#8b5cf6','#06b6d4','#f97316'];
+async function loadStatistics() {
+  try {
+    const res = await fetch(`${API}/statistics/index.php`, { headers: authHeaders() });
+    const data = await res.json();
+    if (!data.success) return;
+    const d = data.data;
+    document.getElementById('stats-pills').innerHTML = [
+      `Residents: <span>${d.overview.total_residents}</span>`,
+      `Households: <span>${d.overview.total_households}</span>`,
+      `Seniors: <span>${d.residents.seniors}</span>`,
+      `PWD: <span>${d.residents.pwd}</span>`,
+      `Registered Voters: <span>${d.residents.voters}</span>`,
+      `Active Blotters: <span>${d.overview.active_blotters}</span>`,
+      `Pending Requests: <span>${d.overview.pending_requests}</span>`,
+    ].map(t => `<div class="stat-pill">${t}</div>`).join('');
+
+    // Doc status doughnut
+    destroyChart('c1');
+    const dsL = Object.keys(d.documents.by_status), dsV = Object.values(d.documents.by_status);
+    if (dsL.length) chartInst['c1'] = new Chart(document.getElementById('chart-doc-status'), { type:'doughnut', data:{ labels:dsL, datasets:[{ data:dsV, backgroundColor:COLORS }] }, options:{ plugins:{ legend:{ position:'bottom' } } } });
+
+    // Blotter status doughnut
+    destroyChart('c2');
+    const bsL = Object.keys(d.blotters.by_status), bsV = Object.values(d.blotters.by_status);
+    if (bsL.length) chartInst['c2'] = new Chart(document.getElementById('chart-blotter-status'), { type:'doughnut', data:{ labels:bsL, datasets:[{ data:bsV, backgroundColor:COLORS }] }, options:{ plugins:{ legend:{ position:'bottom' } } } });
+
+    // 6-month trends
+    destroyChart('c3');
+    const months = [...new Set(d.trends.map(t => t.month))].sort();
+    const get = (type) => months.map(m => { const r = d.trends.find(t => t.month===m && t.type===type); return r ? parseInt(r.count) : 0; });
+    chartInst['c3'] = new Chart(document.getElementById('chart-trends'), { type:'line', data:{ labels:months, datasets:[
+      { label:'Documents', data:get('documents'), borderColor:'#2563eb', backgroundColor:'rgba(37,99,235,.08)', tension:.4, fill:true },
+      { label:'Blotters',  data:get('blotters'),  borderColor:'#dc2626', backgroundColor:'rgba(220,38,38,.08)', tension:.4, fill:true },
+      { label:'Residents', data:get('residents'), borderColor:'#16a34a', backgroundColor:'rgba(22,163,74,.08)', tension:.4, fill:true },
+    ]}, options:{ plugins:{ legend:{ position:'bottom' } }, scales:{ y:{ beginAtZero:true } } } });
+
+    // Gender bar
+    destroyChart('c4');
+    chartInst['c4'] = new Chart(document.getElementById('chart-residents'), { type:'bar', data:{ labels:d.residents.by_gender.map(r=>r.gender||'Unknown'), datasets:[{ label:'Count', data:d.residents.by_gender.map(r=>parseInt(r.count)), backgroundColor:COLORS }] }, options:{ plugins:{ legend:{ display:false } }, scales:{ y:{ beginAtZero:true, ticks:{ stepSize:1, precision:0 } } } } });
+
+    // Doc types horizontal bar
+    destroyChart('c5');
+    chartInst['c5'] = new Chart(document.getElementById('chart-doc-types'), { type:'bar', data:{ labels:d.documents.by_type.map(r=>r.document_type), datasets:[{ label:'Requests', data:d.documents.by_type.map(r=>parseInt(r.count)), backgroundColor:COLORS }] }, options:{ indexAxis:'y', plugins:{ legend:{ display:false } }, scales:{ x:{ beginAtZero:true, ticks:{ stepSize:1, precision:0 } } } } });
+
+    // Blotter categories
+    destroyChart('c6');
+    chartInst['c6'] = new Chart(document.getElementById('chart-blotter-cat'), { type:'bar', data:{ labels:d.blotters.by_category.map(r=>r.category), datasets:[{ label:'Cases', data:d.blotters.by_category.map(r=>parseInt(r.count)), backgroundColor:COLORS }] }, options:{ indexAxis:'y', plugins:{ legend:{ display:false } }, scales:{ x:{ beginAtZero:true, ticks:{ stepSize:1, precision:0 } } } } });
+  } catch(e) { console.error(e); }
+}
+
+// ── USERS ────────────────────────────────────────────────────────────────────
+async function loadUsers() {
+  const search = document.getElementById('user-search')?.value || '';
+  const role   = document.getElementById('user-role-filter')?.value || '';
+  try {
+    const res = await fetch(`${API}/auth/user.php?search=${encodeURIComponent(search)}&role=${role}`, { headers: authHeaders() });
+    const data = await res.json();
+    const tbody = document.getElementById('users-tbody');
+    if (!data.success || !data.data.length) { tbody.innerHTML='<tr><td colspan="5" class="empty-state">No users found</td></tr>'; return; }
+    tbody.innerHTML = data.data.map(u => {
+  const userRole = (user.role || '').toLowerCase();
+  let actionHtml = '<span style="color:#94a3b8; font-size:0.8rem;">No Actions</span>';
+
+  // Only Admin can toggle status, and cannot deactivate themselves
+  // Only Admin can toggle status, and cannot deactivate themselves
+    // Only Admin can toggle status, and cannot deactivate themselves
+    if (userRole === 'admin') {
+      // Man Cave Logic: 1 = Working (Red), 0 = Broken (Green)
+      const isCurrentlyActive = (u.is_active == 1 || u.is_active === true); 
+
+      const btnText = isCurrentlyActive ? 'Deactivate' : 'Activate';
+      const btnColor = isCurrentlyActive ? '#ef4444' : '#22c55e';
+      const nextStatus = isCurrentlyActive ? 0 : 1;
+
+      actionHtml = `<button class="text-link" style="color:${btnColor}; font-weight:700;" onclick="toggleUserStatus(${u.id}, ${nextStatus}, '${u.name}')">${btnText}</button>`;
+    }
+
+  return `<tr>
+    <td>${u.name}</td>
+    <td>${u.email}</td>
+    <td>${statusBadge(u.role)}</td>
+    <td>${formatDate(u.created_at)}</td>
+    <td>${actionHtml}</td>
+  </tr>`;
+}).join('');
+  } catch(e) { console.error(e); }
+}
+function showAddUserModal() { document.getElementById('modal-add-user').style.display='flex'; }
+function closeAddUserModal() { document.getElementById('modal-add-user').style.display='none'; }
+async function handleCreateUser(e) {
+  e.preventDefault();
+  const btn = document.getElementById('btn-submit-user');
+  if (document.getElementById('user-email-input').classList.contains('input-error')) { alert('Fix email format first.'); return; }
+  const payload = Object.fromEntries(new FormData(e.target).entries());
+  const confirmPassword = document.getElementById('confirm_password').value;
+
+  if (payload.password !== confirmPassword) {
+    alert("Passwords do not match!");
+    btn.textContent = 'Create Account';
+    btn.disabled = false;
+    return;
+  }
+  btn.textContent = 'Creating...'; btn.disabled = true;
+  try {
+    const res = await fetch(`${API}/auth/register.php`, { method:'POST', headers: authHeaders(), body: JSON.stringify(payload) });
+    const data = await res.json();
+    if (data.success) { await logActivity('Created', 'User', 'USER-' + (data.user?.id || '')); closeAddUserModal(); e.target.reset(); loadUsers(); }
+    else alert(data.message || 'Error creating user');
+  } catch(e) { console.error(e); }
+  finally { btn.textContent='Create Account'; btn.disabled=false; }
+}
+function deleteUser(id) {
+  document.getElementById('delete-user-id').value = id;
+  document.getElementById('modal-delete-user').style.display = 'flex';
+}
+
+function closeDeleteUserModal() {
+  document.getElementById('modal-delete-user').style.display = 'none';
+}
+
+async function executeDeleteUser() {
+  const id = document.getElementById('delete-user-id').value;
+  const btn = document.getElementById('btn-confirm-delete-user');
+  btn.textContent = 'Deleting...'; 
+  btn.disabled = true;
+
+  try {
+    await fetch(`${API}/auth/user.php?id=${id}`, { method:'DELETE', headers: authHeaders() });
+    await logActivity('Deleted', 'User', 'USER-' + id);
+    closeDeleteUserModal();
+    loadUsers();
+  } catch(e) {
+    console.error(e);
+  } finally {
+    btn.textContent = 'Delete User'; 
+    btn.disabled = false;
+  }
+}
+
+function toggleUserStatus(id, newStatus, name) {
+  const modal = document.getElementById('modal-toggle-status');
+  const title = document.getElementById('status-modal-title');
+  const msg = document.getElementById('status-modal-msg');
+  const icon = document.getElementById('status-icon');
+  const btn = document.getElementById('btn-confirm-status');
+
+  document.getElementById('status-user-id').value = id;
+  document.getElementById('status-next-val').value = newStatus;
+
+  if (newStatus === 0) {
+    title.textContent = "Deactivate Account?";
+    msg.textContent = `Are you sure you want to deactivate ${name}? They will no longer be able to log in.`;
+    icon.textContent = "🚫";
+    btn.style.background = "#dc2626"; // Red for deactivation
+    btn.textContent = "Deactivate";
+  } else {
+    title.textContent = "Activate Account?";
+    msg.textContent = `This will restore login access for ${name}.`;
+    icon.textContent = "✅";
+    btn.style.background = "#22c55e"; // Green for activation
+    btn.textContent = "Activate";
   }
 
-  // LOGOUT
-  async function handleLogout() {
-    await fetch(`${API}/auth/logout.php`, { method: 'POST', headers: authHeaders() });
-    localStorage.removeItem('auth_token');
-    localStorage.removeItem('user');
-    window.location.href = 'login.html';
+  modal.style.display = 'flex';
+}
+
+function closeStatusModal() {
+  document.getElementById('modal-toggle-status').style.display = 'none';
+}
+
+async function executeStatusToggle() {
+  const id = document.getElementById('status-user-id').value;
+  const newStatus = document.getElementById('status-next-val').value;
+  const btn = document.getElementById('btn-confirm-status');
+  
+  btn.disabled = true;
+  btn.textContent = 'Updating...';
+
+  try {
+    const res = await fetch('auth/user_status.php', { 
+      method: 'POST', 
+      headers: authHeaders(), 
+      body: JSON.stringify({ id: id, is_active: newStatus }) 
+    });
+    
+    const text = await res.text(); // Get raw response first to debug
+    try {
+        const data = JSON.parse(text);
+        if (data.success) {
+          await logActivity(newStatus == 1 ? 'Activated' : 'Deactivated', 'User', 'USER-' + id);
+          showToast(`User status updated!`);
+          closeStatusModal();
+          loadUsers();
+        } else {
+          alert("Server said: " + data.message);
+        }
+    } catch (jsonErr) {
+        // This will show you the ACTUAL PHP error in a popup
+        console.error("Malformed JSON:", text);
+        alert("PHP Error detected! Check console or check if 'is_active' column exists in MySQL.");
+    }
+  } catch(e) { 
+    console.error(e); 
+  } finally {
+    btn.disabled = false;
+    // After the update, if the next possible action was 0 (deactivate), 
+    // we reset the text to "Deactivate" for the next time the modal opens.
+    btn.textContent = (parseInt(newStatus) === 0) ? 'Deactivate' : 'Activate';
+  }
+}
+
+// ── RESIDENTS + PHOTO UPLOAD ─────────────────────────────────────────────────
+async function loadResidents() {
+  const search = document.getElementById('resident-search')?.value || '';
+  try {
+    const res = await fetch(`${API}/residents/index.php?search=${encodeURIComponent(search)}`, { headers: authHeaders() });
+    const data = await res.json();
+    const tbody = document.getElementById('residents-tbody');
+    if (!data.success || !data.data.length) { tbody.innerHTML='<tr><td colspan="8" class="empty-state">No residents found</td></tr>'; return; }
+    tbody.innerHTML = data.data.map(r => {
+      const initial = (r.full_name || '?')[0].toUpperCase();
+      const photo = r.photo_url
+        ? `<div style="position:relative;width:36px;height:36px;">
+             <div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#667eea,#764ba2);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:.85rem">${initial}</div>
+             <img src="${API}/${r.photo_url}?t=${Date.now()}" style="position:absolute;top:0;left:0;width:36px;height:36px;border-radius:50%;object-fit:cover;border:2px solid #e2e8f0;background:#fff;" onerror="this.style.display='none'">
+           </div>`
+        : `<div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#667eea,#764ba2);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:.85rem">${initial}</div>`;
+      
+        return `<tr style="cursor:pointer" onclick="viewResident(${r.id})" title="Click to view full profile">
+        <td style="text-align:center;">${photo}</td>
+        <td><strong>${r.full_name}</strong></td>
+        <td>${r.gender||'—'}</td>
+        <td>${r.contact_mobile||'—'}</td>
+        <td>${r.date_of_birth ? formatDate(r.date_of_birth) : '—'}</td>
+        <td>${r.civil_status||'—'}</td>
+        <td>${statusBadge(r.resident_type)}</td>
+        <td onclick="event.stopPropagation()" style="text-align:center;">
+          <button class="btn-secondary" style="padding:.3rem .6rem;font-size:.78rem" onclick="openEditResident(${r.id},'${(r.full_name||'').replace(/'/g,"\\'")}','${r.gender||''}','${r.date_of_birth||''}','${r.contact_mobile||''}','${r.contact_email||''}','${r.civil_status||''}','${r.resident_type||''}',${r.is_senior_citizen||0},${r.is_pwd||0},${r.registered_voter||0},'${(r.place_of_birth||'').replace(/'/g,"\\'")}','${(r.nationality||'Filipino').replace(/'/g,"\\'")}','${(r.religion||'').replace(/'/g,"\\'")}')" >Edit</button>
+        </td>
+        <td onclick="event.stopPropagation()" style="text-align:center;">
+          <button class="upload-photo-btn" onclick="openPhotoModal(${r.id},'${(r.full_name||'').replace(/'/g,"\\'")}')">📷 Photo</button>
+        </td>
+      </tr>`;
+    }).join('');
+  } catch(e) { console.error(e); }
+}
+
+function openPhotoModal(id, name) {
+  document.getElementById('photo-resident-id').value = id;
+  document.getElementById('photo-modal-name').textContent = `Resident: ${name}`;
+  document.getElementById('photo-upload-msg').textContent = '';
+  document.getElementById('photo-file-input').value = '';
+  document.getElementById('modal-upload-photo').style.display = 'flex';
+}
+async function viewResident(id) {
+  try {
+    const res = await fetch(`${API}/residents/index.php?id=${id}`, { headers: authHeaders() });
+    const data = await res.json();
+    if (!data.success) { showToast('Could not load resident details.', 'error'); return; }
+    
+    // Fallback in case your API returns an array instead of a single object
+    const r = Array.isArray(data.data) ? data.data[0] : data.data;
+
+    const photoHtml = r.photo_url
+      ? `<img src="${API}/${r.photo_url}" style="width:84px;height:84px;border-radius:50%;object-fit:cover;border:3px solid #e2e8f0;margin-bottom:1rem">`
+      : `<div style="width:84px;height:84px;border-radius:50%;background:linear-gradient(135deg,#667eea,#764ba2);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:2.5rem;margin-bottom:1rem;box-shadow:0 4px 10px rgba(0,0,0,0.1);">${(r.full_name||'?')[0].toUpperCase()}</div>`;
+
+    let tags = [];
+    if (r.is_senior_citizen == 1) tags.push('<span class="status-badge high">Senior Citizen</span>');
+    if (r.is_pwd == 1) tags.push('<span class="status-badge urgent">PWD</span>');
+    if (r.registered_voter == 1) tags.push('<span class="status-badge approved">Registered Voter</span>');
+
+    document.getElementById('view-resident-body').innerHTML = `
+      <div style="display:flex; flex-direction:column; align-items:center; text-align:center;">
+        ${photoHtml}
+        <h3 style="font-size:1.3rem;font-weight:700;color:#0f172a;margin:0;">${r.full_name}</h3>
+        <p style="color:#64748b;font-size:.95rem;margin-top:.25rem">${statusBadge(r.resident_type)}</p>
+        <div style="display:flex;gap:.5rem;margin-top:.75rem">${tags.join('')}</div>
+      </div>
+      <hr style="border:none;border-top:1px solid #e2e8f0;margin:1.5rem 0">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem 1.5rem;font-size:.875rem;">
+        <div><span style="color:#64748b;font-weight:600">Gender</span><p style="margin:.2rem 0 0;color:#0f172a">${r.gender||'—'}</p></div>
+        <div><span style="color:#64748b;font-weight:600">Date of Birth</span><p style="margin:.2rem 0 0;color:#0f172a">${formatDate(r.date_of_birth)}</p></div>
+        <div><span style="color:#64748b;font-weight:600">Civil Status</span><p style="margin:.2rem 0 0;color:#0f172a">${r.civil_status||'—'}</p></div>
+        <div><span style="color:#64748b;font-weight:600">Religion</span><p style="margin:.2rem 0 0;color:#0f172a">${r.religion||'—'}</p></div>
+        <div><span style="color:#64748b;font-weight:600">Nationality</span><p style="margin:.2rem 0 0;color:#0f172a">${r.nationality||'—'}</p></div>
+        <div><span style="color:#64748b;font-weight:600">Place of Birth</span><p style="margin:.2rem 0 0;color:#0f172a">${r.place_of_birth||'—'}</p></div>
+      </div>
+      <div style="background:#f8fafc;border-radius:.75rem;padding:1rem;margin-top:1.25rem;">
+        <p style="font-size:.75rem;font-weight:700;color:#64748b;margin:0 0 .5rem;text-transform:uppercase;letter-spacing:.05rem">Contact Information</p>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:.5rem;font-size:.875rem;">
+          <div><span style="color:#64748b">Mobile</span><p style="margin:.1rem 0 0;color:#0f172a;font-weight:600">${r.contact_mobile||'—'}</p></div>
+          <div><span style="color:#64748b">Email</span><p style="margin:.1rem 0 0;color:#0f172a">${r.contact_email||'—'}</p></div>
+        </div>
+      </div>
+    `;
+    document.getElementById('modal-view-resident').style.display = 'flex';
+  } catch(e) { console.error(e); showToast('Error loading resident details.', 'error'); }
+}
+function closeViewResident() { document.getElementById('modal-view-resident').style.display = 'none'; }
+
+function closePhotoModal() { document.getElementById('modal-upload-photo').style.display='none'; }
+async function uploadResidentPhoto(input) {
+  const file = input.files[0]; if (!file) return;
+  const id = document.getElementById('photo-resident-id').value;
+  const msg = document.getElementById('photo-upload-msg');
+  msg.textContent = 'Uploading...'; msg.style.color = '#6b7280';
+  const fd = new FormData(); fd.append('photo', file); fd.append('resident_id', id);
+  try {
+    const res = await fetch(`${API}/residents/upload_photo.php`, { method:'POST', headers:{ 'Authorization':`Bearer ${token}` }, body: fd });
+    const data = await res.json();
+    if (data.success) { msg.textContent='Photo uploaded!'; msg.style.color='#16a34a'; setTimeout(()=>{ closePhotoModal(); loadResidents(); }, 1200); }
+    else { msg.textContent='❌ '+(data.message||'Upload failed'); msg.style.color='#dc2626'; }
+  } catch(e) { msg.textContent='❌ Server error'; msg.style.color='#dc2626'; }
+}
+
+// ── DOCUMENTS ────────────────────────────────────────────────────────────────
+async function loadDocuments() {
+  const status = document.getElementById('doc-status-filter')?.value || '';
+  try {
+    const res = await fetch(`${API}/documents/index.php${status?'?status='+status:''}`, { headers: authHeaders() });
+    const data = await res.json();
+    const tbody = document.getElementById('documents-tbody');
+    if (!data.success || !data.data.length) { tbody.innerHTML='<tr><td colspan="7" class="empty-state">No document requests found</td></tr>'; return; }
+    tbody.innerHTML = data.data.map(d => `
+  <tr style="cursor:pointer" onclick="viewDocument(${d.id})" title="Click to view request details">
+    <td><code>${d.reference_no}</code></td>
+    <td>${d.requester_name}</td>
+    <td>${d.document_type}</td>
+    <td>${formatDate(d.date_filed)}</td>
+    <td style="font-size:.78rem;color:#64748b">${d.email||'—'}</td>
+    <td>${statusBadge(d.status)}</td>
+    <td onclick="event.stopPropagation()">
+      <button class="btn-secondary" style="padding:.35rem .75rem;font-size:.8rem;" onclick="updateDocStatus(${d.id})">Update Status</button>
+    </td>
+  </tr>`).join('');
+  } catch(e) { console.error(e); }
+}
+function updateDocStatus(id) {
+  document.getElementById('doc-status-modal').style.display = 'flex';
+  document.getElementById('doc-status-select').value = 'Pending';
+  document.getElementById('doc-status-remarks').value = '';
+  document.getElementById('doc-status-modal').dataset.docId = id;
+}
+function closeDocStatusModal() {
+  document.getElementById('doc-status-modal').style.display = 'none';
+}
+async function submitDocStatus() {
+  const id      = document.getElementById('doc-status-modal').dataset.docId;
+  const status  = document.getElementById('doc-status-select').value;
+  const remarks = document.getElementById('doc-status-remarks').value.trim();
+  if (!status) return;
+  const btn = document.getElementById('doc-status-submit-btn');
+  btn.disabled = true; btn.textContent = 'Saving…';
+  try {
+    await fetch(`${API}/documents/index.php?id=${id}`, { method:'PUT', headers: authHeaders(), body: JSON.stringify({ status, remarks, receiving_staff: user.name||'Admin' }) });
+    await logActivity('Updated Status', 'Document', 'DOC-' + id);
+    closeDocStatusModal();
+    loadDocuments();
+  } finally {
+    btn.disabled = false; btn.textContent = 'Save Changes';
+  }
+}
+
+async function viewDocument(id) {
+  try {
+    const res = await fetch(`${API}/documents/index.php?id=${id}`, { headers: authHeaders() });
+    const data = await res.json();
+    if (!data.success) { showToast('Could not load document details.', 'error'); return; }
+
+    const d = Array.isArray(data.data) ? data.data[0] : data.data;
+
+    document.getElementById('view-document-body').innerHTML = `
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:.5rem;margin-bottom:1.25rem">
+        <div>
+          <code style="font-size:1rem;font-weight:700;color:#0b2250">${d.reference_no}</code>
+          <h3 style="font-size:1.15rem;font-weight:700;color:#0f172a;margin:.25rem 0 0">${d.document_type}</h3>
+        </div>
+        <div>${statusBadge(d.status)}</div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem 1.5rem;font-size:.875rem;margin-bottom:1.25rem">
+        <div><span style="color:#64748b;font-weight:600">Requester</span><p style="margin:.2rem 0 0;color:#0f172a;font-weight:600">${d.requester_name||'—'}</p></div>
+        <div><span style="color:#64748b;font-weight:600">Date Filed</span><p style="margin:.2rem 0 0;color:#0f172a">${formatDate(d.date_filed)}</p></div>
+        <div><span style="color:#64748b;font-weight:600">Contact Number</span><p style="margin:.2rem 0 0;color:#0f172a">${d.contact_number||'—'}</p></div>
+        <div><span style="color:#64748b;font-weight:600">Email</span><p style="margin:.2rem 0 0;color:#0f172a">${d.email||'—'}</p></div>
+        <div style="grid-column:1/-1"><span style="color:#64748b;font-weight:600">Purpose</span><p style="margin:.2rem 0 0;color:#0f172a">${d.purpose||'—'}</p></div>
+      </div>
+      ${d.remarks ? `<div style="background:#f8fafc;border-radius:.75rem;padding:1rem;margin-top:1rem;">
+        <p style="font-size:.75rem;font-weight:700;color:#64748b;margin:0 0 .5rem;text-transform:uppercase;letter-spacing:.05rem">Admin Remarks</p>
+        <p style="margin:0;color:#0f172a;font-size:.9rem">${d.remarks}</p>
+      </div>` : ''}
+    `;
+    document.getElementById('modal-view-document').style.display = 'flex';
+  } catch(e) { console.error(e); showToast('Error loading document details.', 'error'); }
+}
+
+function closeViewDocument() { document.getElementById('modal-view-document').style.display = 'none'; }
+
+async function viewContactMessage(id) {
+  try {
+    // Fetch the new messages to find the content
+    const res = await fetch(`${API}/contact/index.php`, { headers: authHeaders() });
+    const data = await res.json();
+    if (!data.success) { showToast('Could not load message details.', 'error'); return; }
+    
+    // Find the specific message
+    const c = data.data.find(m => m.id == id);
+    if (!c) { showToast('Message not found.', 'error'); return; }
+
+    document.getElementById('view-contact-body').innerHTML = `
+      <div style="display:flex;flex-direction:column;gap:1rem;font-size:0.9rem;">
+        <div><span style="color:#64748b;font-weight:600">From:</span><br><span style="color:#0f172a;font-weight:600">${c.name || '—'}</span> &lt;${c.email || '—'}&gt;</div>
+        <div><span style="color:#64748b;font-weight:600">Contact Number:</span><br><span style="color:#0f172a">${c.contact_number || c.contact || c.phone || '—'}</span></div>
+        <div><span style="color:#64748b;font-weight:600">Subject:</span><br><span style="color:#0f172a;font-weight:600">${c.subject || '—'}</span></div>
+        <div style="background:#f8fafc;border-radius:0.75rem;padding:1rem;margin-top:0.5rem;white-space:pre-wrap;color:#374151;">${c.message || '—'}</div>
+        <div style="font-size:0.8rem;color:#94a3b8;margin-top:0.5rem;">Received on ${formatDate(c.created_at)}</div>
+      </div>
+    `;
+    document.getElementById('modal-view-contact').style.display = 'flex';
+    
+    // Auto-mark as read on the backend so it drops out of the "new" queue
+    fetch(`${API}/contact/index.php?id=${id}`, { 
+      method: 'PUT', 
+      headers: authHeaders(), 
+      body: JSON.stringify({status: 'read'}) 
+    }).catch(()=>{});
+
+  } catch(e) { console.error(e); showToast('Error loading contact message.', 'error'); }
+}
+
+function closeViewContact() { document.getElementById('modal-view-contact').style.display = 'none'; }
+
+// ── BLOTTER ──────────────────────────────────────────────────────────────────
+async function loadBlotter() {
+  try {
+    const res = await fetch(`${API}/blotter/index.php`, { headers: authHeaders() });
+    const data = await res.json();
+    const tbody = document.getElementById('blotter-tbody');
+    if (!data.success || !data.data.length) { tbody.innerHTML='<tr><td colspan="7" class="empty-state">No blotter cases</td></tr>'; return; }
+    
+    const esc = s => (s||'').replace(/'/g,"\\'").replace(/\n/g,' ');
+    
+    // The button onclick here is updated to pass the notes, investigator, and next_hearing_date!
+    tbody.innerHTML = data.data.map(b => `<tr style="cursor:pointer" onclick="viewBlotter(${b.id})" title="Click to view full details">
+  <td><code>${b.case_no}</code></td>
+  <td>${b.case_title}</td>
+  <td>${b.category||'—'}</td>
+  <td>${statusBadge(b.priority)}</td>
+  <td>${statusBadge(b.status)}</td>
+  <td>${formatDate(b.date_reported)}</td>
+  <td onclick="event.stopPropagation()">
+    <button class='btn-secondary' style='padding:.35rem .75rem;font-size:.8rem' onclick="openProcessBlotter(${b.id},'${esc(b.case_no)}','${esc(b.case_title)}','${esc(b.reporter_name)}','${esc(b.location)}','${esc(b.description||b.summary)}','${esc(b.status)}','${esc(b.priority)}','${esc(b.category)}','${esc(b.notes)}','${esc(b.investigator_name)}','${esc(b.next_hearing_date)}')">Process Case</button>
+  </td>
+</tr>`).join('');
+  } catch(e) { console.error(e); }
+}
+
+// ── ANNOUNCEMENTS ────────────────────────────────────────────────────────────
+async function loadAnnouncements() {
+  try {
+    const res = await fetch(`${API}/announcements/index.php`, { headers: authHeaders() });
+    const data = await res.json();
+    const tbody = document.getElementById('announcements-tbody');
+    if (!data.success || !data.data.length) { tbody.innerHTML='<tr><td colspan="5" class="empty-state">No announcements</td></tr>'; return; }
+    tbody.innerHTML = data.data.map(a => {
+      const safeTitle    = (a.title    || '').replace(/&/g,'&amp;').replace(/"/g,'&quot;');
+      const safeStatus   = (a.status   || 'Draft').replace(/"/g,'&quot;');
+      const safeCategory = (a.category || '').replace(/"/g,'&quot;');
+      return `<tr style="cursor:pointer" onclick="viewAnnouncement(${a.id})" title="Click to view full details">
+        <td><code>${a.reference_no}</code></td>
+        <td>${a.title}</td>
+        <td style="text-transform:capitalize;">${a.category||'—'}</td>
+        <td>${statusBadge(a.status)}</td>
+        <td>${formatDate(a.published_on)}</td>
+        <td onclick="event.stopPropagation()" style="text-align:center; white-space:nowrap;">
+          <button class="btn-secondary" style="padding:.35rem .75rem;font-size:.8rem;margin-right:0.5rem;"
+            data-id="${a.id}" data-title="${safeTitle}" data-status="${safeStatus}" data-category="${safeCategory}"
+            onclick="editAnnouncementFromBtn(this)">Edit</button>
+          <button class="upload-photo-btn" style="margin-right:0.5rem;" onclick="triggerAnnImageUpload(${a.id})">📷 Image</button>
+          <button class="text-link" style="color:#ef4444" onclick="deleteAnnouncement(${a.id})">Delete</button>
+        </td>
+      </tr>`;
+    }).join('');
+  } catch(e) { console.error(e); }
+}
+
+// ── AUDIT LOG ────────────────────────────────────────────────────────────────
+async function loadAuditLog() {
+  const actor  = document.getElementById('log-filter-actor')?.value || '';
+  const module = document.getElementById('log-filter-module')?.value || '';
+  const from   = document.getElementById('log-filter-from')?.value || '';
+  const to     = document.getElementById('log-filter-to')?.value || '';
+  const statusEl = document.getElementById('audit-log-list');
+  const tableEl  = document.getElementById('audit-log-table');
+  const tbodyEl  = document.getElementById('audit-log-tbody');
+  if (!statusEl || !tableEl || !tbodyEl) return;
+  statusEl.style.display = 'block';
+  statusEl.innerHTML = '<div class="loading">Loading...</div>';
+  tableEl.style.display = 'none';
+  try {
+    const params = new URLSearchParams();
+    if (module) params.set('module', module);
+    const res = await fetch(`${API}/logs/index.php?${params}`, { headers: authHeaders() });
+    const data = await res.json();
+    if (!data.success) { statusEl.innerHTML='<div class="empty-state">No activity logs</div>'; return; }
+    let logs = data.data || [];
+    if (actor) logs = logs.filter(l => (l.actor_name||'').toLowerCase().includes(actor.toLowerCase()));
+    if (from)  logs = logs.filter(l => l.logged_at && l.logged_at >= from);
+    if (to)    logs = logs.filter(l => l.logged_at && l.logged_at.substring(0,10) <= to);
+    if (!logs.length) { statusEl.innerHTML='<div class="empty-state">No matching logs</div>'; return; }
+    const moduleColors = {
+      System:      { bg:'#eff6ff', color:'#1d4ed8' },
+      User:        { bg:'#f0fdf4', color:'#166534' },
+      Resident:    { bg:'#fefce8', color:'#854d0e' },
+      Document:    { bg:'#fff7ed', color:'#9a3412' },
+      Blotter:     { bg:'#fdf4ff', color:'#7e22ce' },
+      Announcement:{ bg:'#ecfdf5', color:'#065f46' },
+    };
+    tbodyEl.innerHTML = logs.map(l => {
+      const dt = l.logged_at ? new Date(l.logged_at) : null;
+      const datePart = dt ? dt.toLocaleDateString('en-PH', { year:'numeric', month:'short', day:'2-digit' }) : '—';
+      const timePart = dt ? dt.toLocaleTimeString('en-PH', { hour:'2-digit', minute:'2-digit', second:'2-digit' }) : '';
+      const mod = l.module || '';
+      const mc = moduleColors[mod] || { bg:'#f1f5f9', color:'#475569' };
+      const modBadge = mod ? `<span style="background:${mc.bg};color:${mc.color};padding:.2rem .6rem;border-radius:999px;font-size:.75rem;font-weight:600;white-space:nowrap">${mod}</span>` : '—';
+      const ref = l.reference_id ? `<code style="font-size:.78rem;background:#f8fafc;border:1px solid #e2e8f0;border-radius:4px;padding:.1rem .4rem;color:#64748b">${l.reference_id}</code>` : '—';
+          
+          // Generate a descriptive sentence for the action
+          let actText = l.action || 'Performed action';
+          if (actText === 'Logged i') actText = 'Logged in'; // Fix the database truncation!
+          
+          let sentence = actText;
+          const actLower = actText.toLowerCase();
+          const modName = mod ? `<strong>${mod}</strong>` : 'system';
+          
+          if (actLower.includes('log')) {
+              sentence = actLower.includes('out') ? 'Safely logged out of the system.' : 'Successfully authenticated and logged into the system.';
+          } else if (['created', 'filed', 'posted'].includes(actLower)) {
+              sentence = `Successfully ${actLower} a new record in the ${modName} module.`;
+          } else if (actLower.includes('update')) {
+              sentence = `Modified and updated an existing record in the ${modName} module.`;
+          } else if (actLower === 'deleted') {
+              sentence = `Permanently removed a record from the ${modName} module.`;
+          } else {
+              sentence = `Performed a '${actText}' action on the ${modName} module.`;
+          }
+
+          return `<tr>
+            <td style="white-space:nowrap">
+              <div style="font-weight:600;font-size:.85rem;color:#1f2937">${datePart}</div>
+              <div style="font-size:.78rem;color:#9ca3af;margin-top:.1rem">${timePart}</div>
+            </td>
+            <td>
+              <div style="display:flex;align-items:center;gap:.5rem">
+                <div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#667eea,#764ba2);display:flex;align-items:center;justify-content:center;color:#fff;font-size:.72rem;font-weight:700;flex-shrink:0">${(l.actor_name||'S').charAt(0).toUpperCase()}</div>
+                <span style="font-weight:600;font-size:.875rem;color:#1f2937">${l.actor_name||'System'}</span>
+              </div>
+            </td>
+            <td style="color:#374151;font-size:.875rem;line-height:1.4;">${sentence}</td>
+            <td>${modBadge}</td>
+            <td>${ref}</td>
+          </tr>`;
+    }).join('');
+    statusEl.style.display = 'none';
+    tableEl.style.display = 'table';
+  } catch(e) { console.error(e); statusEl.innerHTML='<div class="empty-state">Error loading logs</div>'; }
+}
+
+async function loadContactMessages() {
+  const status = document.getElementById('contact-filter-status')?.value || '';
+  const el = document.getElementById('contact-messages-list');
+  if (!el) return;
+  el.innerHTML = '<div class="loading">Loading...</div>';
+  try {
+    const params = status ? '?status=' + status : '';
+    const res = await fetch(`${API}/contact/index.php${params}`, { headers: authHeaders() });
+    const data = await res.json();
+    if (!data.success || !data.data.length) { el.innerHTML='<div class="empty-state">No contact messages</div>'; return; }
+    el.innerHTML = `<table style="width:100%;border-collapse:collapse">
+      <thead><tr style="background:#f8fafc;font-size:.8rem;color:#64748b;text-transform:uppercase">
+        <th style="padding:.75rem;text-align:left">Name</th><th style="padding:.75rem;text-align:left">Email</th>
+        <th style="padding:.75rem;text-align:left">Subject</th><th style="padding:.75rem;text-align:left">Message</th>
+        <th style="padding:.75rem;text-align:left">Date</th><th style="padding:.75rem;text-align:left">Status</th>
+      </tr></thead>
+      <tbody>${data.data.map(m => `<tr style="border-top:1px solid #f1f5f9;font-size:.88rem${m.status==='new'?' font-weight:600':''}">
+        <td style="padding:.75rem">${m.name||'—'}</td>
+        <td style="padding:.75rem">${m.email||'—'}</td>
+        <td style="padding:.75rem">${m.subject||'—'}</td>
+        <td style="padding:.75rem;max-width:280px;white-space:pre-wrap;word-break:break-word">${m.message||'—'}</td>
+        <td style="padding:.75rem;white-space:nowrap">${formatDate(m.created_at)}</td>
+        <td style="padding:.75rem">${m.status==='new' ? '<span style="background:#fef9c3;color:#854d0e;padding:.2rem .6rem;border-radius:12px;font-size:.78rem">Unread</span>' : '<span style="background:#f0fdf4;color:#166534;padding:.2rem .6rem;border-radius:12px;font-size:.78rem">Read</span>'}</td>
+      </tr>`).join('')}</tbody></table>`;
+  } catch(e) { console.error(e); el.innerHTML='<div class="empty-state">Error loading messages</div>'; }
+}
+
+
+function showAddResident() { document.getElementById('modal-add-resident').style.display='flex'; }
+function closeAddResident() {
+  document.getElementById('modal-add-resident').style.display='none';
+  document.getElementById('form-add-resident').reset();
+  document.getElementById('religion-other-group').style.display = 'none';
+  document.getElementById('religion-other').required = false;
+}
+function toggleReligionOther() {
+  const choice = document.getElementById('religion-choice').value;
+  const otherGroup = document.getElementById('religion-other-group');
+  const otherInput = document.getElementById('religion-other');
+  if (choice === 'Others') {
+    otherGroup.style.display = 'flex';
+    otherInput.required = true;
+  } else {
+    otherGroup.style.display = 'none';
+    otherInput.required = false;
+    otherInput.value = '';
+  }
+}
+
+async function handleAddResident(e) {
+  e.preventDefault();
+  const btn = document.getElementById('btn-submit-resident');
+  btn.textContent = 'Saving...'; btn.disabled = true;
+  const fd = new FormData(e.target);
+  const payload = Object.fromEntries(fd.entries());
+
+  // Resolve religion: if "Others" use the specified text, else use the dropdown value
+  const religionChoice = document.getElementById('religion-choice').value;
+  const religionOther = document.getElementById('religion-other').value.trim();
+  if (religionChoice === 'Others') {
+    if (!religionOther) { alert('Please specify your religion.'); btn.textContent = 'Add Resident'; btn.disabled = false; return; }
+    payload.religion = religionOther;
+  } else {
+    payload.religion = religionChoice;
   }
 
-  // Placeholder functions
-  function showAddResident() { alert('Add Resident form coming soon!'); }
-  function showAddBlotter() { alert('Add Blotter Case form coming soon!'); }
-  function showAddAnnouncement() { alert('Add Announcement form coming soon!'); }
+  payload.is_senior_citizen = fd.get('is_senior_citizen') ? 1 : 0;
+  payload.is_pwd = fd.get('is_pwd') ? 1 : 0;
+  payload.registered_voter = fd.get('registered_voter') ? 1 : 0;
+  try {
+    const res = await fetch(`${API}/residents/index.php`, { method:'POST', headers: authHeaders(), body: JSON.stringify(payload) });
+    const data = await res.json();
+    if (data.success) { await logActivity('Created', 'Resident', 'RES-' + (data.id || '')); closeAddResident(); loadResidents(); }
+    else alert(data.message || 'Error adding resident');
+  } catch(err) { console.error(err); }
+  finally { btn.textContent = 'Add Resident'; btn.disabled = false; }
+}
 
-  // Load dashboard on start
-  loadDashboard();
+function showAddBlotter() { document.getElementById('modal-add-blotter').style.display='flex'; }
+function closeAddBlotter() { document.getElementById('modal-add-blotter').style.display='none'; document.getElementById('form-add-blotter').reset(); }
+function showToast(message, type = 'success') {
+  const existing = document.getElementById('app-toast');
+  if (existing) existing.remove();
+  const colors = { success: { bg:'#dcfce7', border:'#86efac', text:'#166534' }, error: { bg:'#fee2e2', border:'#fca5a5', text:'#991b1b' }, info: { bg:'#dbeafe', border:'#93c5fd', text:'#1e40af' } };
+  const c = colors[type] || colors.info;
+  const toast = document.createElement('div');
+  toast.id = 'app-toast';
+  toast.style.cssText = `position:fixed;bottom:2rem;right:2rem;background:${c.bg};border:1px solid ${c.border};color:${c.text};padding:1rem 1.5rem;border-radius:1rem;box-shadow:0 10px 30px rgba(0,0,0,.12);z-index:9999;font-size:.9rem;font-weight:600;max-width:360px;display:flex;align-items:center;gap:.75rem;animation:slideUp .3s ease`;
+  toast.innerHTML = `<span style="flex:1">${message}</span><button onclick="this.parentElement.remove()" style="background:none;border:none;cursor:pointer;font-size:1.1rem;color:${c.text};opacity:.7;padding:0">✕</button>`;
+  if (!document.getElementById('toast-style')) {
+    const s = document.createElement('style'); s.id='toast-style';
+    s.textContent = '@keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}';
+    document.head.appendChild(s);
+  }
+  document.body.appendChild(toast);
+  setTimeout(() => toast?.remove(), 5000);
+}
+
+async function viewBlotter(id) {
+  try {
+    const res = await fetch(`${API}/blotter/index.php?id=${id}`, { headers: authHeaders() });
+    const data = await res.json();
+    if (!data.success) { showToast('Could not load case details.', 'error'); return; }
+    const b = data.data;
+    document.getElementById('view-blotter-body').innerHTML = `
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:.5rem;margin-bottom:1.25rem">
+        <div>
+          <code style="font-size:1rem;font-weight:700;color:#0b2250">${b.case_no}</code>
+          <h3 style="font-size:1.15rem;font-weight:700;color:#0f172a;margin:.25rem 0 0">${b.case_title}</h3>
+        </div>
+        <div style="display:flex;gap:.5rem;flex-wrap:wrap">${statusBadge(b.status)} ${statusBadge(b.priority)}</div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem 1.5rem;font-size:.875rem;margin-bottom:1.25rem">
+        <div><span style="color:#64748b;font-weight:600">Category</span><p style="margin:.2rem 0 0;color:#0f172a">${b.category||'—'}</p></div>
+        <div><span style="color:#64748b;font-weight:600">Date Reported</span><p style="margin:.2rem 0 0;color:#0f172a">${formatDate(b.date_reported)}</p></div>
+        <div><span style="color:#64748b;font-weight:600">Incident Date</span><p style="margin:.2rem 0 0;color:#0f172a">${formatDate(b.incident_date)}</p></div>
+        <div><span style="color:#64748b;font-weight:600">Incident Time</span><p style="margin:.2rem 0 0;color:#0f172a">${b.incident_time||'—'}</p></div>
+        <div style="grid-column:1/-1"><span style="color:#64748b;font-weight:600">Location</span><p style="margin:.2rem 0 0;color:#0f172a">${b.location||'—'}</p></div>
+      </div>
+      <div style="background:#f8fafc;border-radius:.75rem;padding:1rem;margin-bottom:.75rem">
+        <p style="font-size:.8rem;font-weight:700;color:#64748b;margin:0 0 .35rem;text-transform:uppercase;letter-spacing:.05rem">Summary</p>
+        <p style="margin:0;color:#0f172a;font-size:.9rem">${b.summary||'—'}</p>
+      </div>
+      <div style="background:#f8fafc;border-radius:.75rem;padding:1rem;margin-bottom:.75rem">
+        <p style="font-size:.8rem;font-weight:700;color:#64748b;margin:0 0 .35rem;text-transform:uppercase;letter-spacing:.05rem">Full Description</p>
+        <p style="margin:0;color:#0f172a;font-size:.9rem;white-space:pre-wrap">${b.description||'—'}</p>
+      </div>
+      <div style="background:#f8fafc;border-radius:.75rem;padding:1rem;margin-bottom:.75rem">
+        <p style="font-size:.8rem;font-weight:700;color:#64748b;margin:0 0 .5rem;text-transform:uppercase;letter-spacing:.05rem">Reporter Information</p>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:.5rem 1.5rem;font-size:.875rem">
+          <div><span style="color:#64748b">Name</span><p style="margin:.1rem 0 0;color:#0f172a;font-weight:600">${b.reporter_name||'—'}</p></div>
+          <div><span style="color:#64748b">Contact</span><p style="margin:.1rem 0 0;color:#0f172a;font-weight:600">${b.reporter_contact||'—'}</p></div>
+          <div><span style="color:#64748b">Email</span><p style="margin:.1rem 0 0;color:#0f172a">${b.reporter_email||'—'}</p></div>
+          <div><span style="color:#64748b">Address</span><p style="margin:.1rem 0 0;color:#0f172a">${b.reporter_address||'—'}</p></div>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem">
+        <div style="background:#f8fafc;border-radius:.75rem;padding:1rem">
+          <p style="font-size:.8rem;font-weight:700;color:#64748b;margin:0 0 .35rem;text-transform:uppercase;letter-spacing:.05rem">Persons Involved</p>
+          <p style="margin:0;color:#0f172a;font-size:.9rem">${b.persons_involved||'—'}</p>
+        </div>
+        <div style="background:#f8fafc;border-radius:.75rem;padding:1rem">
+          <p style="font-size:.8rem;font-weight:700;color:#64748b;margin:0 0 .35rem;text-transform:uppercase;letter-spacing:.05rem">Witnesses</p>
+          <p style="margin:0;color:#0f172a;font-size:.9rem">${b.witnesses||'—'}</p>
+        </div>
+      </div>
+      ${b.investigator_name ? `<div style="background:#eff6ff;border-radius:.75rem;padding:1rem;margin-top:.75rem"><p style="font-size:.8rem;font-weight:700;color:#1e40af;margin:0 0 .35rem;text-transform:uppercase">Assigned Investigator</p><p style="margin:0;color:#1e3a8a;font-weight:600">${b.investigator_name}</p>${b.next_hearing_date?`<p style="margin:.25rem 0 0;color:#1e40af;font-size:.85rem">Next Hearing: ${formatDate(b.next_hearing_date)}</p>`:''}</div>` : ''}
+      ${b.notes ? `<div style="background:#fefce8;border-radius:.75rem;padding:1rem;margin-top:.75rem"><p style="font-size:.8rem;font-weight:700;color:#854d0e;margin:0 0 .35rem;text-transform:uppercase">Notes</p><p style="margin:0;color:#713f12;font-size:.9rem">${b.notes}</p></div>` : ''}
+    `;
+    document.getElementById('modal-view-blotter').style.display = 'flex';
+  } catch(e) { console.error(e); showToast('Error loading case details.', 'error'); }
+}
+function closeViewBlotter() { document.getElementById('modal-view-blotter').style.display = 'none'; }
+
+async function handleAddBlotter(e) {
+  e.preventDefault();
+  const btn = document.getElementById('btn-submit-blotter');
+  btn.textContent = 'Filing...'; btn.disabled = true;
+  const payload = Object.fromEntries(new FormData(e.target).entries());
+  try {
+    const res = await fetch(`${API}/blotter/index.php`, { method:'POST', headers: authHeaders(), body: JSON.stringify(payload) });
+    const data = await res.json();
+    if (data.success) { await logActivity('Filed', 'Blotter', data.case_no); closeAddBlotter(); loadBlotter(); showToast('✅ Case filed successfully! Case No: ' + data.case_no, 'success'); }
+    else alert(data.message || 'Error filing case');
+  } catch(err) { console.error(err); }
+  finally { btn.textContent = 'File Case'; btn.disabled = false; }
+}
+function openProcessBlotter(id, caseNo, title, reporter, location, description, status, priority, category, notes, investigator, hearingDate) {
+  document.getElementById('process-case-id').value = id;
+  document.getElementById('process-case-title').value = title || '';
+  document.getElementById('process-case-category').value = category || '';
+  document.getElementById('process-case-location').value = location || '';
+  document.getElementById('process-case-info').innerHTML =
+    '<p><strong>Case No:</strong> ' + caseNo + '</p>' +
+    '<p><strong>Title:</strong> ' + title + '</p>' +
+    '<p><strong>Reporter:</strong> ' + reporter + '</p>' +
+    '<p><strong>Location:</strong> ' + (location||'N/A') + '</p>' +
+    '<p><strong>Description:</strong> ' + (description||'N/A') + '</p>';
+  document.getElementById('process-status').value = status || 'Pending';
+  document.getElementById('process-priority').value = priority || 'Normal';
+  
+  // These lines actively pull the saved data back into the text boxes
+  document.getElementById('process-investigator').value = investigator || '';
+  document.getElementById('process-hearing').value = hearingDate ? hearingDate.substring(0, 10) : '';
+  document.getElementById('process-notes').value = notes || '';
+  
+  document.getElementById('modal-process-blotter').style.display = 'flex';
+}
+function closeProcessBlotter() { document.getElementById('modal-process-blotter').style.display='none'; }
+
+async function handleProcessBlotter(e) {
+  e.preventDefault();
+  const btn = document.getElementById('btn-submit-process');
+  btn.textContent = 'Updating...'; btn.disabled = true;
+  const id = document.getElementById('process-case-id').value;
+  const payload = {
+    case_title: document.getElementById('process-case-title').value,
+    category:   document.getElementById('process-case-category').value,
+    status:     document.getElementById('process-status').value,
+    priority:   document.getElementById('process-priority').value,
+    location:   document.getElementById('process-case-location').value,
+    
+    // THE FIX: Change "summary" to "notes" and "schedule_datetime" to "next_hearing_date"
+    notes:      document.getElementById('process-notes').value,
+    investigator_name:  document.getElementById('process-investigator').value,
+    next_hearing_date:  document.getElementById('process-hearing').value,
+    
+    schedule_location:  ''
+  };
+  try {
+    const res = await fetch(`${API}/blotter/index.php?id=${id}`, { method:'PUT', headers: authHeaders(), body: JSON.stringify(payload) });
+    const data = await res.json();
+    if (data.success) { await logActivity('Updated', 'Blotter', 'BLT-' + id); closeProcessBlotter(); loadBlotter(); }
+    else alert(data.message || 'Update failed');
+  } catch(err) { console.error(err); }
+  finally { btn.textContent = 'Update Case'; btn.disabled = false; }
+}
+
+function showAddAnnouncement() { document.getElementById('modal-add-announcement').style.display='flex'; }
+function closeAddAnnouncement() { document.getElementById('modal-add-announcement').style.display='none'; document.getElementById('form-add-announcement').reset(); }
+async function handleAddAnnouncement(e) {
+  e.preventDefault();
+  const btn = document.getElementById('btn-submit-announcement');
+  btn.textContent = 'Posting...'; btn.disabled = true;
+  const payload = Object.fromEntries(new FormData(e.target).entries());
+  payload.posted_by = user.name || 'Admin';
+  try {
+    const res = await fetch(`${API}/announcements/index.php`, { method:'POST', headers: authHeaders(), body: JSON.stringify(payload) });
+    const data = await res.json();
+    if (data.success) { await logActivity('Posted', 'Announcement', data.reference_no || ''); closeAddAnnouncement(); loadAnnouncements(); }
+    else alert(data.message || 'Error posting announcement');
+  } catch(err) { console.error(err); }
+  finally { btn.textContent = 'Post Announcement'; btn.disabled = false; }
+}
+
+
+// ── DELETE HELPERS ────────────────────────────────────────────────────────────
+function deleteDocument(id) {
+  document.getElementById('delete-document-id').value = id;
+  document.getElementById('modal-delete-document').style.display = 'flex';
+}
+
+function closeDeleteDocumentModal() {
+  document.getElementById('modal-delete-document').style.display = 'none';
+}
+
+async function executeDeleteDocument() {
+  const id = document.getElementById('delete-document-id').value;
+  const btn = document.getElementById('btn-confirm-delete-document');
+  btn.textContent = 'Deleting...'; 
+  btn.disabled = true;
+
+  try {
+    await fetch(`${API}/documents/index.php?id=${id}`, { method:'DELETE', headers: authHeaders() });
+    await logActivity('Deleted', 'Document', 'DOC-' + id);
+    closeDeleteDocumentModal();
+    loadDocuments();
+  } catch(e) {
+    console.error(e);
+  } finally {
+    btn.textContent = 'Delete Document'; 
+    btn.disabled = false;
+  }
+}
+async function deleteBlotter(id) {
+  if (!confirm('Delete this blotter case? This cannot be undone.')) return;
+  await fetch(`${API}/blotter/index.php?id=${id}`, { method:'DELETE', headers: authHeaders() });
+  await logActivity('Deleted', 'Blotter', 'BLT-' + id);
+  loadBlotter();
+}
+async function viewAnnouncement(id) {
+  try {
+    const res = await fetch(`${API}/announcements/index.php?id=${id}`, { headers: authHeaders() });
+    const data = await res.json();
+    if (!data.success) { showToast('Could not load announcement details.', 'error'); return; }
+
+    const a = Array.isArray(data.data) ? data.data[0] : data.data;
+
+    document.getElementById('view-announcement-body').innerHTML = `
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:.5rem;margin-bottom:1.25rem">
+        <div>
+          <code style="font-size:1rem;font-weight:700;color:#0b2250">${a.reference_no}</code>
+          <h3 style="font-size:1.15rem;font-weight:700;color:#0f172a;margin:.25rem 0 0">${a.title}</h3>
+        </div>
+        <div>${statusBadge(a.status)}</div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem 1.5rem;font-size:.875rem;margin-bottom:1.25rem">
+        <div><span style="color:#64748b;font-weight:600">Category</span><p style="margin:.2rem 0 0;color:#0f172a;text-transform:capitalize;">${a.category||'—'}</p></div>
+        <div><span style="color:#64748b;font-weight:600">Priority</span><p style="margin:.2rem 0 0;color:#0f172a">${a.priority||'Normal'}</p></div>
+        <div><span style="color:#64748b;font-weight:600">Published On</span><p style="margin:.2rem 0 0;color:#0f172a">${formatDate(a.published_on)}</p></div>
+        <div><span style="color:#64748b;font-weight:600">Expires On</span><p style="margin:.2rem 0 0;color:#0f172a">${formatDate(a.expires_on)}</p></div>
+        <div><span style="color:#64748b;font-weight:600">Target Audience</span><p style="margin:.2rem 0 0;color:#0f172a">${a.target_audience||'—'}</p></div>
+        <div><span style="color:#64748b;font-weight:600">Posted By</span><p style="margin:.2rem 0 0;color:#0f172a">${a.posted_by||'—'}</p></div>
+      </div>
+      ${a.link ? `<div style="margin-bottom:1.25rem;font-size:.875rem;"><span style="color:#64748b;font-weight:600;display:block;margin-bottom:.2rem;">Reference Link</span><a href="${a.link}" target="_blank" style="color:#2563eb;text-decoration:none;word-break:break-all;">${a.link}</a></div>` : ''}
+      <div style="background:#f8fafc;border-radius:.75rem;padding:1rem;margin-bottom:.75rem">
+        <p style="font-size:.75rem;font-weight:700;color:#64748b;margin:0 0 .5rem;text-transform:uppercase;letter-spacing:.05rem">Summary</p>
+        <p style="margin:0;color:#0f172a;font-size:.9rem">${a.summary||'—'}</p>
+      </div>
+      <div style="background:#f8fafc;border-radius:.75rem;padding:1rem;">
+        <p style="font-size:.75rem;font-weight:700;color:#64748b;margin:0 0 .5rem;text-transform:uppercase;letter-spacing:.05rem">Full Content</p>
+        <p style="margin:0;color:#0f172a;font-size:.9rem;white-space:pre-wrap;">${a.body||'—'}</p>
+      </div>
+    `;
+    document.getElementById('modal-view-announcement').style.display = 'flex';
+  } catch(e) { console.error(e); showToast('Error loading announcement details.', 'error'); }
+}
+function closeViewAnnouncement() { document.getElementById('modal-view-announcement').style.display = 'none'; }
+
+function deleteAnnouncement(id) {
+  document.getElementById('delete-announcement-id').value = id;
+  document.getElementById('modal-delete-announcement').style.display = 'flex';
+}
+
+function closeDeleteAnnouncementModal() {
+  document.getElementById('modal-delete-announcement').style.display = 'none';
+}
+
+async function executeDeleteAnnouncement() {
+  const id = document.getElementById('delete-announcement-id').value;
+  const btn = document.getElementById('btn-confirm-delete-announcement');
+  btn.textContent = 'Deleting...'; 
+  btn.disabled = true;
+
+  try {
+    await fetch(`${API}/announcements/index.php?id=${id}`, { method:'DELETE', headers: authHeaders() });
+    await logActivity('Deleted', 'Announcement', 'ANN-' + id);
+    closeDeleteAnnouncementModal();
+    loadAnnouncements();
+  } catch(e) {
+    console.error(e);
+  } finally {
+    btn.textContent = 'Delete Announcement'; 
+    btn.disabled = false;
+  }
+}
+
+// ── EDIT ANNOUNCEMENT ─────────────────────────────────────────────────────────
+async function editAnnouncement(id, title, status, category) {
+  document.getElementById('edit-ann-id').value = id;
+  document.getElementById('edit-ann-title').value = title;
+  document.getElementById('edit-ann-status').value = status;
+  document.getElementById('edit-ann-category').value = category;
+  document.getElementById('edit-ann-summary').value = '';
+  document.getElementById('edit-ann-body').value = '';
+  document.getElementById('edit-ann-priority').value = 'Normal';
+  document.getElementById('edit-ann-audience').value = '';
+  document.getElementById('edit-ann-published').value = '';
+  document.getElementById('edit-ann-expires').value = '';
+  document.getElementById('edit-ann-link').value = '';
+
+  // Fetch full announcement data to populate all fields
+  const res = await fetch(`${API}/announcements/index.php?id=${id}`, { headers: authHeaders() });
+  const data = await res.json();
+  if (data.success && data.data) {
+    const a = data.data;
+    document.getElementById('edit-ann-summary').value = a.summary || '';
+    document.getElementById('edit-ann-body').value = a.body || '';
+    document.getElementById('edit-ann-priority').value = a.priority || 'Normal';
+    document.getElementById('edit-ann-audience').value = a.target_audience || '';
+    document.getElementById('edit-ann-published').value = a.published_on ? a.published_on.substring(0,10) : '';
+    document.getElementById('edit-ann-expires').value = a.expires_on ? a.expires_on.substring(0,10) : '';
+    document.getElementById('edit-ann-link').value = a.link || '';
+  }
+
+  document.getElementById('modal-edit-announcement').style.display = 'flex';
+}
+// Called from data-attribute buttons (avoids quote-escaping issues in template literals)
+function editAnnouncementFromBtn(btn) {
+  editAnnouncement(
+    btn.dataset.id,
+    btn.dataset.title,
+    btn.dataset.status,
+    btn.dataset.category
+  );
+}
+function closeEditAnnouncement() { document.getElementById('modal-edit-announcement').style.display='none'; }
+async function handleEditAnnouncement(e) {
+  e.preventDefault();
+  const id = document.getElementById('edit-ann-id').value;
+  const payload = {
+    title: document.getElementById('edit-ann-title').value,
+    status: document.getElementById('edit-ann-status').value,
+    category: document.getElementById('edit-ann-category').value,
+    priority: document.getElementById('edit-ann-priority').value,
+    target_audience: document.getElementById('edit-ann-audience').value,
+    summary: document.getElementById('edit-ann-summary').value,
+    body: document.getElementById('edit-ann-body').value,
+    published_on: document.getElementById('edit-ann-published').value,
+    expires_on: document.getElementById('edit-ann-expires').value,
+    link: document.getElementById('edit-ann-link').value,
+  };
+  const res = await fetch(`${API}/announcements/index.php?id=${id}`, { method:'PUT', headers: authHeaders(), body: JSON.stringify(payload) });
+  const data = await res.json();
+  if (data.success) { await logActivity('Updated', 'Announcement', 'ANN-' + id); closeEditAnnouncement(); loadAnnouncements(); }
+  else alert(data.message || 'Update failed');
+}
+
+// ── EDIT RESIDENT ─────────────────────────────────────────────────────────────
+const KNOWN_RELIGIONS = ['Catholic','Islam','Iglesia ni Cristo','Born Again Christian'];
+function openEditResident(id, fullName, gender, dob, mobile, email, civilStatus, residentType, isSenior, isPwd, isVoter, placeOfBirth, nationality, religion) {
+  document.getElementById('edit-res-id').value = id;
+  document.getElementById('edit-res-name').value = fullName;
+  document.getElementById('edit-res-gender').value = gender;
+  document.getElementById('edit-res-dob').value = dob ? dob.substring(0,10) : '';
+  document.getElementById('edit-res-mobile').value = mobile;
+  document.getElementById('edit-res-email').value = email;
+  document.getElementById('edit-res-civil').value = civilStatus;
+  document.getElementById('edit-res-type').value = residentType;
+  document.getElementById('edit-res-senior').checked = isSenior == 1;
+  document.getElementById('edit-res-pwd').checked = isPwd == 1;
+  document.getElementById('edit-res-voter').checked = isVoter == 1;
+  document.getElementById('edit-res-pob').value = placeOfBirth || '';
+  document.getElementById('edit-res-nationality').value = nationality || 'Filipino';
+  // Populate religion dropdown
+  const religionSelect = document.getElementById('edit-res-religion-choice');
+  const religionOtherGroup = document.getElementById('edit-res-religion-other-group');
+  const religionOtherInput = document.getElementById('edit-res-religion-other');
+  if (KNOWN_RELIGIONS.includes(religion)) {
+    religionSelect.value = religion;
+    religionOtherGroup.style.display = 'none';
+    religionOtherInput.required = false;
+    religionOtherInput.value = '';
+  } else if (religion) {
+    religionSelect.value = 'Others';
+    religionOtherGroup.style.display = 'flex';
+    religionOtherInput.required = true;
+    religionOtherInput.value = religion;
+  } else {
+    religionSelect.value = '';
+    religionOtherGroup.style.display = 'none';
+    religionOtherInput.required = false;
+  }
+  document.getElementById('modal-edit-resident').style.display = 'flex';
+}
+function closeEditResident() {
+  document.getElementById('modal-edit-resident').style.display='none';
+  document.getElementById('edit-res-religion-other-group').style.display = 'none';
+  document.getElementById('edit-res-religion-other').required = false;
+}
+function toggleEditReligionOther() {
+  const choice = document.getElementById('edit-res-religion-choice').value;
+  const otherGroup = document.getElementById('edit-res-religion-other-group');
+  const otherInput = document.getElementById('edit-res-religion-other');
+  if (choice === 'Others') {
+    otherGroup.style.display = 'flex';
+    otherInput.required = true;
+  } else {
+    otherGroup.style.display = 'none';
+    otherInput.required = false;
+    otherInput.value = '';
+  }
+}
+async function handleEditResident(e) {
+  e.preventDefault();
+  const id = document.getElementById('edit-res-id').value;
+  // Resolve religion value
+  const editReligionChoice = document.getElementById('edit-res-religion-choice').value;
+  const editReligionOther = document.getElementById('edit-res-religion-other').value.trim();
+  let resolvedReligion = '';
+  if (editReligionChoice === 'Others') {
+    if (!editReligionOther) { alert('Please specify your religion.'); return; }
+    resolvedReligion = editReligionOther;
+  } else {
+    resolvedReligion = editReligionChoice;
+  }
+  const payload = {
+    full_name: document.getElementById('edit-res-name').value,
+    gender: document.getElementById('edit-res-gender').value,
+    date_of_birth: document.getElementById('edit-res-dob').value,
+    contact_mobile: document.getElementById('edit-res-mobile').value,
+    contact_email: document.getElementById('edit-res-email').value,
+    civil_status: document.getElementById('edit-res-civil').value,
+    resident_type: document.getElementById('edit-res-type').value,
+    place_of_birth: document.getElementById('edit-res-pob').value,
+    nationality: document.getElementById('edit-res-nationality').value,
+    religion: resolvedReligion,
+    is_senior_citizen: document.getElementById('edit-res-senior').checked ? 1 : 0,
+    is_pwd: document.getElementById('edit-res-pwd').checked ? 1 : 0,
+    registered_voter: document.getElementById('edit-res-voter').checked ? 1 : 0,
+  };
+  const res = await fetch(`${API}/residents/index.php?id=${id}`, { method:'PUT', headers: authHeaders(), body: JSON.stringify(payload) });
+  const data = await res.json();
+  if (data.success) { await logActivity('Updated', 'Resident', 'RES-' + id); closeEditResident(); loadResidents(); }
+  else alert(data.message || 'Update failed');
+}
+
+
+// ── NOTIFICATION BELL ─────────────────────────────────────────────────────────
+let notifOpen = false;
+let notifData = [];
+const NOTIF_MAX_DAYS = 30; // Issue 4: notifications older than this are ignored
+
+// Per-user read-state stored in localStorage so it persists across logins
+function notifStorageKey() {
+  return 'notif_read_' + (user?.id || 'admin');
+}
+function getReadIds() {
+  try { return new Set(JSON.parse(localStorage.getItem(notifStorageKey()) || '[]')); }
+  catch { return new Set(); }
+}
+function saveReadIds(set) {
+  localStorage.setItem(notifStorageKey(), JSON.stringify([...set]));
+}
+function markIdRead(id) {
+  const ids = getReadIds(); ids.add(id); saveReadIds(ids);
+}
+function markAllIdsRead(ids) {
+  const existing = getReadIds(); ids.forEach(id => existing.add(id)); saveReadIds(existing);
+}
+
+function toggleNotifDropdown() {
+  notifOpen = !notifOpen;
+  document.getElementById('notif-dropdown').style.display = notifOpen ? 'block' : 'none';
+  if (notifOpen) loadNotifications();
+}
+
+// Close dropdown when clicking outside
+document.addEventListener('click', function(e) {
+  if (!document.getElementById('notif-wrapper')?.contains(e.target)) {
+    notifOpen = false;
+    const dd = document.getElementById('notif-dropdown');
+    if (dd) dd.style.display = 'none';
+  }
+});
+
+// Issue 4: filter items within last 30 days
+function withinMaxDays(dateStr) {
+  if (!dateStr) return true;
+  const cutoff = new Date(); cutoff.setDate(cutoff.getDate() - NOTIF_MAX_DAYS);
+  return new Date(dateStr) >= cutoff;
+}
+
+async function loadNotifications() {
+  const list = document.getElementById('notif-list');
+  try {
+    const [docsRes, blotterRes, contactRes] = await Promise.all([
+      fetch(`${API}/documents/index.php?status=Pending`, { headers: authHeaders() }),
+      fetch(`${API}/blotter/index.php?status=Pending`,   { headers: authHeaders() }),
+      fetch(`${API}/contact/index.php?status=new`,       { headers: authHeaders() })
+    ]);
+    const docs     = await docsRes.json();
+    const blotters = await blotterRes.json();
+    const contacts = await contactRes.json();
+
+    // Issue 4: only keep items within last 30 days
+    const recentDocs     = (docs.data     || []).filter(d => withinMaxDays(d.date_filed));
+    const recentBlotters = (blotters.data || []).filter(b => withinMaxDays(b.date_reported));
+    const recentContacts = (contacts.data || []).filter(c => withinMaxDays(c.created_at));
+
+    const readIds = getReadIds();
+
+    // Build unified list: { id, type, title, sub, date, section }
+    const items = [
+      ...recentDocs.map(d => ({
+        id:      'doc-' + d.id,
+        rawId:   d.id,
+        type:    'doc',
+        icon:    '',
+        title:   'Doc request: ' + d.document_type,
+        sub:     d.requester_name + ' · ' + formatDate(d.date_filed),
+        section: 'documents'
+      })),
+      ...recentBlotters.map(b => ({
+        id:      'blt-' + b.id,
+        rawId:   b.id,
+        type:    'blotter',
+        icon:    '',
+        title:   'Pending blotter: ' + b.case_title,
+        sub:     (b.reporter_name || '—') + ' · ' + formatDate(b.date_reported),
+        section: 'blotter'
+      })),
+      ...recentContacts.map(c => ({
+        id:      'msg-' + c.id,
+        rawId:   c.id,
+        type:    'contact',
+        icon:    '',
+        title:   'New Message: ' + (c.subject || 'No Subject'),
+        sub:     (c.name || 'Resident') + ' · ' + formatDate(c.created_at),
+        section: 'contact_modal'
+      }))
+    ];
+
+    // Issue 2/3: unread = not in readIds
+    const unreadItems = items.filter(n => !readIds.has(n.id));
+    const unreadCount = unreadItems.length;
+
+    // Issue 3: badge reflects truly unread count only
+    const badge = document.getElementById('notif-badge');
+    if (unreadCount > 0) {
+      badge.style.display = 'flex'; badge.textContent = unreadCount;
+    } else {
+      badge.style.display = 'none';
+    }
+
+    if (items.length === 0) {
+      list.innerHTML = '<div style="padding:1.5rem;text-align:center;color:#94a3b8;font-size:.85rem">No pending items 🎉</div>';
+      return;
+    }
+
+    // Store current item ids for mark-all
+    notifData = items;
+
+    // Issue 1 + 2: clickable items, unread highlighted
+    list.innerHTML = items.map(n => {
+      const isUnread = !readIds.has(n.id);
+      const bg = isUnread ? 'background:#eff6ff;' : 'background:#fff;';
+      const dot = isUnread
+        ? '<span style="width:8px;height:8px;border-radius:50%;background:#3b82f6;flex-shrink:0;margin-top:4px"></span>'
+        : '<span style="width:8px;height:8px;flex-shrink:0"></span>';
+      return `<div data-notif-id="${n.id}" data-section="${n.section}" data-raw-id="${n.rawId}"
+        onclick="handleNotifClick(this)"
+        style="padding:.75rem 1rem;border-bottom:1px solid #f0f4f8;display:flex;gap:.75rem;align-items:flex-start;cursor:pointer;transition:background .15s;${bg}"
+        onmouseover="this.style.filter='brightness(0.97)'" onmouseout="this.style.filter=''">
+        ${dot}
+        <span style="font-size:1.1rem">${n.icon}</span>
+        <div style="min-width:0">
+          <div style="font-size:.84rem;font-weight:${isUnread ? '600' : '500'};color:#0f172a">${n.title}</div>
+          <div style="font-size:.78rem;color:#64748b">${n.sub}</div>
+          ${isUnread ? '<div style="font-size:.72rem;color:#3b82f6;margin-top:2px">Tap to view →</div>' : ''}
+        </div>
+      </div>`;
+    }).join('');
+
+  } catch(e) {
+    list.innerHTML = '<div style="padding:1rem;color:#dc2626;font-size:.85rem">Failed to load notifications</div>';
+  }
+}
+
+// Issue 1: clicking a notification marks it read and navigates to the right section
+function handleNotifClick(el) {
+  const nid     = el.dataset.notifId;
+  const section = el.dataset.section;
+  markIdRead(nid);
+  // Update this item's visual immediately (no full reload needed)
+  el.style.background = '#fff';
+  el.querySelector('[data-notif-id]'); // noop — just refresh badge
+  const unreadNow = [...document.querySelectorAll('#notif-list [data-notif-id]')]
+    .filter(e => !getReadIds().has(e.dataset.notifId)).length;
+  const badge = document.getElementById('notif-badge');
+  if (unreadNow > 0) { badge.style.display='flex'; badge.textContent=unreadNow; }
+  else badge.style.display='none';
+  // Re-render this item as read
+  el.style.background = '#fff';
+  const dot = el.querySelector('span:first-child');
+  if (dot) { dot.style.background = 'transparent'; }
+  const hint = el.querySelector('[style*="3b82f6"]');
+  if (hint) hint.remove();
+  const titleEl = el.querySelector('div > div:first-child');
+  if (titleEl) titleEl.style.fontWeight = '500';
+  // Issue 1: navigate to the section or open modal
+  toggleNotifDropdown(); // close dropdown
+  if (section === 'contact_modal') {
+    viewContactMessage(el.dataset.rawId);
+  } else {
+    const navItem = [...document.querySelectorAll('#nav-list li')].find(li => {
+      const fn = li.getAttribute('onclick') || '';
+      return fn.includes("'" + section + "'");
+    });
+    if (navItem) navItem.click();
+  }
+}
+
+// Issue 2 + 3: mark all read persists to localStorage
+function markAllNotifsRead() {
+  const allIds = notifData.map(n => n.id);
+  markAllIdsRead(allIds);
+  const badge = document.getElementById('notif-badge');
+  if (badge) badge.style.display = 'none';
+  // Re-render all items as read in place (no spinner flash)
+  document.querySelectorAll('#notif-list [data-notif-id]').forEach(el => {
+    el.style.background = '#fff';
+    const dot = el.querySelector('span:first-child');
+    if (dot) { dot.style.background = 'transparent'; }
+    const hint = el.querySelector('[style*="3b82f6"]');
+    if (hint) hint.remove();
+    const titleEl = el.querySelector('div > div:first-child');
+    if (titleEl) titleEl.style.fontWeight = '500';
+  });
+}
+
+// ── SETTINGS: Change Password ─────────────────────────────────────────────────
+async function handleChangePassword(e) {
+  e.preventDefault();
+  const current  = document.getElementById('settings-pw-current').value;
+  const newPw    = document.getElementById('settings-pw-new').value;
+  const confirm  = document.getElementById('settings-pw-confirm').value;
+  const msgEl    = document.getElementById('settings-pw-msg');
+  msgEl.textContent = '';
+
+  if (newPw.length < 6) { msgEl.style.color='#dc2626'; msgEl.textContent='Password must be at least 6 characters.'; return; }
+  if (newPw !== confirm)  { msgEl.style.color='#dc2626'; msgEl.textContent='Passwords do not match.'; return; }
+
+  try {
+    const res = await fetch(`${API}/profile/index.php`, {
+      method: 'POST',
+      headers: authHeaders(),
+      body: JSON.stringify({ name: user.name, current_password: current, new_password: newPw })
+    });
+    const data = await res.json();
+    if (data.success) {
+      msgEl.style.color='#16a34a';
+      msgEl.textContent='Password updated successfully!';
+      e.target.reset();
+    } else {
+      msgEl.style.color='#dc2626';
+      msgEl.textContent = data.message || 'Update failed.';
+    }
+  } catch(err) {
+    msgEl.style.color='#dc2626';
+    msgEl.textContent='Server error. Please try again.';
+  }
+}
+
+// Init
+loadDashboard();
+loadNotifications();
+document.addEventListener('DOMContentLoaded', () => {
+  if (typeof Validation !== 'undefined') Validation.setupLiveValidation('user-email-input','email-warning','email');
+});
 </script>
 
+<div id="modal-add-resident" class="modal-backdrop" style="display:none">
+  <div class="modal" style="max-width:560px">
+    <button class="modal-close" onclick="closeAddResident()">&times;</button>
+    <h2 style="margin-bottom:1.5rem;font-size:1.25rem">Add New Resident</h2>
+    <form id="form-add-resident" onsubmit="handleAddResident(event)">
+      <div class="form-grid">
+        <div class="form-group" style="grid-column:1/-1"><label>Full Name *</label><input type="text" name="full_name" placeholder="Full name" required></div>
+        <div class="form-group"><label>Gender *</label><select name="gender" required><option value="">Select</option><option>Male</option><option>Female</option><option>Other</option></select></div>
+        <div class="form-group"><label>Date of Birth *</label><input type="date" name="date_of_birth" required></div>
+        <div class="form-group"><label>Civil Status *</label><select name="civil_status" required><option value="">Select</option><option>Single</option><option>Married</option><option>Widowed</option><option>Separated</option></select></div>
+        <div class="form-group"><label>Resident Type *</label><select name="resident_type" required><option value="">Select</option><option>Permanent</option><option>Temporary</option><option>Transient</option></select></div>
+        <div class="form-group"><label>Contact Mobile *</label><input type="text" name="contact_mobile" maxlength="11" pattern="^09\d{9}$" placeholder="09XXXXXXXXX" title="Must start with 09 and be exactly 11 digits long" oninput="this.value = this.value.replace(/[^0-9]/g, '');" required></div>
+        <div class="form-group"><label>Contact Email *</label><input type="email" name="contact_email" placeholder="email@example.com" required></div>
+        <div class="form-group"><label>Place of Birth *</label><input type="text" name="place_of_birth" placeholder="City/Municipality" required></div>
+        <div class="form-group"><label>Nationality *</label><input type="text" name="nationality" value="Filipino" required></div>
+        <div class="form-group">
+          <label>Religion *</label>
+          <select name="religion_choice" id="religion-choice" required onchange="toggleReligionOther()">
+            <option value="">Select Religion</option>
+            <option>Catholic</option>
+            <option>Islam</option>
+            <option>Iglesia ni Cristo</option>
+            <option>Born Again Christian</option>
+            <option>Others</option>
+          </select>
+        </div>
+        <div class="form-group" id="religion-other-group" style="display:none">
+          <label>Please Specify Religion *</label>
+          <input type="text" name="religion_other" id="religion-other" placeholder="Enter your religion">
+        </div>
+        <input type="hidden" name="religion" id="religion-hidden">
+      </div>
+      <div style="display:flex;gap:1.5rem;margin-top:1rem;flex-wrap:wrap">
+        <label style="display:flex;align-items:center;gap:.5rem;font-size:.88rem;cursor:pointer"><input type="checkbox" name="is_senior_citizen" value="1"> Senior Citizen</label>
+        <label style="display:flex;align-items:center;gap:.5rem;font-size:.88rem;cursor:pointer"><input type="checkbox" name="is_pwd" value="1"> PWD</label>
+        <label style="display:flex;align-items:center;gap:.5rem;font-size:.88rem;cursor:pointer"><input type="checkbox" name="registered_voter" value="1"> Registered Voter</label>
+      </div>
+      <div style="display:flex;gap:1rem;margin-top:1.5rem">
+        <button type="button" class="btn-secondary" onclick="closeAddResident()">Cancel</button>
+        <button type="submit" class="btn-primary" style="flex:1" id="btn-submit-resident">Add Resident</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div id="modal-add-blotter" class="modal-backdrop" style="display:none">
+  <div class="modal" style="max-width:580px">
+    <button class="modal-close" onclick="closeAddBlotter()">&times;</button>
+    <h2 style="margin-bottom:1.5rem;font-size:1.25rem">File New Blotter Case</h2>
+    <form id="form-add-blotter" onsubmit="handleAddBlotter(event)">
+      <div class="form-grid">
+        <div class="form-group" style="grid-column:1/-1"><label>Case Title *</label><input type="text" name="case_title" placeholder="Brief title of the case" required></div>
+        <div class="form-group"><label>Category *</label><select name="category" required><option value="">Select</option><option>Dispute</option><option>Physical Assault</option><option>Theft</option><option>Noise Complaint</option><option>Property Damage</option><option>Threat</option><option>Other</option></select></div>
+        <div class="form-group"><label>Priority *</label><select name="priority" required><option value="">Select</option><option value="Normal">Normal</option><option value="High">High</option><option value="Urgent">Urgent</option></select></div>
+        <div class="form-group"><label>Incident Date *</label><input type="date" name="incident_date" required></div>
+        <div class="form-group"><label>Incident Time *</label><input type="time" name="incident_time" required></div>
+        <div class="form-group" style="grid-column:1/-1"><label>Location *</label><input type="text" name="location" placeholder="Where did it happen?" required></div>
+        <div class="form-group" style="grid-column:1/-1"><label>Summary *</label><input type="text" name="summary" placeholder="One-line summary" required></div>
+        <div class="form-group" style="grid-column:1/-1"><label>Full Description *</label><textarea name="description" rows="3" placeholder="Detailed description of the incident" required></textarea></div>
+        <div class="form-group"><label>Reporter Name *</label><input type="text" name="reporter_name" placeholder="Full name" required></div>
+        <div class="form-group"><label>Reporter Contact *</label><input type="text" name="reporter_contact" placeholder="09XXXXXXXXX" maxlength="11" pattern="^09\d{9}$" title="Must start with 09 and be exactly 11 digits" oninput="this.value=this.value.replace(/[^0-9]/g,'')" required></div>
+        <div class="form-group"><label>Reporter Email *</label><input type="email" name="reporter_email" placeholder="email@example.com" required></div>
+        <div class="form-group"><label>Reporter Address *</label><input type="text" name="reporter_address" placeholder="Address" required></div>
+        <div class="form-group" style="grid-column:1/-1"><label>Persons Involved *</label><textarea name="persons_involved" rows="2" placeholder="Names of persons involved" required></textarea></div>
+        <div class="form-group" style="grid-column:1/-1"><label>Witnesses *</label><input type="text" name="witnesses" placeholder="Names of witnesses (if any)" required></div>
+      </div>
+      <div style="display:flex;gap:1rem;margin-top:1.5rem">
+        <button type="button" class="btn-secondary" onclick="closeAddBlotter()">Cancel</button>
+        <button type="submit" class="btn-primary" style="flex:1" id="btn-submit-blotter">File Case</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div id="modal-process-blotter" class="modal-backdrop" style="display:none">
+  <div class="modal" style="max-width:560px">
+    <button class="modal-close" onclick="closeProcessBlotter()">&times;</button>
+    <h2 style="margin-bottom:1rem;font-size:1.25rem">Process Blotter Case</h2>
+    <input type="hidden" id="process-case-id">
+    <input type="hidden" id="process-case-title">
+    <input type="hidden" id="process-case-category">
+    <input type="hidden" id="process-case-location">
+    <div id="process-case-info" style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:.75rem;padding:1rem;margin-bottom:1.25rem;font-size:.88rem;display:flex;flex-direction:column;gap:.35rem;color:#374151"></div>
+    <form id="form-process-blotter" onsubmit="handleProcessBlotter(event)">
+      <div class="form-grid">
+        <div class="form-group"><label>Status *</label><select id="process-status"><option value="Pending">Pending</option><option value="In Progress">In Progress</option><option value="Resolved">Resolved</option><option value="Closed">Closed</option><option value="Cancelled">Cancelled</option></select></div>
+        <div class="form-group"><label>Priority</label><select id="process-priority"><option value="Normal">Normal</option><option value="High">High</option><option value="Urgent">Urgent</option></select></div>
+        <div class="form-group" style="grid-column:1/-1"><label>Investigator Name</label><input type="text" id="process-investigator" placeholder="Assigned investigator"></div>
+        <div class="form-group" style="grid-column:1/-1"><label>Next Hearing Date</label><input type="date" id="process-hearing"></div>
+        <div class="form-group" style="grid-column:1/-1"><label>Notes</label><textarea id="process-notes" rows="3" placeholder="Add processing notes"></textarea></div>
+      </div>
+      <div style="display:flex;gap:1rem;margin-top:1.5rem">
+        <button type="button" class="btn-secondary" onclick="closeProcessBlotter()">Cancel</button>
+        <button type="submit" class="btn-primary" style="flex:1" id="btn-submit-process">Update Case</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div id="modal-add-announcement" class="modal-backdrop" style="display:none">
+  <div class="modal" style="max-width:520px">
+    <button class="modal-close" onclick="closeAddAnnouncement()">&times;</button>
+    <h2 style="margin-bottom:1.5rem;font-size:1.25rem">Post New Announcement</h2>
+    <form id="form-add-announcement" onsubmit="handleAddAnnouncement(event)">
+      <div class="form-grid">
+        <div class="form-group" style="grid-column:1/-1"><label>Title *</label><input type="text" name="title" placeholder="Announcement title" required></div>
+        
+<div class="form-group"><label>Category *</label><select name="category" required><option value="">Select Category</option><option value="announcements">Announcement</option><option value="events">Event</option><option value="services">Service</option></select></div>
+        
+        <div class="form-group"><label>Priority *</label><select name="priority" required><option value="Normal">Normal</option><option value="High">High</option><option value="Urgent">Urgent</option></select></div>
+        
+        <div class="form-group"><label>Status *</label><select name="status" required><option value="Draft">Draft</option><option value="Published">Published</option></select></div>
+        
+        <div class="form-group"><label>Target Audience *</label><input type="text" name="target_audience" placeholder="e.g. All Residents" required></div>
+        
+        <div class="form-group" style="grid-column:1/-1"><label>Summary *</label><input type="text" name="summary" placeholder="Short summary" required></div>
+        
+        <div class="form-group" style="grid-column:1/-1"><label>Body *</label><textarea name="body" rows="4" placeholder="Full announcement content" required></textarea></div>
+        
+        <div class="form-group"><label>Publish Date *</label><input type="date" id="edit-ann-published"></div>
+
+        <div class="form-group"><label>Expires On *</label><input type="date" id="edit-ann-expires"></div>
+        <div class="form-group" style="grid-column:1/-1">
+          <label>Link (optional)</label>
+          <input type="url" name="link" id="add-ann-link" placeholder="https://...">
+        </div>
+      </div>
+      <div style="display:flex;gap:1rem;margin-top:1.5rem">
+        <button type="button" class="btn-secondary" onclick="closeAddAnnouncement()">Cancel</button>
+        <button type="submit" class="btn-primary" style="flex:1" id="btn-submit-announcement">Post Announcement</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script src="public.js"></script>
+
+<div id="modal-edit-announcement" class="modal-backdrop" style="display:none">
+  <div class="modal" style="max-width:520px">
+    <button class="modal-close" onclick="closeEditAnnouncement()">&times;</button>
+    <h2 style="margin-bottom:1.5rem;font-size:1.25rem">Edit Announcement</h2>
+    <form onsubmit="handleEditAnnouncement(event)">
+      <input type="hidden" id="edit-ann-id">
+      <div class="form-grid">
+        <div class="form-group" style="grid-column:1/-1"><label>Title *</label><input type="text" id="edit-ann-title" placeholder="Announcement title" required></div>
+
+        <div class="form-group"><label>Category *</label>
+          <select id="edit-ann-category" required>
+            <option value="">Select Category</option>
+            <option value="announcements">Announcement</option>
+            <option value="events">Event</option>
+            <option value="services">Service</option>
+          </select>
+        </div>
+
+        <div class="form-group"><label>Priority *</label>
+          <select id="edit-ann-priority" required>
+            <option value="Normal">Normal</option>
+            <option value="High">High</option>
+            <option value="Urgent">Urgent</option>
+          </select>
+        </div>
+
+        <div class="form-group"><label>Status *</label>
+          <select id="edit-ann-status" required>
+            <option value="Draft">Draft</option>
+            <option value="Published">Published</option>
+            <option value="Archived">Archived</option>
+          </select>
+        </div>
+
+        <div class="form-group"><label>Target Audience *</label><input type="text" id="edit-ann-audience" placeholder="e.g. All Residents"></div>
+
+        <div class="form-group" style="grid-column:1/-1"><label>Summary *</label><input type="text" id="edit-ann-summary" placeholder="Short summary"></div>
+
+        <div class="form-group" style="grid-column:1/-1"><label>Body *</label><textarea id="edit-ann-body" rows="4" placeholder="Full announcement content" style="width:100%;resize:vertical;padding:.6rem;border:1px solid #e2e8f0;border-radius:8px;font-family:inherit"></textarea></div>
+
+        <div class="form-group"><label>Publish Date *</label><input type="date" id="edit-ann-published" name="published_on" required></div>
+        
+                <div class="form-group"><label>Expires On *</label><input type="date" id="edit-ann-expires" name="expires_on" required></div>
+        
+                <div class="form-group" style="grid-column:1/-1"><label>Link (optional)</label><input type="url" id="edit-ann-link" name="link" placeholder="https://..."></div>
+      </div>
+      <div style="display:flex;gap:1rem;margin-top:1.5rem">
+        <button type="button" class="btn-secondary" onclick="closeEditAnnouncement()">Cancel</button>
+        <button type="submit" class="btn-primary" style="flex:1">Save Changes</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div id="modal-edit-resident" class="modal-backdrop" style="display:none">
+  <div class="modal" style="max-width:560px">
+    <button class="modal-close" onclick="closeEditResident()">&times;</button>
+    <h2 style="margin-bottom:1.5rem;font-size:1.25rem">Edit Resident</h2>
+    <form onsubmit="handleEditResident(event)">
+      <input type="hidden" id="edit-res-id">
+      <div class="form-grid">
+        <div class="form-group" style="grid-column:1/-1"><label>Full Name *</label><input type="text" id="edit-res-name" placeholder="Full name" required></div>
+        <div class="form-group"><label>Gender *</label>
+          <select id="edit-res-gender" required><option value="">Select</option><option>Male</option><option>Female</option><option>Other</option></select>
+        </div>
+        <div class="form-group"><label>Date of Birth *</label><input type="date" id="edit-res-dob" required></div>
+        <div class="form-group"><label>Civil Status *</label>
+          <select id="edit-res-civil" required><option value="">Select</option><option>Single</option><option>Married</option><option>Widowed</option><option>Separated</option></select>
+        </div>
+        <div class="form-group"><label>Resident Type *</label>
+          <select id="edit-res-type" required><option value="">Select</option><option>Permanent</option><option>Temporary</option><option>Transient</option></select>
+        </div>
+        <div class="form-group"><label>Contact Mobile *</label><input type="text" id="edit-res-mobile" maxlength="11" pattern="^09\d{9}$" placeholder="09XXXXXXXXX" title="Must start with 09 and be exactly 11 digits long" oninput="this.value = this.value.replace(/[^0-9]/g, '');" required></div>
+        <div class="form-group"><label>Contact Email *</label><input type="email" id="edit-res-email" placeholder="email@example.com" required></div>
+        <div class="form-group"><label>Place of Birth *</label><input type="text" id="edit-res-pob" placeholder="City/Municipality" required></div>
+        <div class="form-group"><label>Nationality *</label><input type="text" id="edit-res-nationality" placeholder="e.g. Filipino" required></div>
+        <div class="form-group">
+          <label>Religion *</label>
+          <select id="edit-res-religion-choice" required onchange="toggleEditReligionOther()">
+            <option value="">Select Religion</option>
+            <option>Catholic</option>
+            <option>Islam</option>
+            <option>Iglesia ni Cristo</option>
+            <option>Born Again Christian</option>
+            <option>Others</option>
+          </select>
+        </div>
+        <div class="form-group" id="edit-res-religion-other-group" style="display:none">
+          <label>Please Specify Religion *</label>
+          <input type="text" id="edit-res-religion-other" placeholder="Enter your religion">
+        </div>
+      </div>
+      <div style="display:flex;gap:1.5rem;margin-top:1rem;flex-wrap:wrap">
+        <label style="display:flex;align-items:center;gap:.5rem;font-size:.88rem;cursor:pointer"><input type="checkbox" id="edit-res-senior"> Senior Citizen</label>
+        <label style="display:flex;align-items:center;gap:.5rem;font-size:.88rem;cursor:pointer"><input type="checkbox" id="edit-res-pwd"> PWD</label>
+        <label style="display:flex;align-items:center;gap:.5rem;font-size:.88rem;cursor:pointer"><input type="checkbox" id="edit-res-voter"> Registered Voter</label>
+      </div>
+      <div style="display:flex;gap:1rem;margin-top:1.5rem">
+        <button type="button" class="btn-secondary" onclick="closeEditResident()">Cancel</button>
+        <button type="submit" class="btn-primary" style="flex:1">Save Changes</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+
+<div id="modal-view-blotter" class="modal-backdrop" style="display:none">
+  <div class="modal" style="max-width:620px">
+    <button class="modal-close" onclick="closeViewBlotter()">&times;</button>
+    <h2 style="margin-bottom:1.5rem;font-size:1.25rem">⚖️ Blotter Case Details</h2>
+    <div id="view-blotter-body" style="display:flex;flex-direction:column;gap:.75rem"></div>
+    <div style="display:flex;justify-content:flex-end;margin-top:1.5rem">
+      <button class="btn-secondary" onclick="closeViewBlotter()">Close</button>
+    </div>
+  </div>
+</div>
+
+<div id="modal-view-resident" class="modal-backdrop" style="display:none"></div>
+  <div class="modal" style="max-width:480px; padding-bottom: 2.5rem;">
+    <button class="modal-close" onclick="closeViewResident()">&times;</button>
+    <div id="view-resident-body" style="display:flex;flex-direction:column;"></div>
+  </div>
+</div>
+
+<div id="modal-view-document" class="modal-backdrop" style="display:none">
+  <div class="modal" style="max-width:520px; padding-bottom: 2.5rem;">
+    <button class="modal-close" onclick="closeViewDocument()">&times;</button>
+    <h2 style="margin-bottom:1.25rem;font-size:1.2rem;color:#64748b;">📄 Request Details</h2>
+    <div id="view-document-body" style="display:flex;flex-direction:column;"></div>
+  </div>
+</div>
+
+<div id="modal-view-contact" class="modal-backdrop" style="display:none">
+  <div class="modal" style="max-width:520px; padding-bottom: 2.5rem;">
+    <button class="modal-close" onclick="closeViewContact()">&times;</button>
+    <h2 style="margin-bottom:1.25rem;font-size:1.2rem;color:#64748b;">✉️ Contact Message</h2>
+    <div id="view-contact-body" style="display:flex;flex-direction:column;"></div>
+  </div>
+</div>
+
+
+<!-- Update Document Status Modal -->
+<div id="doc-status-modal" class="modal-backdrop" style="display:none">
+  <div class="modal" style="max-width:440px">
+    <button class="modal-close" onclick="closeDocStatusModal()">&times;</button>
+    <h2 style="margin-bottom:0.35rem;font-size:1.2rem">Update Document Status</h2>
+    <p style="color:#64748b;font-size:0.85rem;margin-bottom:1.5rem">Select a new status and optionally add remarks.</p>
+    <div class="form-grid" style="grid-template-columns:1fr">
+      <div class="form-group">
+        <label>Status *</label>
+        <select id="doc-status-select">
+          <option value="Pending">Pending</option>
+          <option value="Review">Review</option>
+          <option value="Approved">Approved</option>
+          <option value="Released">Released</option>
+          <option value="Rejected">Rejected</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Remarks / Notes <span style="color:#94a3b8;font-weight:400">(optional)</span></label>
+        <textarea id="doc-status-remarks" rows="3" placeholder="Add any notes or remarks here..." style="resize:vertical;border:1px solid #d5d8f0;border-radius:0.75rem;padding:0.75rem 1rem;font-size:0.9rem;width:100%"></textarea>
+      </div>
+    </div>
+    <div style="display:flex;gap:1rem;margin-top:1.5rem">
+      <button class="btn-secondary" onclick="closeDocStatusModal()">Cancel</button>
+      <button id="doc-status-submit-btn" class="btn-primary" style="flex:1" onclick="submitDocStatus()">Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<div id="modal-delete-document" class="modal-backdrop" style="display:none">
+  <div class="modal" style="max-width:400px; text-align:center;">
+    <button class="modal-close" onclick="closeDeleteDocumentModal()">&times;</button>
+    <div style="font-size:3rem; margin-bottom:1rem;">⚠️</div>
+    <h2 style="margin-bottom:0.5rem;font-size:1.25rem">Delete Document Request?</h2>
+    <p style="color:#64748b;font-size:0.9rem;margin-bottom:1.5rem">Are you sure you want to delete this document request? This action cannot be undone.</p>
+    <input type="hidden" id="delete-document-id">
+    <div style="display:flex;gap:1rem;">
+      <button type="button" class="btn-secondary" style="flex:1" onclick="closeDeleteDocumentModal()">Cancel</button>
+      <button type="button" class="btn-primary" id="btn-confirm-delete-document" style="flex:1; background:#dc2626;" onclick="executeDeleteDocument()">Delete Request</button>
+    </div>
+  </div>
+</div>
+
+<div id="modal-view-announcement" class="modal-backdrop" style="display:none">
+  <div class="modal" style="max-width:580px; padding-bottom: 2.5rem;">
+    <button class="modal-close" onclick="closeViewAnnouncement()">&times;</button>
+    <h2 style="margin-bottom:1.25rem;font-size:1.2rem;color:#64748b;">📢 Announcement Details</h2>
+    <div id="view-announcement-body" style="display:flex;flex-direction:column;"></div>
+  </div>
+</div>
+
+<div id="modal-delete-announcement" class="modal-backdrop" style="display:none">
+  <div class="modal" style="max-width:400px; text-align:center;">
+    <button class="modal-close" onclick="closeDeleteAnnouncementModal()">&times;</button>
+    <div style="font-size:3rem; margin-bottom:1rem;">⚠️</div>
+    <h2 style="margin-bottom:0.5rem;font-size:1.25rem">Delete Announcement?</h2>
+    <p style="color:#64748b;font-size:0.9rem;margin-bottom:1.5rem">Are you sure you want to delete this announcement? This action cannot be undone.</p>
+    <input type="hidden" id="delete-announcement-id">
+    <div style="display:flex;gap:1rem;">
+      <button type="button" class="btn-secondary" style="flex:1" onclick="closeDeleteAnnouncementModal()">Cancel</button>
+      <button type="button" class="btn-primary" id="btn-confirm-delete-announcement" style="flex:1; background:#dc2626;" onclick="executeDeleteAnnouncement()">Delete</button>
+    </div>
+  </div>
+</div>
+
+
+<input type="file" id="ann-image-upload-input" accept="image/jpeg,image/png,image/webp" style="display:none" onchange="handleAnnImageUpload(this)">
+<script>
+  let _annImageTargetId = null;
+  function triggerAnnImageUpload(id) {
+    _annImageTargetId = id;
+    document.getElementById('ann-image-upload-input').click();
+  }
+  async function handleAnnImageUpload(input) {
+    if (!input.files[0] || !_annImageTargetId) return;
+    const fd = new FormData();
+    fd.append('image', input.files[0]);
+    fd.append('announcement_id', _annImageTargetId);
+    try {
+      const res = await fetch(`${API}/announcements/upload_image.php`, { 
+        method: 'POST', 
+        headers: { 'Authorization': `Bearer ${token}` },
+        body: fd 
+      });
+      const data = await res.json();
+      if (data.success) { showToast && showToast('Image uploaded successfully!', 'success'); loadAnnouncements && loadAnnouncements(); }
+      else alert(data.message || 'Upload failed');
+    } catch(e) { alert('Upload failed'); }
+    input.value = '';
+  }
+</script>
 </body>
 </html>

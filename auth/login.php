@@ -15,20 +15,27 @@ if (!isset($data['email']) || !isset($data['password'])) {
     exit();
 }
 
-$email = trim($data['email']);
+$email    = trim($data['email']);
 $password = $data['password'];
 
 $conn = getConnection();
 
-$stmt = $conn->prepare('SELECT id, name, email, password, role, avatar FROM users WHERE email = ?');
+// Try login by email first, then fall back to name
+$stmt = $conn->prepare('SELECT id, name, email, password, role, avatar FROM users WHERE LOWER(email) = LOWER(?)');
 $stmt->bind_param('s', $email);
 $stmt->execute();
-$result = $stmt->get_result();
-$user = $result->fetch_assoc();
+$user = $stmt->get_result()->fetch_assoc();
+
+if (!$user) {
+    $stmt2 = $conn->prepare('SELECT id, name, email, password, role, avatar FROM users WHERE LOWER(name) = LOWER(?)');
+    $stmt2->bind_param('s', $email);
+    $stmt2->execute();
+    $user = $stmt2->get_result()->fetch_assoc();
+}
 
 if (!$user) {
     http_response_code(401);
-    echo json_encode(['success' => false, 'message' => 'No account found with that email']);
+    echo json_encode(['success' => false, 'message' => 'No account found with that email or name']);
     exit();
 }
 
@@ -38,28 +45,40 @@ if (!password_verify($password, $user['password'])) {
     exit();
 }
 
-// Generate simple session token
-$token = bin2hex(random_bytes(32));
-
-// Store token in database
+// Generate session token
+$token  = bin2hex(random_bytes(32));
 $userId = $user['id'];
-$stmt2 = $conn->prepare('INSERT INTO personal_access_tokens (tokenable_type, tokenable_id, name, token, abilities, created_at, updated_at) VALUES (?, ?, ?, ?, ?, NOW(), NOW())');
+
+$stmt2 = $conn->prepare('INSERT INTO personal_access_tokens 
+    (tokenable_type, tokenable_id, name, token, abilities, created_at, updated_at) 
+    VALUES (?, ?, ?, ?, ?, NOW(), NOW())');
 $tokenableType = 'App\\Models\\User';
-$tokenName = 'auth_token';
-$abilities = '["*"]';
+$tokenName     = 'auth_token';
+$abilities     = '["*"]';
 $stmt2->bind_param('sisss', $tokenableType, $userId, $tokenName, $token, $abilities);
 $stmt2->execute();
+
+// Log the login to activity_logs
+$actorName = $user['name'];
+$logStmt = $conn->prepare('INSERT INTO activity_logs 
+    (actor_name, action, module, reference_id, logged_at, created_at, updated_at) 
+    VALUES (?, ?, ?, ?, NOW(), NOW(), NOW())');
+$action   = 'Logged in';
+$module   = 'System';
+$refId    = 'USER-' . $userId . ' (' . $user['role'] . ')';
+$logStmt->bind_param('ssss', $actorName, $action, $module, $refId);
+$logStmt->execute();
 
 $conn->close();
 
 echo json_encode([
     'success' => true,
-    'token' => $token,
-    'user' => [
-        'id' => $user['id'],
-        'name' => $user['name'],
-        'email' => $user['email'],
-        'role' => $user['role'],
+    'token'   => $token,
+    'user'    => [
+        'id'     => $user['id'],
+        'name'   => $user['name'],
+        'email'  => $user['email'],
+        'role'   => $user['role'],
         'avatar' => $user['avatar']
     ]
 ]);

@@ -89,11 +89,20 @@
               <div class="form-row">
                 <div class="form-group">
                   <label>Contact Number <span class="required">*</span></label>
-                  <input type="tel" name="reporterContact" class="input" placeholder="09XX-XXX-XXXX" required>
+                  <!-- FIX #2: numbers only, max 11, starts with 09 -->
+                  <input type="tel" name="reporterContact" id="reporterContact" class="input"
+                         placeholder="09XXXXXXXXX" maxlength="11" inputmode="numeric" required>
+                  <small id="contact-warning" style="color:#dc2626;display:none;font-size:0.8rem;margin-top:0.25rem;">
+                    Must be exactly 11 digits and start with 09
+                  </small>
                 </div>
                 <div class="form-group">
-                  <label>Email Address</label>
-                  <input type="email" name="reporterEmail" class="input">
+                  <!-- FIX #3: email pre-filled from logged-in user, but editable -->
+                  <label>Email Address <span class="required">*</span></label>
+                  <input type="email" name="reporterEmail" id="reporterEmail" class="input" required>
+                  <small style="color:#6b7280;font-size:0.78rem;margin-top:0.2rem;display:block;">
+                    You'll receive status updates here.
+                  </small>
                 </div>
               </div>
               <div class="form-group">
@@ -133,16 +142,20 @@
                 <input type="text" name="incidentLocation" class="input" placeholder="Street, House Number, etc." required>
               </div>
               <div class="form-group">
-                <label>Persons Involved</label>
-                <textarea name="personsInvolved" class="input" rows="3" placeholder="Name(s) of person(s) involved"></textarea>
+                <label>Persons Involved <span class="required">*</span></label>
+                <textarea name="personsInvolved" class="input" rows="3" placeholder="Name(s) of person(s) involved" required></textarea>
+              </div>
+              <div class="form-group">
+                <label>Brief Summary <span class="required">*</span></label>
+                <input type="text" name="incidentSummary" class="input" placeholder="One-line summary of the incident" required>
               </div>
               <div class="form-group">
                 <label>Detailed Description <span class="required">*</span></label>
                 <textarea name="incidentDescription" class="input" rows="6" placeholder="Please provide a detailed account of what happened..." required></textarea>
               </div>
               <div class="form-group">
-                <label>Witnesses (if any)</label>
-                <textarea name="witnesses" class="input" rows="2" placeholder="Name(s) and contact information of witnesses"></textarea>
+                <label>Witnesses (if any) <span class="required">*</span></label>
+                <textarea name="witnesses" class="input" rows="2" placeholder="Name(s) and contact info of witnesses, or write 'None'"></textarea>
               </div>
             </div>
 
@@ -171,7 +184,7 @@
       <div class="modal-success-icon">✓</div>
       <h3>Report Submitted Successfully</h3>
       <p>Your incident report has been received. A barangay official will review your report and contact you if additional information is needed.</p>
-      <p><strong>Reference Number:</strong> <span id="ref-number"></span></p>
+      <p><strong>Reference Number:</strong> <span id="ref-number" style="font-family:monospace;color:#1d4ed8;font-weight:700;"></span></p>
       <div class="modal-footer">
         <button class="btn primary" onclick="closeConfirmModal()">Close</button>
       </div>
@@ -191,8 +204,47 @@
 
   <script src="public.js"></script>
   <script>
-    const API = 'http://localhost/Barangay853';
     document.getElementById('incident-date').max = new Date().toISOString().split('T')[0];
+
+    // FIX #3: Pre-fill reporter info from logged-in user
+    (function prefillUser() {
+      const user = JSON.parse(localStorage.getItem('user') || 'null');
+      if (!user) return;
+      const form = document.getElementById('report-form');
+      if (user.name) form.reporterName.value = user.name;
+      if (user.email) document.getElementById('reporterEmail').value = user.email;
+    })();
+
+    // FIX #2: Phone validation – numbers only, max 11, must start with 09
+    const contactInput = document.getElementById('reporterContact');
+    const contactWarning = document.getElementById('contact-warning');
+
+    contactInput.addEventListener('input', function () {
+      // Strip non-digits
+      this.value = this.value.replace(/\D/g, '').slice(0, 11);
+      validateContact();
+    });
+    contactInput.addEventListener('keydown', function (e) {
+      // Allow: backspace, delete, tab, arrows, home, end
+      const allowed = ['Backspace','Delete','Tab','ArrowLeft','ArrowRight','Home','End'];
+      if (!allowed.includes(e.key) && !/^\d$/.test(e.key)) e.preventDefault();
+    });
+
+    function validateContact() {
+      const val = contactInput.value;
+      const valid = /^09\d{9}$/.test(val);
+      if (val.length === 0) {
+        contactWarning.style.display = 'none';
+        contactInput.style.borderColor = '';
+      } else if (!valid) {
+        contactWarning.style.display = 'block';
+        contactInput.style.borderColor = '#dc2626';
+      } else {
+        contactWarning.style.display = 'none';
+        contactInput.style.borderColor = '#16a34a';
+      }
+      return valid;
+    }
 
     async function submitReport(e) {
       e.preventDefault();
@@ -200,27 +252,49 @@
       const errEl = document.getElementById('report-error');
       const btn = document.getElementById('submit-btn');
       errEl.style.display = 'none';
+
+      // FIX #2: Validate contact before submit
+      if (!validateContact()) {
+        errEl.textContent = 'Contact number must be exactly 11 digits and start with 09.';
+        errEl.style.display = 'block';
+        contactInput.focus();
+        return;
+      }
+
+      // FIX #4: Include auth token so the request isn't rejected as Unauthorized
+      const token = localStorage.getItem('auth_token');
+      if (!token) {
+        errEl.textContent = 'You must be logged in to file an incident report.';
+        errEl.style.display = 'block';
+        return;
+      }
+
       btn.disabled = true;
       btn.textContent = 'Submitting...';
 
       try {
-        const res = await fetch(`${API}/blotter/index.php?public=1`, {
+        const res = await fetch(`${API}/blotter/index.php`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`   // FIX #4
+          },
           body: JSON.stringify({
             case_title: form.incidentType.value + ' - ' + form.reporterName.value,
             category: form.incidentType.value,
+            summary: form.incidentSummary.value,
             reporter_name: form.reporterName.value,
             reporter_contact: form.reporterContact.value,
-            reporter_email: form.reporterEmail.value || null,
+            reporter_email: form.reporterEmail.value || '',
             reporter_address: form.reporterAddress.value,
             incident_date: form.incidentDate.value,
             incident_time: form.incidentTime.value,
             location: form.incidentLocation.value,
             description: form.incidentDescription.value,
-            persons_involved: form.personsInvolved.value || null,
-            witnesses: form.witnesses.value || null,
-            status: 'Pending'
+            persons_involved: form.personsInvolved.value || 'None',
+            witnesses: form.witnesses.value || 'None',
+            status: 'Pending',
+            priority: 'Normal'
           })
         });
         const data = await res.json();
@@ -228,6 +302,14 @@
           document.getElementById('ref-number').textContent = data.case_no;
           document.getElementById('confirm-modal').style.display = 'flex';
           form.reset();
+          // Re-fill user info after reset
+          const user = JSON.parse(localStorage.getItem('user') || 'null');
+          if (user) {
+            if (user.name) form.reporterName.value = user.name;
+            if (user.email) document.getElementById('reporterEmail').value = user.email;
+          }
+          contactWarning.style.display = 'none';
+          contactInput.style.borderColor = '';
         } else {
           errEl.textContent = data.message || 'Submission failed.';
           errEl.style.display = 'block';

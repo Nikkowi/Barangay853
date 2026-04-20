@@ -16,16 +16,32 @@ if (!isset($data['email']) || !isset($data['password'])) {
     exit();
 }
 
-$firstName = trim($data['first_name'] ?? '');
-$lastName = trim($data['last_name'] ?? '');
+// --- BUG FIX 1: Handle Name (Admin Modal vs Public Form) ---
+if (isset($data['name']) && !empty(trim($data['name']))) {
+    // Came from Admin Dashboard Modal
+    $fullName = trim($data['name']);
+} else {
+    // Came from Public Resident Registration Form
+    $firstName = trim($data['first_name'] ?? '');
+    $lastName = trim($data['last_name'] ?? '');
+    $fullName = trim("$firstName $lastName") ?: 'Resident';
+}
+
 $email = trim($data['email']);
 $password = $data['password'];
 $contactNumber = $data['contact_number'] ?? null;
 $address = $data['address'] ?? null;
 $dateOfBirth = $data['date_of_birth'] ?? null;
 
-// Build full name
-$fullName = trim("$firstName $lastName") ?: 'Resident';
+// --- BUG FIX 2: Handle Role (Dynamic instead of Hardcoded) ---
+// If the form sends a role (like the Admin Modal), use it. Otherwise, default to 'resident'.
+$role = $data['role'] ?? 'resident'; 
+
+// Security Check: Ensure nobody tries to hack the system by sending a fake role like "SuperGodAdmin"
+$allowedRoles = ['admin', 'staff', 'resident'];
+if (!in_array($role, $allowedRoles)) {
+    $role = 'resident';
+}
 
 // Validate password length
 if (strlen($password) < 6) {
@@ -51,14 +67,14 @@ if ($existing) {
 // Hash the password
 $hashedPassword = password_hash($password, PASSWORD_BCRYPT);
 
-// Insert new user as resident
-$stmt = $conn->prepare('INSERT INTO users (name, email, password, role, created_at, updated_at) VALUES (?, ?, ?, "resident", NOW(), NOW())');
-$stmt->bind_param('sss', $fullName, $email, $hashedPassword);
+// Insert new user with the DYNAMIC role, not the hardcoded one!
+$stmt = $conn->prepare('INSERT INTO users (name, email, password, role, created_at, updated_at) VALUES (?, ?, ?, ?, NOW(), NOW())');
+$stmt->bind_param('ssss', $fullName, $email, $hashedPassword, $role);
 $stmt->execute();
 $newUserId = $conn->insert_id;
 
-// Also add to residents table
-if ($newUserId) {
+// Only add to the 'residents' table if they are actually a resident
+if ($newUserId && $role === 'resident') {
     $stmt2 = $conn->prepare('INSERT INTO residents (full_name, contact_mobile, date_of_birth, created_at, updated_at) VALUES (?, ?, ?, NOW(), NOW())');
     $stmt2->bind_param('sss', $fullName, $contactNumber, $dateOfBirth);
     $stmt2->execute();
@@ -73,7 +89,7 @@ echo json_encode([
         'id' => $newUserId,
         'name' => $fullName,
         'email' => $email,
-        'role' => 'resident'
+        'role' => $role
     ]
 ]);
 ?>

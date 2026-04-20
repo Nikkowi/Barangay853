@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Track Request — Brgy. 853</title>
+  <link rel="icon" href="assets/logo-brgy.png">
+  <script src="public.js" defer></script>
+  <link rel="stylesheet" href="public.css">
+  <style>
+    .track-hero { background: linear-gradient(135deg,#0b2250 60%,#1e3a8a); color:#fff; padding: 4rem 1rem 6rem; text-align:center; }
+    .track-hero h1 { font-size: clamp(1.6rem,4vw,2.5rem); font-weight:800; margin-bottom:.5rem; }
+    .track-hero p { color:rgba(255,255,255,.75); font-size:1.05rem; }
+    .track-card { max-width: 640px; margin: -3.5rem auto 3rem; background:#fff; border-radius:1.25rem; box-shadow:0 20px 60px rgba(15,23,42,.14); padding:2.25rem; }
+    .search-row { display:flex; gap:.75rem; margin-top:1.5rem; }
+    .search-row input { flex:1; border:1.5px solid #d1d5db; border-radius:.75rem; padding:.8rem 1.1rem; font-size:1rem; transition:border .2s; }
+    .search-row input:focus { outline:none; border-color:#0b2250; box-shadow:0 0 0 3px rgba(11,34,80,.1); }
+    .search-row button { background:#0b2250; color:#fff; border:none; border-radius:.75rem; padding:.8rem 1.5rem; font-size:.95rem; font-weight:600; cursor:pointer; white-space:nowrap; transition:background .2s; }
+    .search-row button:hover { background:#1e3a8a; }
+    .result-area { margin-top:1.75rem; }
+    .result-box { background:#f8fafc; border:1px solid #e2e8f0; border-radius:1rem; padding:1.5rem; }
+    .result-header { display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:.75rem; margin-bottom:1.25rem; }
+    .result-ref { font-size:.8rem; color:#64748b; font-weight:500; text-transform:uppercase; letter-spacing:.05em; }
+    .result-name { font-size:1.2rem; font-weight:700; color:#0f172a; margin:.15rem 0; }
+    .result-type { color:#475569; font-size:.9rem; }
+    .status-pill { padding:.35rem .9rem; border-radius:999px; font-size:.8rem; font-weight:700; }
+    .status-pill.pending { background:#fef3c7; color:#92400e; }
+    .status-pill.review  { background:#dbeafe; color:#1e40af; }
+    .status-pill.approved { background:#dcfce7; color:#166534; }
+    .status-pill.released { background:#d1fae5; color:#065f46; }
+    .status-pill.rejected { background:#fee2e2; color:#991b1b; }
+    .info-grid { display:grid; grid-template-columns:1fr 1fr; gap:.75rem 1.5rem; margin-bottom:1.5rem; }
+    .info-item label { font-size:.75rem; color:#94a3b8; text-transform:uppercase; letter-spacing:.05em; display:block; margin-bottom:.2rem; }
+    .info-item span { font-size:.9rem; color:#0f172a; font-weight:500; }
+    /* Timeline */
+    .timeline { display:flex; justify-content:space-between; position:relative; margin-top:1.5rem; }
+    .timeline::before { content:''; position:absolute; top:16px; left:0; right:0; height:3px; background:#e2e8f0; z-index:0; }
+    .tl-step { flex:1; text-align:center; position:relative; z-index:1; }
+    .tl-dot { width:32px; height:32px; border-radius:50%; background:#e2e8f0; display:flex; align-items:center; justify-content:center; margin:0 auto .5rem; font-size:.85rem; border:3px solid #fff; }
+    .tl-dot.done { background:#0b2250; color:#fff; }
+    .tl-dot.rejected { background:#dc2626; color:#fff; }
+    .tl-label { font-size:.72rem; color:#64748b; font-weight:600; }
+    .tl-label.done { color:#0b2250; }
+    .error-msg { background:#fee2e2; border:1px solid #fca5a5; color:#991b1b; border-radius:.75rem; padding:1rem 1.25rem; text-align:center; }
+    .loading-msg { text-align:center; color:#64748b; padding:1.5rem; }
+    .hint { font-size:.8rem; color:#94a3b8; margin-top:.6rem; }
+  </style>
+</head>
+<body>
+<nav class="navbar">
+  <a href="index.html" class="navbar-brand">
+    <img src="assets/logo-brgy.png" alt="Logo" class="navbar-logo">
+    <span>Barangay 853</span>
+  </a>
+  <div class="navbar-links">
+    <a href="index.html">Home</a>
+    <a href="announcements.html">Announcements</a>
+    <a href="documents.html">Request Docs</a>
+    <a href="track.html" class="active">Track Request</a>
+    <a href="about.html">About</a>
+  </div>
+  <div id="nav-auth"></div>
+</nav>
+
+<div class="track-hero">
+  <h1>🔍 Track Your Request</h1>
+  <p>Enter your reference number to check the status of your document request.</p>
+</div>
+
+<div class="track-card">
+  <h2 style="font-size:1.05rem;font-weight:700;color:#0f172a;margin:0 0 .25rem">Enter Reference Number</h2>
+  <p class="hint">Your reference number was given to you when you submitted your request (e.g. DOC-2025-0042).</p>
+  <div class="search-row">
+    <input type="text" id="ref-input" placeholder="e.g. DOC-2025-0042" autocomplete="off" />
+    <button onclick="trackRequest()">Track</button>
+  </div>
+  <div class="result-area" id="result-area"></div>
+</div>
+
+<footer style="text-align:center;padding:2rem;color:#94a3b8;font-size:.85rem;">
+  &copy; 2025 Barangay 853, Zone 93. All rights reserved.
+</footer>
+
+<script>
+const API = window.location.origin + '/Barangay853';
+
+document.getElementById('ref-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') trackRequest();
+});
+
+function getStatusClass(s) {
+  const m = { pending:'pending', review:'review', approved:'approved', released:'released', rejected:'rejected' };
+  return m[(s||'').toLowerCase()] || 'pending';
+}
+
+function formatDate(d) {
+  if (!d) return 'N/A';
+  return new Date(d).toLocaleDateString('en-PH', { year:'numeric', month:'long', day:'numeric' });
+}
+
+async function trackRequest() {
+  const ref = document.getElementById('ref-input').value.trim();
+  const area = document.getElementById('result-area');
+  if (!ref) {
+    area.innerHTML = '<div class="error-msg">Please enter a reference number.</div>';
+    return;
+  }
+  area.innerHTML = '<div class="loading-msg">⏳ Searching...</div>';
+  try {
+    const res = await fetch(`${API}/track/index.php?ref=${encodeURIComponent(ref)}`);
+    const data = await res.json();
+    if (!data.success) {
+      area.innerHTML = `<div class="error-msg">❌ ${data.message}</div>`;
+      return;
+    }
+    const d = data.data;
+    const tl = data.timeline;
+    const sc = getStatusClass(d.status);
+
+    const tlHtml = tl.map(step => {
+      const dotClass = step.done ? (d.status === 'Rejected' && step.step === 'Rejected' ? 'rejected' : 'done') : '';
+      const labelClass = step.done ? 'done' : '';
+      const icon = step.done ? (d.status === 'Rejected' && step.step === 'Rejected' ? '✕' : '✓') : '○';
+      return `
+        <div class="tl-step">
+          <div class="tl-dot ${dotClass}">${icon}</div>
+          <div class="tl-label ${labelClass}">${step.step}</div>
+          ${step.date ? `<div style="font-size:.68rem;color:#94a3b8;margin-top:.2rem">${formatDate(step.date)}</div>` : ''}
+        </div>`;
+    }).join('');
+
+    area.innerHTML = `
+      <div class="result-box">
+        <div class="result-header">
+          <div>
+            <div class="result-ref">${d.reference_no}</div>
+            <div class="result-name">${d.requester_name}</div>
+            <div class="result-type">${d.document_type}</div>
+          </div>
+          <span class="status-pill ${sc}">${d.status}</span>
+        </div>
+        <div class="info-grid">
+          <div class="info-item"><label>Purpose</label><span>${d.purpose || 'N/A'}</span></div>
+          <div class="info-item"><label>Date Filed</label><span>${formatDate(d.date_filed || d.created_at)}</span></div>
+          <div class="info-item"><label>Last Updated</label><span>${formatDate(d.updated_at)}</span></div>
+        </div>
+        <div style="border-top:1px solid #e2e8f0;padding-top:1.25rem">
+          <p style="font-size:.78rem;color:#94a3b8;font-weight:600;text-transform:uppercase;letter-spacing:.06em;margin-bottom:1rem">Request Progress</p>
+          <div class="timeline">${tlHtml}</div>
+        </div>
+        ${d.status === 'Approved' || d.status === 'Released' ? `<div style="margin-top:1.25rem;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:.75rem;padding:1rem;color:#166534;font-size:.9rem;">✅ Please visit the barangay hall with a valid ID to claim your document.</div>` : ''}
+        ${d.status === 'Rejected' ? `<div style="margin-top:1.25rem;background:#fef2f2;border:1px solid #fecaca;border-radius:.75rem;padding:1rem;color:#991b1b;font-size:.9rem;">❌ Your request was not approved. Please visit the barangay office for more details.</div>` : ''}
+      </div>`;
+  } catch (err) {
+    area.innerHTML = '<div class="error-msg">⚠️ Could not connect to the server. Please try again later.</div>';
+  }
+}
+</script>
+</body>
+</html>

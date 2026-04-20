@@ -1,0 +1,12 @@
+{
+    "name": "barangay853/system",
+    "description": "Barangay 853 Management System",
+    "require": {
+        "phpmailer/phpmailer": "^6.9"
+    },
+    "autoload": {
+        "psr-4": {
+            "Barangay853\\": "src/"
+        }
+    }
+}

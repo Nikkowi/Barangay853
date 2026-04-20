@@ -163,15 +163,20 @@
         </div>
         <div class="form-group">
           <label>Document Type *</label>
-          <input type="text" class="input" id="req-doctype" readonly style="background:#f3f4f6">
+          <select class="input" id="req-doctype" style="border:1px solid #d1d5db;border-radius:.5rem;padding:.75rem;width:100%;font-size:.95rem"></select>
         </div>
         <div class="form-group">
           <label>Purpose *</label>
+          <!-- FIX #7: Purpose resets on close -->
           <textarea class="input" id="req-purpose" rows="3" placeholder="State the purpose for requesting this document" required></textarea>
         </div>
         <div class="form-group">
           <label>Contact Number *</label>
-          <input type="tel" class="input" id="req-contact" placeholder="0917 123 4567" required>
+          <!-- FIX #5: numbers only, max 11, starts with 09 -->
+          <input type="tel" class="input" id="req-contact" placeholder="09XXXXXXXXX" maxlength="11" inputmode="numeric" required>
+          <small id="req-contact-warning" style="color:#dc2626;display:none;font-size:0.8rem;margin-top:0.25rem;">
+            Must be exactly 11 digits and start with 09
+          </small>
         </div>
         <div class="form-group">
           <label>Email Address</label>
@@ -179,6 +184,7 @@
         </div>
         <div class="form-group">
           <label>Complete Address *</label>
+          <!-- FIX #7: Address resets on close -->
           <textarea class="input" id="req-address" rows="2" placeholder="Lot/Block, Street, Zone, Barangay" required></textarea>
         </div>
         <div class="modal-footer">
@@ -200,9 +206,7 @@
     </div>
   </footer>
 
-  <script src="public.js"></script>
   <script>
-    const API = 'http://localhost/Barangay853';
     const requirements = {
       'clearance-requirements': { title: 'Barangay Clearance Requirements', content: `<ul class="requirements-list"><li>Valid ID (Government-issued)</li><li>Barangay Residency Certificate or Proof of Address</li><li>1x1 ID Picture (2 copies)</li><li>Cedula or Community Tax Certificate</li><li>Processing Fee: ₱50.00</li></ul><p><strong>Processing Time:</strong> 3-5 working days</p>` },
       'business-requirements': { title: 'Business Clearance Requirements', content: `<ul class="requirements-list"><li>DTI/SEC Registration</li><li>Valid ID of Business Owner</li><li>Proof of Business Location</li><li>Barangay Clearance (Personal)</li><li>Processing Fee: ₱200.00</li></ul><p><strong>Processing Time:</strong> 5-7 working days</p>` },
@@ -230,39 +234,113 @@
       selectedDocType = docType;
       const user = JSON.parse(localStorage.getItem('user') || 'null');
       if (!user) { window.location.href = 'login.html'; return; }
-      document.getElementById('req-doctype').value = docType;
+      const sel = document.getElementById('req-doctype');
+      if (docType) {
+        sel.innerHTML = `<option value="${docType}">${docType}</option>`;
+        sel.disabled = true;
+      } else {
+        sel.innerHTML = `
+          <option value="">-- Select Document Type --</option>
+          <option>Barangay Clearance</option>
+          <option>Business Clearance</option>
+          <option>Construction Clearance</option>
+          <option>Certificate of Residency</option>
+          <option>Certificate of Indigency</option>
+          <option>Good Moral Certificate</option>
+          <option>Barangay ID</option>
+          <option>Community Tax Certificate (Cedula)</option>
+          <option>First-Time Jobseeker Certificate</option>`;
+        sel.disabled = false;
+      }
+      // Pre-fill name and email from user
       document.getElementById('req-name').value = user.name || '';
       document.getElementById('req-email').value = user.email || '';
+      // FIX #7: Always clear purpose and address when opening
+      document.getElementById('req-purpose').value = '';
+      document.getElementById('req-address').value = '';
+      // Reset contact field and validation state
+      document.getElementById('req-contact').value = '';
+      document.getElementById('req-contact').style.borderColor = '';
+      document.getElementById('req-contact-warning').style.display = 'none';
+      // Clear any previous messages
+      document.getElementById('req-error').style.display = 'none';
+      document.getElementById('req-success').style.display = 'none';
+
       document.getElementById('request-modal').style.display = 'flex';
     }
 
     function showRequestForm() {
       const user = JSON.parse(localStorage.getItem('user') || 'null');
       if (!user) { window.location.href = 'login.html'; return; }
-      document.getElementById('request-modal').style.display = 'flex';
+      requestDocument('');
     }
 
     function closeRequestModal() {
       document.getElementById('request-modal').style.display = 'none';
+      // FIX #7: Reset purpose and address on close
+      document.getElementById('req-purpose').value = '';
+      document.getElementById('req-address').value = '';
+      document.getElementById('req-contact').value = '';
+      document.getElementById('req-contact').style.borderColor = '';
+      document.getElementById('req-contact-warning').style.display = 'none';
       document.getElementById('req-error').style.display = 'none';
       document.getElementById('req-success').style.display = 'none';
     }
 
+    // FIX #5: Phone validation for document request contact field
+    const reqContact = document.getElementById('req-contact');
+    const reqContactWarning = document.getElementById('req-contact-warning');
+
+    reqContact.addEventListener('input', function () {
+      this.value = this.value.replace(/\D/g, '').slice(0, 11);
+      validateReqContact();
+    });
+    reqContact.addEventListener('keydown', function (e) {
+      const allowed = ['Backspace','Delete','Tab','ArrowLeft','ArrowRight','Home','End'];
+      if (!allowed.includes(e.key) && !/^\d$/.test(e.key)) e.preventDefault();
+    });
+
+    function validateReqContact() {
+      const val = reqContact.value;
+      const valid = /^09\d{9}$/.test(val);
+      if (val.length === 0) {
+        reqContactWarning.style.display = 'none';
+        reqContact.style.borderColor = '';
+      } else if (!valid) {
+        reqContactWarning.style.display = 'block';
+        reqContact.style.borderColor = '#dc2626';
+      } else {
+        reqContactWarning.style.display = 'none';
+        reqContact.style.borderColor = '#16a34a';
+      }
+      return valid;
+    }
+
     async function submitRequest() {
-      const name = document.getElementById('req-name').value;
+      const name    = document.getElementById('req-name').value.trim();
       const docType = document.getElementById('req-doctype').value;
-      const purpose = document.getElementById('req-purpose').value;
-      const contact = document.getElementById('req-contact').value;
-      const email = document.getElementById('req-email').value;
-      const address = document.getElementById('req-address').value;
-      const errEl = document.getElementById('req-error');
-      const sucEl = document.getElementById('req-success');
-      const btn = document.getElementById('req-submit-btn');
+      const purpose = document.getElementById('req-purpose').value.trim();
+      const contact = document.getElementById('req-contact').value.trim();
+      const email   = document.getElementById('req-email').value.trim();
+      const address = document.getElementById('req-address').value.trim();
+      const errEl   = document.getElementById('req-error');
+      const sucEl   = document.getElementById('req-success');
+      const btn     = document.getElementById('req-submit-btn');
 
       errEl.style.display = 'none';
+      sucEl.style.display = 'none';
+
       if (!name || !docType || !purpose || !contact || !address) {
         errEl.textContent = 'Please fill in all required fields.';
         errEl.style.display = 'block';
+        return;
+      }
+
+      // FIX #5: Validate phone before submitting
+      if (!validateReqContact()) {
+        errEl.textContent = 'Contact number must be exactly 11 digits and start with 09.';
+        errEl.style.display = 'block';
+        reqContact.focus();
         return;
       }
 
@@ -270,22 +348,30 @@
       btn.textContent = 'Submitting...';
 
       try {
-        const res = await fetch(`${API}/documents/index.php?public=1`, {
+        const res = await fetch(`${API}/documents/index.php`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ requester_name: name, document_type: docType, purpose, contact_number: contact, email, address })
         });
         const data = await res.json();
         if (data.success) {
-          sucEl.textContent = `Request submitted! Reference: ${data.reference_no}`;
+          // FIX #6: Show success immediately, close modal right away (no 10-sec email delay visible)
+          sucEl.innerHTML = `✅ Request submitted!<br><strong>Reference No: ${data.reference_no}</strong><br><small>Save this number to track your request.</small>`;
           sucEl.style.display = 'block';
-          setTimeout(() => closeRequestModal(), 3000);
+          // FIX #7: Clear purpose and address after success
+          document.getElementById('req-purpose').value = '';
+          document.getElementById('req-address').value = '';
+          document.getElementById('req-contact').value = '';
+          document.getElementById('req-contact').style.borderColor = '';
+          reqContactWarning.style.display = 'none';
+          // Close after 2.5 seconds (user can read the ref number)
+          setTimeout(() => closeRequestModal(), 2500);
         } else {
           errEl.textContent = data.message || 'Submission failed.';
           errEl.style.display = 'block';
         }
       } catch (err) {
-        errEl.textContent = 'Cannot connect to server.';
+        errEl.textContent = 'Cannot connect to server. Make sure XAMPP is running.';
         errEl.style.display = 'block';
       } finally {
         btn.disabled = false;
@@ -293,5 +379,6 @@
       }
     }
   </script>
+  <script src="public.js"></script>
 </body>
 </html>
