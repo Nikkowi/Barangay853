@@ -784,7 +784,7 @@ async function loadUsers() {
 }).join('');
   } catch(e) { console.error(e); }
 }
-function showAddUserModal() { document.getElementById('modal-add-user').style.display='flex'; }
+function showAddUserModal() { document.getElementById('modal-add-user').style.display='flex'; setupCreateUserValidation();}
 function closeAddUserModal() { document.getElementById('modal-add-user').style.display='none'; }
 async function handleCreateUser(e) {
   e.preventDefault();

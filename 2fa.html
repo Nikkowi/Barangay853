@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Verify Your Identity — Brgy. 853</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter','Segoe UI',system-ui,sans-serif;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #0b2250 0%, #1e3a8a 100%);
+      padding: 2rem;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 1.5rem;
+      padding: 2.75rem 2.5rem;
+      width: 100%;
+      max-width: 440px;
+      box-shadow: 0 24px 60px rgba(0,0,0,0.3);
+      text-align: center;
+    }
+
+    .shield-icon {
+      width: 72px; height: 72px;
+      background: linear-gradient(135deg,#0b2250,#1e3a8a);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 2rem;
+      margin: 0 auto 1.25rem;
+    }
+
+    h1 { font-size: 1.4rem; font-weight: 700; color: #0f172a; margin-bottom: .4rem; }
+    .subtitle { font-size: .88rem; color: #6b7280; line-height: 1.6; margin-bottom: 2rem; }
+    .email-hint { font-weight: 600; color: #0b2250; }
+
+    /* OTP input row */
+    .otp-row {
+      display: flex; gap: .6rem; justify-content: center; margin-bottom: 1.75rem;
+    }
+    .otp-input {
+      width: 52px; height: 60px;
+      border: 2px solid #d1d5db;
+      border-radius: .75rem;
+      font-size: 1.6rem;
+      font-weight: 700;
+      text-align: center;
+      color: #0b2250;
+      transition: border .2s, box-shadow .2s;
+      -moz-appearance: textfield;
+    }
+    .otp-input::-webkit-inner-spin-button,
+    .otp-input::-webkit-outer-spin-button { -webkit-appearance: none; }
+    .otp-input:focus {
+      outline: none;
+      border-color: #0b2250;
+      box-shadow: 0 0 0 3px rgba(11,34,80,.12);
+    }
+    .otp-input.filled  { border-color: #0b2250; background: #f0f4ff; }
+    .otp-input.error   { border-color: #ef4444; background: #fef2f2; animation: shake .35s; }
+    @keyframes shake {
+      0%,100% { transform: translateX(0); }
+      20%,60% { transform: translateX(-4px); }
+      40%,80% { transform: translateX(4px); }
+    }
+
+    /* Timer bar */
+    .timer-wrap { margin-bottom: 1.5rem; }
+    .timer-bar-track {
+      height: 6px; background: #e5e7eb; border-radius: 999px; overflow: hidden;
+      margin-bottom: .5rem;
+    }
+    .timer-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #0b2250, #2563eb);
+      border-radius: 999px;
+      transition: width .9s linear, background .5s;
+      width: 100%;
+    }
+    .timer-bar-fill.warn  { background: linear-gradient(90deg,#f59e0b,#ef4444); }
+    .timer-bar-fill.dead  { background: #ef4444; width: 0 !important; }
+    .timer-text { font-size: .8rem; color: #6b7280; }
+    .timer-text.warn  { color: #d97706; font-weight: 600; }
+    .timer-text.dead  { color: #ef4444; font-weight: 600; }
+
+    /* Buttons */
+    .btn-verify {
+      width: 100%; padding: .9rem;
+      background: linear-gradient(120deg,#0b2250,#1e3a8a);
+      color: #fff; border: none; border-radius: .85rem;
+      font-size: 1rem; font-weight: 600; cursor: pointer;
+      transition: opacity .2s, transform .1s;
+      margin-bottom: 1rem;
+    }
+    .btn-verify:hover:not(:disabled) { opacity: .88; transform: translateY(-1px); }
+    .btn-verify:disabled { background: #94a3b8; cursor: not-allowed; transform: none; }
+
+    .resend-wrap { margin-bottom: 1.25rem; }
+    .btn-resend {
+      background: none; border: 1.5px solid #d1d5db; border-radius: .65rem;
+      color: #374151; padding: .55rem 1.25rem;
+      font-size: .875rem; font-weight: 600; cursor: pointer;
+      transition: all .2s;
+    }
+    .btn-resend:hover:not(:disabled) { border-color: #0b2250; color: #0b2250; background: #f0f4ff; }
+    .btn-resend:disabled { color: #94a3b8; border-color: #e5e7eb; cursor: not-allowed; }
+    .resend-countdown { font-size: .8rem; color: #94a3b8; margin-top: .4rem; }
+
+    /* Alert messages */
+    .alert {
+      border-radius: .75rem; padding: .8rem 1rem;
+      font-size: .875rem; margin-bottom: 1rem; display: none;
+    }
+    .alert.error   { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
+    .alert.success { background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; }
+    .alert.info    { background: #eff6ff; color: #1e40af; border: 1px solid #bfdbfe; }
+
+    .back-link {
+      font-size: .82rem; color: #6b7280; text-decoration: none;
+      display: inline-block; margin-top: .25rem;
+    }
+    .back-link:hover { color: #0b2250; }
+  </style>
+</head>
+<body>
+
+<div class="card">
+  <div class="shield-icon">🔐</div>
+  <h1>Two-Factor Verification</h1>
+  <p class="subtitle">
+    We sent a <strong>6-digit code</strong> to<br>
+    <span class="email-hint" id="email-display">your email</span>.<br>
+    Enter it below to continue.
+  </p>
+
+  <div id="alert-box" class="alert"></div>
+
+  <!-- OTP inputs -->
+  <div class="otp-row" id="otp-row">
+    <input class="otp-input" type="number" inputmode="numeric" maxlength="1" id="d0" autocomplete="one-time-code">
+    <input class="otp-input" type="number" inputmode="numeric" maxlength="1" id="d1">
+    <input class="otp-input" type="number" inputmode="numeric" maxlength="1" id="d2">
+    <input class="otp-input" type="number" inputmode="numeric" maxlength="1" id="d3">
+    <input class="otp-input" type="number" inputmode="numeric" maxlength="1" id="d4">
+    <input class="otp-input" type="number" inputmode="numeric" maxlength="1" id="d5">
+  </div>
+
+  <!-- Expiry timer -->
+  <div class="timer-wrap">
+    <div class="timer-bar-track"><div class="timer-bar-fill" id="timer-bar"></div></div>
+    <div class="timer-text" id="timer-text">Code expires in 3:00</div>
+  </div>
+
+  <button class="btn-verify" id="btn-verify" onclick="submitCode()">Verify Code</button>
+
+  <!-- Resend -->
+  <div class="resend-wrap">
+    <button class="btn-resend" id="btn-resend" onclick="resendCode()" disabled>
+      🔄 Resend Code
+    </button>
+    <div class="resend-countdown" id="resend-countdown">You can resend in <span id="resend-secs">3:00</span></div>
+  </div>
+
+  <a href="login.html" class="back-link">← Back to Login</a>
+</div>
+
+<script>
+  const API = window.location.origin + '/Barangay853';
+
+  // ── State loaded from login flow ────────────────────────────────────────────
+  // login.html must store these in sessionStorage before redirecting here:
+  //   sessionStorage.setItem('2fa_user_id', userId);
+  //   sessionStorage.setItem('2fa_email',   email);
+  //   sessionStorage.setItem('2fa_expires', isoDateString); // optional
+  const userId     = sessionStorage.getItem('2fa_user_id');
+  const userEmail  = sessionStorage.getItem('2fa_email');
+  const expiresAt  = sessionStorage.getItem('2fa_expires');  // ISO string from server
+  const EXPIRY_MS  = (parseInt(sessionStorage.getItem('2fa_expiry_minutes') || '3')) * 60 * 1000;
+
+  if (!userId || !userEmail) {
+    // No 2FA session — send back to login
+    window.location.href = 'login.html';
+  }
+
+  // Mask and display email
+  function maskEmail(e) {
+    const [local, domain] = e.split('@');
+    return local[0] + '*'.repeat(Math.max(1, local.length - 1)) + '@' + domain;
+  }
+  document.getElementById('email-display').textContent = maskEmail(userEmail);
+
+  // ── Alert helper ────────────────────────────────────────────────────────────
+  function showAlert(type, msg) {
+    const el = document.getElementById('alert-box');
+    el.className = `alert ${type}`;
+    el.textContent = msg;
+    el.style.display = 'block';
+  }
+  function hideAlert() {
+    const el = document.getElementById('alert-box');
+    el.style.display = 'none';
+  }
+
+  // ── OTP input wiring ─────────────────────────────────────────────────────────
+  const inputs = Array.from(document.querySelectorAll('.otp-input'));
+
+  inputs.forEach((inp, i) => {
+    inp.addEventListener('input', e => {
+      // Keep only last digit typed
+      const val = inp.value.replace(/\D/g, '').slice(-1);
+      inp.value = val;
+      inp.classList.toggle('filled', val !== '');
+      if (val && i < inputs.length - 1) inputs[i + 1].focus();
+    });
+
+    inp.addEventListener('keydown', e => {
+      if (e.key === 'Backspace' && !inp.value && i > 0) {
+        inputs[i - 1].value = '';
+        inputs[i - 1].classList.remove('filled');
+        inputs[i - 1].focus();
+      }
+      if (e.key === 'Enter') submitCode();
+    });
+
+    // Handle paste on any box
+    inp.addEventListener('paste', e => {
+      e.preventDefault();
+      const pasted = (e.clipboardData || window.clipboardData)
+        .getData('text').replace(/\D/g, '').slice(0, 6);
+      pasted.split('').forEach((ch, idx) => {
+        if (inputs[idx]) {
+          inputs[idx].value = ch;
+          inputs[idx].classList.add('filled');
+        }
+      });
+      const nextEmpty = inputs.findIndex(x => !x.value);
+      (inputs[nextEmpty] || inputs[inputs.length - 1]).focus();
+    });
+  });
+
+  function getCode() { return inputs.map(i => i.value).join(''); }
+
+  function setInputsError() {
+    inputs.forEach(i => { i.classList.remove('filled'); i.classList.add('error'); });
+    setTimeout(() => inputs.forEach(i => i.classList.remove('error')), 400);
+  }
+
+  // ── Expiry countdown timer ────────────────────────────────────────────────────
+  let expiryTimestamp = expiresAt
+    ? new Date(expiresAt).getTime()
+    : Date.now() + EXPIRY_MS;
+
+  const barEl   = document.getElementById('timer-bar');
+  const textEl  = document.getElementById('timer-text');
+  const totalMs = expiryTimestamp - (Date.now() < expiryTimestamp
+    ? Date.now()
+    : Date.now() - EXPIRY_MS);   // fallback: use configured duration
+
+  function updateTimer() {
+    const remaining = Math.max(0, expiryTimestamp - Date.now());
+    const pct       = (remaining / EXPIRY_MS) * 100;
+    const mins      = Math.floor(remaining / 60000);
+    const secs      = Math.floor((remaining % 60000) / 1000);
+    const label     = `${mins}:${String(secs).padStart(2, '0')}`;
+
+    barEl.style.width = pct + '%';
+
+    if (remaining <= 0) {
+      barEl.className  = 'timer-bar-fill dead';
+      textEl.className = 'timer-text dead';
+      textEl.textContent = 'Code expired — request a new one.';
+      document.getElementById('btn-verify').disabled = true;
+      clearInterval(timerInterval);
+      return;
+    }
+
+    if (remaining <= 60000) {
+      barEl.className  = 'timer-bar-fill warn';
+      textEl.className = 'timer-text warn';
+    } else {
+      barEl.className  = 'timer-bar-fill';
+      textEl.className = 'timer-text';
+    }
+    textEl.textContent = `Code expires in ${label}`;
+  }
+  let timerInterval;
+    updateTimer();
+    timerInterval = setInterval(updateTimer, 1000);
+
+  // ── Resend cooldown countdown ─────────────────────────────────────────────────
+  // The cooldown matches the expiry duration by default (set by server).
+  // We track when the last send happened (stored in sessionStorage).
+  let resendInterval = null;
+
+  function startResendCountdown(secondsLeft) {
+    const btn       = document.getElementById('btn-resend');
+    const label     = document.getElementById('resend-countdown');
+    const secsEl    = document.getElementById('resend-secs');
+    btn.disabled    = true;
+
+    function tick() {
+      if (secondsLeft <= 0) {
+        btn.disabled        = false;
+        label.textContent   = '';
+        clearInterval(resendInterval);
+        return;
+      }
+      const m = Math.floor(secondsLeft / 60);
+      const s = secondsLeft % 60;
+      secsEl.textContent   = `${m}:${String(s).padStart(2, '0')}`;
+      label.style.display  = 'block';
+      secondsLeft--;
+    }
+    tick();
+    resendInterval = setInterval(tick, 1000);
+  }
+
+  // Start cooldown immediately (user was just sent a code from login page)
+  startResendCountdown((parseInt(sessionStorage.getItem('2fa_expiry_minutes') || '3')) * 60);
+
+  // ── Submit code ────────────────────────────────────────────────────────────────
+  async function submitCode() {
+    hideAlert();
+    const code = getCode();
+    if (code.length < 6) {
+      showAlert('error', 'Please enter all 6 digits.');
+      setInputsError();
+      return;
+    }
+
+    const btn       = document.getElementById('btn-verify');
+    btn.disabled    = true;
+    btn.textContent = 'Verifying…';
+
+    try {
+      const res  = await fetch(`${API}/auth/2fa.php`, {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ action: 'verify', user_id: userId, code }),
+      });
+      const data = await res.json();
+
+      if (data.success) {
+    showAlert('success', '✅ Identity verified! Redirecting…');
+    clearInterval(timerInterval);
+
+    // Use the real token returned by 2fa.php
+    localStorage.setItem('auth_token', data.token);
+    localStorage.setItem('user', JSON.stringify(data.user));
+
+    // Clear 2FA temp session data
+    sessionStorage.removeItem('2fa_user_id');
+    sessionStorage.removeItem('2fa_email');
+    sessionStorage.removeItem('2fa_expires');
+    sessionStorage.removeItem('2fa_expiry_minutes');
+    sessionStorage.removeItem('2fa_pending_login');
+
+    setTimeout(() => {
+        const role = data.user?.role || 'resident';
+        window.location.href = role === 'resident' ? 'resident-dashboard.html' : 'dashboard.html';
+    }, 1200);
+
+      } else if (data.expired) {
+    showAlert('error', 'Code expired. Please request a new one.');
+    document.getElementById('btn-verify').disabled = true;
+    setInputsError();
+    } else {
+        showAlert('error', data.message || 'Incorrect code. Please try again.');
+        setInputsError();
+        // Clear inputs and refocus for retry
+        inputs.forEach(i => { i.value = ''; i.classList.remove('filled'); });
+        inputs[0].focus();
+    }
+    } catch (err) {
+      showAlert('error', 'Cannot connect to server. Please try again.');
+    } finally {
+      if (!document.getElementById('alert-box').classList.contains('success')) {
+        btn.disabled    = false;
+        btn.textContent = 'Verify Code';
+      }
+    }
+  }
+
+  // ── Resend code ────────────────────────────────────────────────────────────────
+  async function resendCode() {
+    hideAlert();
+    const btn = document.getElementById('btn-resend');
+    btn.disabled = true;
+
+    try {
+      const res  = await fetch(`${API}/auth/2fa.php`, {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ action: 'resend', user_id: userId }),
+      });
+      const data = await res.json();
+
+      if (data.success) {
+        showAlert('info', '📧 New code sent! Check your email.');
+
+        // Reset expiry timer
+        expiryTimestamp = new Date(data.expires_at).getTime();
+        clearInterval(timerInterval);
+        document.getElementById('btn-verify').disabled = false;
+        updateTimer();
+        setInterval(updateTimer, 1000);
+
+        // Reset inputs
+        inputs.forEach(i => { i.value = ''; i.classList.remove('filled','error'); });
+        inputs[0].focus();
+
+        // Restart resend cooldown
+        startResendCountdown(data.expiry_minutes * 60);
+
+      } else if (data.cooldown) {
+        showAlert('error', data.message);
+        startResendCountdown(data.seconds_left);
+      } else {
+        showAlert('error', data.message || 'Failed to resend code.');
+        btn.disabled = false;
+      }
+    } catch (err) {
+      showAlert('error', 'Cannot connect to server. Please try again.');
+      btn.disabled = false;
+    }
+  }
+
+  // Auto-focus first input
+  inputs[0].focus();
+</script>
+</body>
+</html>
