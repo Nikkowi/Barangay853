@@ -158,6 +158,29 @@
 
   <button class="btn-verify" id="btn-verify" onclick="submitCode()">Verify Code</button>
 
+  <!-- Trust device section — shown after successful verify -->
+  <div id="trust-section" style="display:none;margin-bottom:1rem;">
+    <div style="background:#f0f9ff;border:1px solid #bae6fd;border-radius:0.875rem;padding:1rem 1.1rem;text-align:left;">
+      <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.75rem;">
+        <input type="checkbox" id="trust-checkbox" style="width:16px;height:16px;accent-color:#0b2250;cursor:pointer;">
+        <label for="trust-checkbox" style="font-size:0.9rem;font-weight:600;color:#0b2250;cursor:pointer;">
+          🔒 Trust this device
+        </label>
+      </div>
+      <p style="font-size:0.8rem;color:#475569;margin-bottom:0.75rem;line-height:1.5;">
+        Skip 2FA on this browser for a set period. Only use this on your personal device.
+      </p>
+      <div style="display:flex;gap:0.5rem;align-items:center;">
+        <label style="font-size:0.8rem;color:#475569;white-space:nowrap;">Duration:</label>
+        <select id="trust-duration" style="border:1px solid #d1d5db;border-radius:0.5rem;padding:0.35rem 0.6rem;font-size:0.82rem;color:#374151;background:#fff;cursor:pointer;flex:1;">
+          <option value="30">30 days</option>
+          <option value="60">60 days</option>
+          <option value="90">90 days</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
   <!-- Resend -->
   <div class="resend-wrap">
     <button class="btn-resend" id="btn-resend" onclick="resendCode()" disabled>
@@ -346,24 +369,25 @@
       const data = await res.json();
 
       if (data.success) {
-    showAlert('success', '✅ Identity verified! Redirecting…');
-    clearInterval(timerInterval);
+        showAlert('success', '✅ Identity verified!');
+        clearInterval(timerInterval);
 
-    // Use the real token returned by 2fa.php
-    localStorage.setItem('auth_token', data.token);
-    localStorage.setItem('user', JSON.stringify(data.user));
+        // Store auth data
+        localStorage.setItem('auth_token', data.token);
+        localStorage.setItem('user', JSON.stringify(data.user));
 
-    // Clear 2FA temp session data
-    sessionStorage.removeItem('2fa_user_id');
-    sessionStorage.removeItem('2fa_email');
-    sessionStorage.removeItem('2fa_expires');
-    sessionStorage.removeItem('2fa_expiry_minutes');
-    sessionStorage.removeItem('2fa_pending_login');
+        // Clear 2FA temp session data
+        sessionStorage.removeItem('2fa_user_id');
+        sessionStorage.removeItem('2fa_email');
+        sessionStorage.removeItem('2fa_expires');
+        sessionStorage.removeItem('2fa_expiry_minutes');
+        sessionStorage.removeItem('2fa_pending_login');
 
-    setTimeout(() => {
-        const role = data.user?.role || 'resident';
-        window.location.href = role === 'resident' ? 'resident-dashboard.html' : 'dashboard.html';
-    }, 1200);
+        // Show the "Trust this device" panel
+        document.getElementById('trust-section').style.display = 'block';
+        btn.textContent = 'Continue →';
+        btn.disabled    = false;
+        btn.onclick     = () => finalizeTrust(data.token, data.user);
 
       } else if (data.expired) {
     showAlert('error', 'Code expired. Please request a new one.');
@@ -428,6 +452,40 @@
       showAlert('error', 'Cannot connect to server. Please try again.');
       btn.disabled = false;
     }
+  }
+
+  // ── Finalize: optionally trust the device, then redirect ─────────────────────
+  async function finalizeTrust(authToken, user) {
+    const shouldTrust = document.getElementById('trust-checkbox').checked;
+    const duration    = parseInt(document.getElementById('trust-duration').value) || 30;
+    const btn         = document.getElementById('btn-verify');
+    btn.disabled      = true;
+    btn.textContent   = 'Saving…';
+
+    if (shouldTrust) {
+      try {
+        const res  = await fetch(`${API}/auth/2fa.php`, {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` },
+          body:    JSON.stringify({ action: 'trust', user_id: userId, duration_days: duration }),
+        });
+        const data = await res.json();
+        if (data.success) {
+          // Store the trusted token — sent to login.php on next login
+          localStorage.setItem('trusted_token', data.trusted_token);
+          localStorage.setItem('trusted_expires', data.expires_at);
+          localStorage.setItem('trusted_label', data.device_label);
+          showAlert('success', `✅ Device trusted for ${duration} days. Redirecting…`);
+        }
+      } catch (e) {
+        // Non-fatal — proceed without trust
+      }
+    }
+
+    setTimeout(() => {
+      const role = user?.role || 'resident';
+      window.location.href = role === 'resident' ? 'resident-dashboard.html' : 'dashboard.html';
+    }, 900);
   }
 
   // Auto-focus first input

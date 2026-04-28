@@ -24,9 +24,9 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 $data   = json_decode(file_get_contents('php://input'), true);
 $action = trim($data['action'] ?? '');
 
-if (!in_array($action, ['send', 'verify', 'resend'], true)) {
+if (!in_array($action, ['send', 'verify', 'resend', 'trust', 'revoke_trusted'], true)) {
     http_response_code(400);
-    echo json_encode(['success' => false, 'message' => 'Invalid action. Use "send", "verify", or "resend".']);
+    echo json_encode(['success' => false, 'message' => 'Invalid action.']);
     exit();
 }
 
@@ -294,6 +294,142 @@ if ($action === 'verify') {
             'email' => $user['email'],
             'role'  => $user['role'],
         ],
+    ]);
+    exit();
+}
+// ─────────────────────────────────────────────────────────────────────────────
+// ACTION: trust
+// Called after successful 2FA verify when user checks "Trust this device".
+// Creates a trusted_sessions row and returns the token to store in localStorage.
+// ─────────────────────────────────────────────────────────────────────────────
+if ($action === 'trust') {
+    $user = resolveUser($conn, $data);
+    if (!$user) {
+        http_response_code(404);
+        echo json_encode(['success' => false, 'message' => 'User not found.']);
+        exit();
+    }
+
+    // Must send a valid auth token to prove they just passed 2FA
+    $authHeader = isset(getallheaders()['Authorization']) ? getallheaders()['Authorization'] : '';
+    if (!$authHeader || !str_starts_with($authHeader, 'Bearer ')) {
+        http_response_code(401);
+        echo json_encode(['success' => false, 'message' => 'Authorization required.']);
+        exit();
+    }
+    $authToken = substr($authHeader, 7);
+    $authCheck = $conn->prepare("SELECT id FROM personal_access_tokens WHERE token = ? AND tokenable_id = ? AND tokenable_type = 'App\\\\Models\\\\User'");
+    $authCheck->bind_param('si', $authToken, $user['id']);
+    $authCheck->execute();
+    if (!$authCheck->get_result()->fetch_assoc()) {
+        http_response_code(401);
+        echo json_encode(['success' => false, 'message' => 'Invalid auth token.']);
+        exit();
+    }
+
+    // Duration: 30, 60, or 90 days — default 30
+    $allowedDays  = [30, 60, 90];
+    $durationDays = intval($data['duration_days'] ?? 30);
+    if (!in_array($durationDays, $allowedDays, true)) $durationDays = 30;
+
+    $trustedToken = bin2hex(random_bytes(32));
+    $expiresAt    = date('Y-m-d H:i:s', strtotime("+{$durationDays} days"));
+    $ipAddress    = $_SERVER['REMOTE_ADDR'] ?? null;
+    $userAgent    = $_SERVER['HTTP_USER_AGENT'] ?? null;
+
+    // Build a human-readable device label from User-Agent
+    $deviceLabel = 'Unknown Device';
+    if ($userAgent) {
+        if (str_contains($userAgent, 'Chrome'))       $deviceLabel = 'Chrome';
+        elseif (str_contains($userAgent, 'Firefox'))  $deviceLabel = 'Firefox';
+        elseif (str_contains($userAgent, 'Safari'))   $deviceLabel = 'Safari';
+        elseif (str_contains($userAgent, 'Edge'))     $deviceLabel = 'Edge';
+        if (str_contains($userAgent, 'Windows'))      $deviceLabel .= ' on Windows';
+        elseif (str_contains($userAgent, 'Macintosh')) $deviceLabel .= ' on Mac';
+        elseif (str_contains($userAgent, 'Linux'))    $deviceLabel .= ' on Linux';
+        elseif (str_contains($userAgent, 'Android'))  $deviceLabel .= ' on Android';
+        elseif (str_contains($userAgent, 'iPhone'))   $deviceLabel .= ' on iPhone';
+    }
+
+    $ins = $conn->prepare(
+        'INSERT INTO trusted_sessions
+            (user_id, token, device_label, ip_address, user_agent, duration_days, expires_at, last_used_at, created_at)
+         VALUES (?, ?, ?, ?, ?, ?, ?, NOW(), NOW())'
+    );
+    // 7 placeholders: user_id(i), token(s), device_label(s), ip_address(s), user_agent(s), duration_days(i), expires_at(s)
+    $ins->bind_param('issssis',
+        $user['id'],
+        $trustedToken,
+        $deviceLabel,
+        $ipAddress,
+        $userAgent,
+        $durationDays,
+        $expiresAt
+    );
+    if (!$ins->execute()) {
+        error_log('[Trust] Insert failed: ' . $conn->error);
+        echo json_encode(['success' => false, 'message' => 'Failed to save trusted session: ' . $conn->error]);
+        exit();
+    }
+
+    $conn->close();
+
+    echo json_encode([
+        'success'       => true,
+        'trusted_token' => $trustedToken,
+        'expires_at'    => $expiresAt,
+        'duration_days' => $durationDays,
+        'device_label'  => $deviceLabel,
+        'message'       => "This device is now trusted for {$durationDays} days.",
+    ]);
+    exit();
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// ACTION: revoke_trusted
+// Lets an authenticated user revoke all their trusted sessions (or one by token).
+// ─────────────────────────────────────────────────────────────────────────────
+if ($action === 'revoke_trusted') {
+    $user = resolveUser($conn, $data);
+    if (!$user) {
+        http_response_code(404);
+        echo json_encode(['success' => false, 'message' => 'User not found.']);
+        exit();
+    }
+
+    $authHeader = isset(getallheaders()['Authorization']) ? getallheaders()['Authorization'] : '';
+    if (!$authHeader || !str_starts_with($authHeader, 'Bearer ')) {
+        http_response_code(401);
+        echo json_encode(['success' => false, 'message' => 'Authorization required.']);
+        exit();
+    }
+    $authToken = substr($authHeader, 7);
+    $authCheck = $conn->prepare("SELECT id FROM personal_access_tokens WHERE token = ? AND tokenable_id = ?");
+    $authCheck->bind_param('si', $authToken, $user['id']);
+    $authCheck->execute();
+    if (!$authCheck->get_result()->fetch_assoc()) {
+        http_response_code(401);
+        echo json_encode(['success' => false, 'message' => 'Invalid auth token.']);
+        exit();
+    }
+
+    $revokeToken = trim($data['trusted_token'] ?? '');
+    if (!empty($revokeToken)) {
+        // Revoke a specific device
+        $rev = $conn->prepare('UPDATE trusted_sessions SET revoked = 1 WHERE user_id = ? AND token = ?');
+        $rev->bind_param('is', $user['id'], $revokeToken);
+    } else {
+        // Revoke ALL trusted devices for this user
+        $rev = $conn->prepare('UPDATE trusted_sessions SET revoked = 1 WHERE user_id = ?');
+        $rev->bind_param('i', $user['id']);
+    }
+    $rev->execute();
+    $affected = $rev->affected_rows;
+    $conn->close();
+
+    echo json_encode([
+        'success' => true,
+        'message' => "Revoked {$affected} trusted session(s). You will need to verify via 2FA on next login.",
     ]);
     exit();
 }

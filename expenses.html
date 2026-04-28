@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fund Transparency - Barangay 853</title>
+  <link rel="stylesheet" href="public.css">
+  <style>
+    /* ── Page-level overrides ── */
+    .transparency-header {
+      background: linear-gradient(135deg, #1a237e 0%, #283593 60%, #3949ab 100%);
+      color: #fff;
+      padding: 3.5rem 0 2.5rem;
+      text-align: center;
+    }
+    .transparency-header h1 {
+      font-size: 2.4rem;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      margin-bottom: 0.4rem;
+    }
+    .transparency-header p {
+      font-size: 1rem;
+      opacity: 0.82;
+      max-width: 520px;
+      margin: 0 auto;
+    }
+
+    /* ── Budget Summary Cards ── */
+    .budget-summary {
+      background: #f4f6fb;
+      padding: 2.5rem 0 1.5rem;
+    }
+    .summary-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1.25rem;
+    }
+    .summary-card {
+      background: #fff;
+      border-radius: 14px;
+      padding: 1.4rem 1.6rem;
+      box-shadow: 0 2px 12px rgba(26,35,126,0.07);
+      border-left: 5px solid #3949ab;
+      display: flex;
+      flex-direction: column;
+      gap: 0.3rem;
+    }
+    .summary-card.green  { border-left-color: #2e7d32; }
+    .summary-card.red    { border-left-color: #c62828; }
+    .summary-card.orange { border-left-color: #e65100; }
+    .summary-card .s-label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: #888;
+    }
+    .summary-card .s-value {
+      font-size: 1.65rem;
+      font-weight: 800;
+      color: #1a237e;
+    }
+    .summary-card.green  .s-value { color: #2e7d32; }
+    .summary-card.red    .s-value { color: #c62828; }
+    .summary-card.orange .s-value { color: #e65100; }
+    .summary-card .s-sub {
+      font-size: 0.78rem;
+      color: #aaa;
+    }
+
+    /* ── Filter / Period Selector ── */
+    .period-filter {
+      padding: 1.5rem 0 0.5rem;
+      background: #f4f6fb;
+    }
+    .period-tabs {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+    .period-tab {
+      padding: 0.45rem 1.1rem;
+      border-radius: 20px;
+      border: 1.5px solid #c5cae9;
+      background: #fff;
+      color: #3949ab;
+      font-size: 0.83rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.18s;
+    }
+    .period-tab:hover, .period-tab.active {
+      background: #3949ab;
+      color: #fff;
+      border-color: #3949ab;
+    }
+
+    /* ── Timeline Feed ── */
+    .timeline-section {
+      padding: 2.5rem 0 4rem;
+      background: #f4f6fb;
+    }
+    .timeline-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #1a237e;
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .timeline {
+      position: relative;
+      padding-left: 2.5rem;
+    }
+    .timeline::before {
+      content: '';
+      position: absolute;
+      left: 10px;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background: linear-gradient(to bottom, #3949ab, #c5cae9);
+      border-radius: 2px;
+    }
+
+    .timeline-item {
+      position: relative;
+      margin-bottom: 1.4rem;
+      opacity: 0;
+      transform: translateY(16px);
+      animation: fadeUp 0.4s forwards;
+    }
+    .timeline-item:nth-child(1)  { animation-delay: 0.05s; }
+    .timeline-item:nth-child(2)  { animation-delay: 0.10s; }
+    .timeline-item:nth-child(3)  { animation-delay: 0.15s; }
+    .timeline-item:nth-child(4)  { animation-delay: 0.20s; }
+    .timeline-item:nth-child(5)  { animation-delay: 0.25s; }
+    .timeline-item:nth-child(6)  { animation-delay: 0.30s; }
+    .timeline-item:nth-child(7)  { animation-delay: 0.35s; }
+    .timeline-item:nth-child(8)  { animation-delay: 0.40s; }
+    @keyframes fadeUp {
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .timeline-dot {
+      position: absolute;
+      left: -2.05rem;
+      top: 1.1rem;
+      width: 13px;
+      height: 13px;
+      border-radius: 50%;
+      background: #3949ab;
+      border: 2.5px solid #fff;
+      box-shadow: 0 0 0 2px #3949ab;
+    }
+    .timeline-dot.senior  { background: #2e7d32; box-shadow: 0 0 0 2px #2e7d32; }
+    .timeline-dot.event   { background: #e65100; box-shadow: 0 0 0 2px #e65100; }
+    .timeline-dot.infra   { background: #6a1b9a; box-shadow: 0 0 0 2px #6a1b9a; }
+    .timeline-dot.health  { background: #00838f; box-shadow: 0 0 0 2px #00838f; }
+    .timeline-dot.admin   { background: #78909c; box-shadow: 0 0 0 2px #78909c; }
+
+    .timeline-card {
+      background: #fff;
+      border-radius: 12px;
+      padding: 1.1rem 1.4rem;
+      box-shadow: 0 2px 10px rgba(26,35,126,0.06);
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 0.5rem 1.5rem;
+      align-items: start;
+      transition: box-shadow 0.18s, transform 0.18s;
+    }
+    .timeline-card:hover {
+      box-shadow: 0 6px 22px rgba(26,35,126,0.12);
+      transform: translateY(-2px);
+    }
+
+    .tc-left {}
+    .tc-meta {
+      display: flex;
+      align-items: center;
+      gap: 0.55rem;
+      margin-bottom: 0.3rem;
+    }
+    .tc-badge {
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      padding: 0.18rem 0.6rem;
+      border-radius: 20px;
+      color: #fff;
+    }
+    .badge-senior { background: #2e7d32; }
+    .badge-event  { background: #e65100; }
+    .badge-infra  { background: #6a1b9a; }
+    .badge-health { background: #00838f; }
+    .badge-admin  { background: #78909c; }
+    .badge-other  { background: #3949ab; }
+
+    .tc-date {
+      font-size: 0.75rem;
+      color: #aaa;
+      font-weight: 500;
+    }
+    .tc-title {
+      font-size: 0.97rem;
+      font-weight: 700;
+      color: #1a237e;
+      margin-bottom: 0.2rem;
+    }
+    .tc-desc {
+      font-size: 0.83rem;
+      color: #666;
+      line-height: 1.5;
+    }
+    .tc-right {
+      text-align: right;
+      min-width: 120px;
+    }
+    .tc-amount {
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: #c62828;
+    }
+    .tc-balance {
+      font-size: 0.78rem;
+      color: #888;
+      margin-top: 0.2rem;
+    }
+    .tc-balance span {
+      font-weight: 700;
+      color: #2e7d32;
+    }
+    .tc-approved {
+      font-size: 0.72rem;
+      color: #bbb;
+      margin-top: 0.3rem;
+    }
+
+    /* ── Month Group Label ── */
+    .month-group {
+      font-size: 0.78rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: #9fa8da;
+      margin: 1.5rem 0 0.75rem;
+      padding-left: 0.2rem;
+    }
+
+    /* ── Empty State ── */
+    .empty-expenses {
+      text-align: center;
+      padding: 3rem 1rem;
+      color: #aaa;
+    }
+    .empty-expenses .icon { font-size: 3rem; margin-bottom: 0.75rem; }
+    .empty-expenses h3 { color: #888; font-size: 1.1rem; }
+
+    /* ── Notice Banner ── */
+    .transparency-notice {
+      background: #e8eaf6;
+      border-left: 4px solid #3949ab;
+      border-radius: 8px;
+      padding: 0.9rem 1.2rem;
+      margin-bottom: 2rem;
+      font-size: 0.83rem;
+      color: #3949ab;
+      display: flex;
+      align-items: flex-start;
+      gap: 0.6rem;
+    }
+    .transparency-notice .icon { font-size: 1rem; margin-top: 1px; flex-shrink: 0; }
+
+    @media (max-width: 600px) {
+      .timeline-card {
+        grid-template-columns: 1fr;
+      }
+      .tc-right { text-align: left; }
+      .summary-cards { grid-template-columns: 1fr 1fr; }
+      .transparency-header h1 { font-size: 1.7rem; }
+    }
+  </style>
+</head>
+<body class="public-page">
+
+  <!-- Navigation -->
+  <nav class="navbar">
+    <div class="container">
+      <div class="nav-brand">
+        <img src="assets/logo-brgy.png" alt="Barangay 853 Logo" class="nav-logo">
+        <span class="brand-name">Barangay 853</span>
+      </div>
+      <ul class="nav-menu">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="documents.html">Documents</a></li>
+        <li><a href="announcements.html">Announcements</a></li>
+        <li><a href="expenses.html" class="active">Transparency</a></li>
+        <li><a href="report.html">Report</a></li>
+        <li><a href="about.html">About</a></li>
+        <li id="nav-auth"></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- Page Header -->
+  <section class="transparency-header">
+    <div class="container">
+      <h1>💰 Fund Transparency</h1>
+      <p>An open record of barangay expenditures. We are committed to responsible and transparent use of public funds.</p>
+    </div>
+  </section>
+
+  <!-- Budget Summary -->
+  <section class="budget-summary">
+    <div class="container">
+      <div class="summary-cards" id="summary-cards">
+        <div class="summary-card">
+          <span class="s-label">Annual Budget</span>
+          <span class="s-value" id="s-budget">₱0.00</span>
+          <span class="s-sub">Fiscal Year 2025</span>
+        </div>
+        <div class="summary-card red">
+          <span class="s-label">Total Disbursed</span>
+          <span class="s-value" id="s-spent">₱0.00</span>
+          <span class="s-sub" id="s-spent-pct">0% of budget used</span>
+        </div>
+        <div class="summary-card green">
+          <span class="s-label">Remaining Balance</span>
+          <span class="s-value" id="s-balance">₱0.00</span>
+          <span class="s-sub">Available funds</span>
+        </div>
+        <div class="summary-card orange">
+          <span class="s-label">No. of Transactions</span>
+          <span class="s-value" id="s-count">0</span>
+          <span class="s-sub">Recorded entries</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Period Filter -->
+  <section class="period-filter">
+    <div class="container">
+      <div class="period-tabs" id="period-tabs">
+        <button class="period-tab active" onclick="filterByPeriod('all', this)">All Records</button>
+        <button class="period-tab" onclick="filterByPeriod('2025-04', this)">April 2025</button>
+        <button class="period-tab" onclick="filterByPeriod('2025-03', this)">March 2025</button>
+        <button class="period-tab" onclick="filterByPeriod('2025-02', this)">February 2025</button>
+        <button class="period-tab" onclick="filterByPeriod('2025-01', this)">January 2025</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Timeline Feed -->
+  <section class="timeline-section">
+    <div class="container">
+
+      <div class="transparency-notice">
+        <span class="icon">ℹ️</span>
+        <span>All expenditures listed here are officially recorded and approved by the Barangay Council. This page is updated monthly. For inquiries, please contact the Barangay Treasurer.</span>
+      </div>
+
+      <div class="timeline-title">
+        📋 Expense Records
+      </div>
+
+      <div class="timeline" id="timeline-container">
+        <div class="empty-expenses">
+          <div class="icon">⏳</div>
+          <h3>Loading records…</h3>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-content">
+        <div class="footer-section">
+          <h4>Barangay 853</h4>
+          <p>Serving the community with dedication and transparency</p>
+        </div>
+        <div class="footer-section">
+          <h4>Quick Links</h4>
+          <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="documents.html">Documents</a></li>
+            <li><a href="announcements.html">Announcements</a></li>
+            <li><a href="expenses.html">Transparency</a></li>
+            <li><a href="about.html">About</a></li>
+          </ul>
+        </div>
+        <div class="footer-section">
+          <h4>Contact Us</h4>
+          <p>Email: barangay853@example.com</p>
+          <p>Phone: (02) 1234-5678</p>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2025 Barangay 853. All rights reserved.</p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="public.js"></script>
+  <script>
+    // ── Static placeholder data (replace with API call when backend is ready) ──
+    // Each entry: { id, date, category, title, description, amount, balance, approved_by }
+    const ANNUAL_BUDGET = 500000;
+
+    const staticExpenses = [
+      {
+        id: 1,
+        date: '2025-04-15',
+        category: 'senior',
+        title: 'Senior Citizen Cash Assistance',
+        description: 'Monthly cash aid distribution for registered senior citizens (60+) in Barangay 853.',
+        amount: 12500,
+        balance: 412300,
+        approved_by: 'Brgy. Captain Juan dela Cruz'
+      },
+      {
+        id: 2,
+        date: '2025-04-10',
+        category: 'health',
+        title: 'Free Medical Mission Supplies',
+        description: 'Purchase of medicines, bandages, and consumables for the quarterly medical mission.',
+        amount: 8750,
+        balance: 424800,
+        approved_by: 'Brgy. Treasurer Maria Santos'
+      },
+      {
+        id: 3,
+        date: '2025-04-02',
+        category: 'infra',
+        title: 'Street Light Repair — Zone 95',
+        description: 'Replacement of 6 defective street lights along Zone 95 main road.',
+        amount: 4200,
+        balance: 433550,
+        approved_by: 'Brgy. Captain Juan dela Cruz'
+      },
+      {
+        id: 4,
+        date: '2025-03-15',
+        category: 'senior',
+        title: 'Senior Citizen Cash Assistance',
+        description: 'Monthly cash aid distribution for registered senior citizens (60+) in Barangay 853.',
+        amount: 12500,
+        balance: 437750,
+        approved_by: 'Brgy. Captain Juan dela Cruz'
+      },
+      {
+        id: 5,
+        date: '2025-03-08',
+        category: 'event',
+        title: "National Women's Month Celebration",
+        description: "Program expenses for the Barangay's Women's Month activities including materials and food.",
+        amount: 6300,
+        balance: 450250,
+        approved_by: 'Brgy. Treasurer Maria Santos'
+      },
+      {
+        id: 6,
+        date: '2025-03-01',
+        category: 'admin',
+        title: 'Office Supplies & Printing',
+        description: 'Quarterly replenishment of office supplies, ink, and document printing for barangay operations.',
+        amount: 3200,
+        balance: 456550,
+        approved_by: 'Brgy. Secretary Ana Reyes'
+      },
+      {
+        id: 7,
+        date: '2025-02-15',
+        category: 'senior',
+        title: 'Senior Citizen Cash Assistance',
+        description: 'Monthly cash aid distribution for registered senior citizens (60+) in Barangay 853.',
+        amount: 12500,
+        balance: 459750,
+        approved_by: 'Brgy. Captain Juan dela Cruz'
+      },
+      {
+        id: 8,
+        date: '2025-02-10',
+        category: 'health',
+        title: 'Dengue Prevention Materials',
+        description: 'Purchase of larvicides, fogging equipment rental, and IEC materials for dengue drive.',
+        amount: 5500,
+        balance: 472250,
+        approved_by: 'Brgy. Captain Juan dela Cruz'
+      },
+      {
+        id: 9,
+        date: '2025-01-28',
+        category: 'infra',
+        title: 'Barangay Hall Painting & Maintenance',
+        description: 'Annual repainting and minor repairs of the Barangay Hall exterior and interior.',
+        amount: 9800,
+        balance: 477750,
+        approved_by: 'Brgy. Treasurer Maria Santos'
+      },
+      {
+        id: 10,
+        date: '2025-01-15',
+        category: 'senior',
+        title: 'Senior Citizen Cash Assistance',
+        description: 'Monthly cash aid distribution for registered senior citizens (60+) in Barangay 853.',
+        amount: 12500,
+        balance: 487550,
+        approved_by: 'Brgy. Captain Juan dela Cruz'
+      }
+    ];
+
+    let allExpenses = [];
+
+    const categoryConfig = {
+      senior: { label: 'Senior Aid',    dot: 'senior', badge: 'badge-senior' },
+      event:  { label: 'Events',        dot: 'event',  badge: 'badge-event'  },
+      infra:  { label: 'Infrastructure',dot: 'infra',  badge: 'badge-infra'  },
+      health: { label: 'Health',        dot: 'health', badge: 'badge-health' },
+      admin:  { label: 'Administrative',dot: 'admin',  badge: 'badge-admin'  },
+    };
+
+    function formatPHP(amount) {
+      return '₱' + Number(amount).toLocaleString('en-PH', { minimumFractionDigits: 2 });
+    }
+
+    function formatDate(dateStr) {
+      return new Date(dateStr).toLocaleDateString('en-PH', {
+        year: 'numeric', month: 'long', day: 'numeric'
+      });
+    }
+
+    function getMonthLabel(dateStr) {
+      return new Date(dateStr).toLocaleDateString('en-PH', { year: 'numeric', month: 'long' });
+    }
+
+    function updateSummary(data) {
+      const totalSpent  = data.reduce((s, e) => s + Number(e.amount), 0);
+      const remaining   = data.length > 0 ? Number(data[0].balance) : ANNUAL_BUDGET;
+      const pct         = ((totalSpent / ANNUAL_BUDGET) * 100).toFixed(1);
+
+      document.getElementById('s-budget').textContent  = formatPHP(ANNUAL_BUDGET);
+      document.getElementById('s-spent').textContent   = formatPHP(totalSpent);
+      document.getElementById('s-spent-pct').textContent = pct + '% of budget used';
+      document.getElementById('s-balance').textContent = formatPHP(remaining);
+      document.getElementById('s-count').textContent   = data.length;
+    }
+
+    function renderTimeline(data) {
+      const container = document.getElementById('timeline-container');
+
+      if (!data || data.length === 0) {
+        container.innerHTML = `
+          <div class="empty-expenses">
+            <div class="icon">📂</div>
+            <h3>No expense records found</h3>
+            <p>No records available for this period.</p>
+          </div>`;
+        return;
+      }
+
+      // Group by month
+      const groups = {};
+      data.forEach(e => {
+        const m = getMonthLabel(e.date);
+        if (!groups[m]) groups[m] = [];
+        groups[m].push(e);
+      });
+
+      let html = '';
+      let itemIndex = 0;
+      Object.entries(groups).forEach(([month, entries]) => {
+        html += `<div class="month-group">📅 ${month}</div>`;
+        entries.forEach(e => {
+          const cfg = categoryConfig[e.category] || { label: e.category, dot: '', badge: 'badge-other' };
+          html += `
+            <div class="timeline-item" style="animation-delay:${(itemIndex * 0.07).toFixed(2)}s">
+              <div class="timeline-dot ${cfg.dot}"></div>
+              <div class="timeline-card">
+                <div class="tc-left">
+                  <div class="tc-meta">
+                    <span class="tc-badge ${cfg.badge}">${cfg.label}</span>
+                    <span class="tc-date">${formatDate(e.date)}</span>
+                  </div>
+                  <div class="tc-title">${e.title}</div>
+                  <div class="tc-desc">${e.description}</div>
+                  <div class="tc-approved">✅ Approved by: ${e.approved_by}</div>
+                </div>
+                <div class="tc-right">
+                  <div class="tc-amount">−${formatPHP(e.amount)}</div>
+                  <div class="tc-balance">Balance after: <span>${formatPHP(e.balance)}</span></div>
+                </div>
+              </div>
+            </div>`;
+          itemIndex++;
+        });
+      });
+
+      container.innerHTML = html;
+    }
+
+    function filterByPeriod(period, el) {
+      document.querySelectorAll('.period-tab').forEach(t => t.classList.remove('active'));
+      el.classList.add('active');
+
+      let filtered = allExpenses;
+      if (period !== 'all') {
+        filtered = allExpenses.filter(e => e.date.startsWith(period));
+      }
+      renderTimeline(filtered);
+      updateSummary(filtered);
+    }
+
+    async function loadExpenses() {
+  try {
+    const BASE_URL = window.API || window.location.origin + '/Barangay853';
+    const res  = await fetch(`${BASE_URL}/expenses/index.php?public=1`);
+    const data = await res.json();
+    if (data.success && data.data && data.data.length > 0) {
+      allExpenses = data.data.map(r => ({
+        id:          r.id,
+        date:        r.date,
+        category:    r.category,
+        title:       r.title,
+        description: r.description,
+        amount:      parseFloat(r.amount),
+        balance:     parseFloat(r.balance_after),
+        approved_by: r.approved_by
+      }));
+    } else {
+      allExpenses = staticExpenses; // fallback if DB is empty
+    }
+  } catch (err) {
+    console.error('Failed to load expenses:', err);
+    allExpenses = staticExpenses;
+  }
+
+  renderTimeline(allExpenses);
+  updateSummary(allExpenses);
+  
+    }
+    // Initial load
+    loadExpenses();
+  </script>
+</body>
+</html>
