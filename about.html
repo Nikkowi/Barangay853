@@ -59,46 +59,20 @@
         </div>
       </div>
 
-      <!-- Officials -->
+      <!-- Officials (loaded dynamically) -->
       <div class="officials-section">
         <h2>Barangay Officials</h2>
         <p class="section-subtitle">Meet our dedicated leaders serving the community</p>
 
-        <div class="officials-grid">
-          <div class="official-card">
-            <div class="official-photo"><img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="Male Profile" style="width:100%;height:100%;border-radius:50%;object-fit:cover;"></div>
-            <h4>Hon. Roger Ferrer</h4>
-            <p class="position">Barangay Chairman</p>
-          </div>
-          <div class="official-card">
-            <div class="official-photo"><img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="Male Profile" style="width:100%;height:100%;border-radius:50%;object-fit:cover;"></div>
-            <h4>Wilfredo Delos Santos</h4>
-            <p class="position">Barangay Secretary</p>
-          </div>
-          <div class="official-card">
-            <div class="official-photo"><img src="https://cdn-icons-png.flaticon.com/512/3135/3135789.png" alt="Female Profile" style="width:100%;height:100%;border-radius:50%;object-fit:cover;"></div>
-            <h4>Adey Gregorio</h4>
-            <p class="position">Barangay Treasurer</p>
-          </div>
+        <!-- Main Officials (Chairman, Secretary, Treasurer) -->
+        <div class="officials-grid" id="main-officials-grid">
+          <div style="grid-column:1/-1;text-align:center;padding:2rem;color:#94a3b8;">Loading officials…</div>
         </div>
 
-        <h3 style="margin-top: 2rem; margin-bottom: 1rem; color: #0b2250;">Barangay Council & SK</h3>
-        <div class="kagawads-grid">
-          <div class="kagawad-card">
-            <div class="kagawad-photo"><img src="https://cdn-icons-png.flaticon.com/512/3135/3135789.png" alt="Female Profile" style="width:100%;height:100%;border-radius:50%;object-fit:cover;"></div>
-            <h5>Hon. Gemma Blaquera</h5>
-            <p>Kagawad - Health & Sanitation</p>
-          </div>
-          <div class="kagawad-card">
-            <div class="kagawad-photo"><img src="https://cdn-icons-png.flaticon.com/512/3135/3135789.png" alt="Female Profile" style="width:100%;height:100%;border-radius:50%;object-fit:cover;"></div>
-            <h5>Hon. Merlita Galon</h5>
-            <p>Kagawad - Services</p>
-          </div>
-          <div class="kagawad-card">
-            <div class="kagawad-photo"><img src="https://cdn-icons-png.flaticon.com/512/3135/3135789.png" alt="Female Profile" style="width:100%;height:100%;border-radius:50%;object-fit:cover;"></div>
-            <h5>Hon. Mica Grace Villaluz</h5>
-            <p>SK Chairman</p>
-          </div>
+        <!-- Council & SK -->
+        <div id="council-section" style="display:none">
+          <h3 style="margin-top:2rem;margin-bottom:1rem;color:#0b2250;">Barangay Council & SK</h3>
+          <div class="kagawads-grid" id="council-grid"></div>
         </div>
       </div>
 
@@ -174,6 +148,67 @@
 
   <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script src="public.js"></script>
   <script>
+
+    // ── Load officials from API ───────────────────────────────────────────────
+    const MALE_AVATAR   = 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png';
+    const FEMALE_AVATAR = 'https://cdn-icons-png.flaticon.com/512/3135/3135789.png';
+
+    function officialPhoto(o) {
+      if (o.photo_url) return `${API}/${o.photo_url}`;
+      return (o.gender === 'Female') ? FEMALE_AVATAR : MALE_AVATAR;
+    }
+
+    async function loadOfficials() {
+      try {
+        const res  = await fetch(`${API}/officials/index.php`);
+        const data = await res.json();
+        if (!data.success || !data.data.length) {
+          document.getElementById('main-officials-grid').innerHTML =
+            '<div style="grid-column:1/-1;text-align:center;padding:2rem;color:#94a3b8;">No officials listed yet.</div>';
+          return;
+        }
+
+        const mainRoles   = ['Chairman','Secretary','Treasurer'];
+        const councilRoles = ['Kagawad','SK Chairman','SK Kagawad'];
+
+        const main    = data.data.filter(o => mainRoles.some(r => o.position.includes(r)));
+        const council = data.data.filter(o => !mainRoles.some(r => o.position.includes(r)));
+
+        // Main officials grid
+        document.getElementById('main-officials-grid').innerHTML = main.length
+          ? main.map(o => `
+            <div class="official-card">
+              <div class="official-photo">
+                <img src="${officialPhoto(o)}" alt="${o.name}"
+                  style="width:100%;height:100%;border-radius:50%;object-fit:cover;"
+                  onerror="this.src='${o.gender === 'Female' ? FEMALE_AVATAR : MALE_AVATAR}'">
+              </div>
+              <h4>${o.name}</h4>
+              <p class="position">${o.position}</p>
+            </div>`).join('')
+          : '<div style="grid-column:1/-1;text-align:center;padding:1rem;color:#94a3b8;">No main officials found.</div>';
+
+        // Council & SK grid
+        if (council.length) {
+          document.getElementById('council-section').style.display = 'block';
+          document.getElementById('council-grid').innerHTML = council.map(o => `
+            <div class="kagawad-card">
+              <div class="kagawad-photo">
+                <img src="${officialPhoto(o)}" alt="${o.name}"
+                  style="width:100%;height:100%;border-radius:50%;object-fit:cover;"
+                  onerror="this.src='${o.gender === 'Female' ? FEMALE_AVATAR : MALE_AVATAR}'">
+              </div>
+              <h5>${o.name}</h5>
+              <p>${o.position}</p>
+            </div>`).join('');
+        }
+      } catch(e) {
+        document.getElementById('main-officials-grid').innerHTML =
+          '<div style="grid-column:1/-1;text-align:center;padding:2rem;color:#94a3b8;">Could not load officials.</div>';
+      }
+    }
+
+    loadOfficials();
 
     async function submitContact(e) {
       e.preventDefault();

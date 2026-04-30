@@ -346,7 +346,7 @@
         if (!data.success) throw new Error(data.message || 'Failed to load');
 
         // ── Stats ──
-        const budget  = parseFloat(data.annual_budget || 0);
+        const budget  = parseFloat(data.annual_budget || 150000);
         const spent   = parseFloat(data.total_spent   || 0);
         const balance = budget - spent;
         const pct     = budget > 0 ? Math.min((spent / budget) * 100, 100).toFixed(1) : 0;

@@ -387,6 +387,8 @@
         document.getElementById('trust-section').style.display = 'block';
         btn.textContent = 'Continue →';
         btn.disabled    = false;
+        // ── FIX: remove the old submitCode onclick before assigning the new one ──
+        btn.removeAttribute('onclick');
         btn.onclick     = () => finalizeTrust(data.token, data.user);
 
       } else if (data.expired) {
@@ -476,16 +478,16 @@
           localStorage.setItem('trusted_expires', data.expires_at);
           localStorage.setItem('trusted_label', data.device_label);
           showAlert('success', `✅ Device trusted for ${duration} days. Redirecting…`);
+          await new Promise(r => setTimeout(r, 1200));
         }
       } catch (e) {
         // Non-fatal — proceed without trust
       }
     }
 
-    setTimeout(() => {
-      const role = user?.role || 'resident';
-      window.location.href = role === 'resident' ? 'resident-dashboard.html' : 'dashboard.html';
-    }, 900);
+    // ── FIX: redirect only after trust fetch completes (no blind 900ms timeout) ──
+    const role = user?.role || 'resident';
+    window.location.href = role === 'resident' ? 'resident-dashboard.html' : 'dashboard.html';
   }
 
   // Auto-focus first input

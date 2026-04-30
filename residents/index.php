@@ -132,6 +132,35 @@ switch ($method) {
         );
         $stmt->execute();
         $newId = $conn->insert_id;
+        
+// Assign to household if provided
+if (!empty($data['household_id']) && !empty($data['household_role'])) {
+    $hhId   = intval($data['household_id']);
+    $hhRole = $data['household_role'];
+
+    // Validate role value
+    $allowedRoles = ['head','spouse','child','sibling','extended','boarder','other'];
+    if (!in_array($hhRole, $allowedRoles)) {
+        $hhRole = 'other';
+    }
+
+    // If this person is being set as head, demote any existing head to 'other'
+    if ($hhRole === 'head') {
+        $demote = $conn->prepare(
+            'UPDATE residents SET household_role = \'other\'
+             WHERE household_id = ? AND household_role = \'head\''
+        );
+        $demote->bind_param('i', $hhId);
+        $demote->execute();
+    }
+
+    $assignStmt = $conn->prepare(
+        'UPDATE residents SET household_id = ?, household_role = ? WHERE id = ?'
+    );
+    $assignStmt->bind_param('isi', $hhId, $hhRole, $newId);
+    $assignStmt->execute();
+}
+
         logActivity($conn, $actorName, 'Created', 'Resident', 'RES-' . $newId);
         echo json_encode(['success' => true, 'message' => 'Resident added successfully', 'id' => $newId]);
         break;

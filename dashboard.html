@@ -213,9 +213,10 @@
         <li onclick="switchSection('blotter',this)"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="8" r="3.5"/><path d="M5 20c0-3.9 3.1-7 7-7s7 3.1 7 7"/></svg></span><span>Blotter & Disputes</span></li>
         <li onclick="switchSection('expenses',this)"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="2" y="6" width="20" height="14" rx="2"/><path d="M2 10h20"/><path d="M6 14h4"/><path d="M14 14h4"/></svg></span><span>Fund Management</span></li>
         <li onclick="switchSection('announcements',this)"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 10v4"/><path d="M6 8h6l5-3v14l-5-3H6z"/></svg></span><span>Announcements</span></li>
+        <li onclick="switchSection('familytree',this)"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="5" r="2"/><path d="M12 7v4"/><path d="M8 11H4a1 1 0 0 0-1 1v2a1 1 0 0 0 1 1h4"/><path d="M16 11h4a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1h-4"/><path d="M8 15v2a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-2"/><path d="M12 11v4"/></svg></span><span>Family Tree</span></li>
+        <li onclick="switchSection('officials',this)"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="8" r="3.5"/><path d="M3 20c0-4 4-7 9-7s9 3 9 7"/><path d="M17 8l2 2 4-4"/></svg></span><span>Brgy. Officials</span></li>
         <li onclick="switchSection('statistics',this)"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></span><span>Reports & Statistics</span></li>
         <li id="nav-audit" onclick="switchSection('auditlog',this)"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/></svg></span><span>Audit Log</span></li>
-        <li onclick="switchSection('settings',this)"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span><span>Settings</span></li>
         
       </ul>
     </nav>
@@ -616,6 +617,49 @@
         </div>
       </div>
     </div>
+
+    <!-- ── BARANGAY OFFICIALS ──────────────────────────────────────────────── -->
+    <div id="section-officials" class="section-page">
+      <div class="page-header" style="display:flex;justify-content:space-between;align-items:center">
+        <div><h1>Barangay Officials</h1><p>Manage officials displayed on the public About page</p></div>
+        <button class="btn-primary" onclick="showOfficialModal()">+ Add Official</button>
+      </div>
+
+      <!-- Officials table -->
+      <div class="panel">
+        <div class="data-table-wrap"><table class="data-table">
+          <thead><tr><th>Photo</th><th>Name</th><th>Position</th><th>Gender</th><th>Sort Order</th><th style="text-align:center">Action</th></tr></thead>
+          <tbody id="officials-tbody"><tr><td colspan="6" class="loading">Loading…</td></tr></tbody>
+        </table></div>
+      </div>
+    </div>
+
+    <!-- ── FAMILY TREE ─────────────────────────────────────────────────────── -->
+    <div id="section-familytree" class="section-page">
+      <div class="panel" style="padding:1.5rem;">
+        <div class="panel-heading">
+          <div>
+            <h2>Family Tree</h2>
+            <p class="muted">Household family structures</p>
+          </div>
+        </div>
+        <div id="familytree-content" style="margin-top:1rem;">
+          <div style="display:flex;gap:.75rem;margin-bottom:1.5rem;">
+            <input id="familytree-search" type="text" placeholder="Search by household code, head name, or address..."
+              style="flex:1;padding:.6rem 1rem;border:1px solid #e2e8f0;border-radius:8px;font-size:.9rem;outline:none;"
+              onkeydown="if(event.key==='Enter')loadFamilyTree()" />
+            <button onclick="loadFamilyTree()"
+              style="padding:.6rem 1.2rem;background:#0b2250;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:.9rem;font-weight:600;">
+              Search
+            </button>
+          </div>
+          <div id="familytree-result">
+            <p class="muted" style="text-align:center;padding:2rem;">Search for a household to view its family tree.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
   </main>
 </div>
 
@@ -928,7 +972,7 @@ function switchSection(name, el) {
   document.querySelectorAll('.sidebar-nav li').forEach(l => l.classList.remove('active'));
   document.getElementById(`section-${name}`).classList.add('active');
   if (el) el.classList.add('active');
-  const loaders = { dashboard:loadDashboard, residents:loadResidents, documents:loadDocuments, blotter:loadBlotter, announcements:loadAnnouncements, auditlog:loadAuditLog, users:loadUsers, statistics:loadStatistics, expenses:loadExpenses };
+  const loaders = { dashboard:loadDashboard, residents:loadResidents, documents:loadDocuments, blotter:loadBlotter, announcements:loadAnnouncements, auditlog:loadAuditLog, users:loadUsers, statistics:loadStatistics, expenses:loadExpenses, familytree:loadFamilyTree, officials:loadOfficials };
   if (loaders[name]) loaders[name]();
 }
 
@@ -1701,7 +1745,7 @@ async function loadResidents() {
         <td>${r.civil_status||'—'}</td>
         <td>${statusBadge(r.resident_type)}</td>
         <td onclick="event.stopPropagation()" style="text-align:center;">
-          <button class="btn-secondary" style="padding:.3rem .6rem;font-size:.78rem" onclick="openEditResident(${r.id},'${(r.full_name||'').replace(/'/g,"\\'")}','${r.gender||''}','${r.date_of_birth||''}','${r.contact_mobile||''}','${r.contact_email||''}','${r.civil_status||''}','${r.resident_type||''}',${r.is_senior_citizen||0},${r.is_pwd||0},${r.registered_voter||0},'${(r.place_of_birth||'').replace(/'/g,"\\'")}','${(r.nationality||'Filipino').replace(/'/g,"\\'")}','${(r.religion||'').replace(/'/g,"\\'")}')" >Edit</button>
+          <button class="btn-secondary" style="padding:.3rem .6rem;font-size:.78rem" onclick="openEditResident(${r.id},'${(r.full_name||'').replace(/'/g,"\\'")}','${r.gender||''}','${r.date_of_birth||''}','${r.contact_mobile||''}','${r.contact_email||''}','${r.civil_status||''}','${r.resident_type||''}',${r.is_senior_citizen||0},${r.is_pwd||0},${r.registered_voter||0},'${(r.place_of_birth||'').replace(/'/g,"\\'")}','${(r.nationality||'Filipino').replace(/'/g,"\\'")}','${(r.religion||'').replace(/'/g,"\\'")}',${r.household_id||'null'},'${r.household_role||''}','${(r.household_code||'').replace(/'/g,"\\'")}','${(r.address_line||'').replace(/'/g,"\\'")}')">Edit</button>
         </td>
         <td onclick="event.stopPropagation()" style="text-align:center;">
           <button class="upload-photo-btn" onclick="openPhotoModal(${r.id},'${(r.full_name||'').replace(/'/g,"\\'")}')">📷 Photo</button>
@@ -2079,12 +2123,19 @@ async function loadContactMessages() {
 }
 
 
-function showAddResident() { document.getElementById('modal-add-resident').style.display='flex'; }
+function showAddResident() {
+  document.getElementById('modal-add-resident').style.display = 'flex';
+  // Reset household step to default state
+  hhAssignReset();
+  // Load households for the dropdown
+  hhLoadDropdown();
+}
 function closeAddResident() {
-  document.getElementById('modal-add-resident').style.display='none';
+  document.getElementById('modal-add-resident').style.display = 'none';
   document.getElementById('form-add-resident').reset();
   document.getElementById('religion-other-group').style.display = 'none';
   document.getElementById('religion-other').required = false;
+  hhAssignReset();
 }
 function toggleReligionOther() {
   const choice = document.getElementById('religion-choice').value;
@@ -2100,6 +2151,43 @@ function toggleReligionOther() {
   }
 }
 
+// ── Household Assignment helpers ─────────────────────────────────────────────
+function hhAssignReset() {
+  const modeEl = document.getElementById('hh-assign-mode');
+  if (modeEl) modeEl.value = 'skip';
+  hhToggleAssignPanel();
+}
+
+function hhToggleAssignPanel() {
+  const mode     = document.getElementById('hh-assign-mode')?.value || 'skip';
+  const existing = document.getElementById('hh-panel-existing');
+  const newPanel = document.getElementById('hh-panel-new');
+  if (existing) existing.style.display = mode === 'existing' ? 'block' : 'none';
+  if (newPanel) newPanel.style.display  = mode === 'new'      ? 'block' : 'none';
+  // toggle required on new-household fields
+  ['hh-new-address'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.required = (mode === 'new');
+  });
+}
+
+async function hhLoadDropdown() {
+  const sel = document.getElementById('hh-existing-select');
+  if (!sel) return;
+  sel.innerHTML = '<option value="">Loading households\u2026</option>';
+  try {
+    const res  = await fetch(`${API}/households/index.php`, { headers: authHeaders() });
+    const data = await res.json();
+    if (!data.success) throw new Error(data.message);
+    sel.innerHTML = '<option value="">-- Select household --</option>'
+      + data.data.map(h =>
+          `<option value="${h.id}">${h.household_code} &mdash; ${h.address_line}${h.head_name ? ' (' + h.head_name + ')' : ''}</option>`
+        ).join('');
+  } catch(e) {
+    sel.innerHTML = '<option value="">Failed to load households</option>';
+  }
+}
+
 async function handleAddResident(e) {
   e.preventDefault();
   const btn = document.getElementById('btn-submit-resident');
@@ -2107,9 +2195,9 @@ async function handleAddResident(e) {
   const fd = new FormData(e.target);
   const payload = Object.fromEntries(fd.entries());
 
-  // Resolve religion: if "Others" use the specified text, else use the dropdown value
+  // Resolve religion
   const religionChoice = document.getElementById('religion-choice').value;
-  const religionOther = document.getElementById('religion-other').value.trim();
+  const religionOther  = document.getElementById('religion-other').value.trim();
   if (religionChoice === 'Others') {
     if (!religionOther) { alert('Please specify your religion.'); btn.textContent = 'Add Resident'; btn.disabled = false; return; }
     payload.religion = religionOther;
@@ -2118,13 +2206,62 @@ async function handleAddResident(e) {
   }
 
   payload.is_senior_citizen = fd.get('is_senior_citizen') ? 1 : 0;
-  payload.is_pwd = fd.get('is_pwd') ? 1 : 0;
-  payload.registered_voter = fd.get('registered_voter') ? 1 : 0;
+  payload.is_pwd             = fd.get('is_pwd')             ? 1 : 0;
+  payload.registered_voter   = fd.get('registered_voter')   ? 1 : 0;
+
+  // ── Household assignment ──────────────────────────────────────────────────
+  const mode = document.getElementById('hh-assign-mode')?.value || 'skip';
+
+  if (mode === 'existing') {
+    const hhId   = document.getElementById('hh-existing-select')?.value;
+    const hhRole = document.getElementById('hh-existing-role')?.value || 'other';
+    if (!hhId) { alert('Please select a household.'); btn.textContent = 'Add Resident'; btn.disabled = false; return; }
+    payload.household_id   = hhId;
+    payload.household_role = hhRole;
+  }
+
+  if (mode === 'new') {
+    const newAddr  = document.getElementById('hh-new-address')?.value.trim();
+    const newPurok = document.getElementById('hh-new-purok')?.value.trim();
+    if (!newAddr) { alert('Please enter the household address.'); btn.textContent = 'Add Resident'; btn.disabled = false; return; }
+    // Create the household first
+    try {
+      const hhRes  = await fetch(`${API}/households/index.php`, {
+        method: 'POST', headers: authHeaders(),
+        body: JSON.stringify({
+          address_line: newAddr,
+          purok_sitio:  newPurok || null,
+          zone:         'Zone 93',
+          barangay:     'Barangay 853',
+          city:         'Pandacan, Manila',
+          province:     'Metro Manila',
+          postal_code:  '1011'
+        })
+      });
+      const hhData = await hhRes.json();
+      if (!hhData.success) throw new Error(hhData.message || 'Could not create household');
+      payload.household_id   = hhData.id;
+      payload.household_role = 'head'; // new household → this person is the head
+    } catch(err) {
+      alert('Household creation failed: ' + err.message);
+      btn.textContent = 'Add Resident'; btn.disabled = false;
+      return;
+    }
+  }
+
   try {
-    const res = await fetch(`${API}/residents/index.php`, { method:'POST', headers: authHeaders(), body: JSON.stringify(payload) });
+    const res  = await fetch(`${API}/residents/index.php`, { method:'POST', headers: authHeaders(), body: JSON.stringify(payload) });
     const data = await res.json();
-    if (data.success) { await logActivity('Created', 'Resident', 'RES-' + (data.id || '')); closeAddResident(); loadResidents(); }
-    else alert(data.message || 'Error adding resident');
+    if (data.success) {
+      await logActivity('Created', 'Resident', 'RES-' + (data.id || ''));
+      if (mode === 'new')      showToast('\u2705 Resident added and new household created!', 'success');
+      else if (mode === 'existing') showToast('\u2705 Resident added to household!', 'success');
+      else                     showToast('\u2705 Resident added successfully!', 'success');
+      closeAddResident();
+      loadResidents();
+    } else {
+      alert(data.message || 'Error adding resident');
+    }
   } catch(err) { console.error(err); }
   finally { btn.textContent = 'Add Resident'; btn.disabled = false; }
 }
@@ -2451,7 +2588,7 @@ async function handleEditAnnouncement(e) {
 
 // ── EDIT RESIDENT ─────────────────────────────────────────────────────────────
 const KNOWN_RELIGIONS = ['Catholic','Islam','Iglesia ni Cristo','Born Again Christian'];
-function openEditResident(id, fullName, gender, dob, mobile, email, civilStatus, residentType, isSenior, isPwd, isVoter, placeOfBirth, nationality, religion) {
+function openEditResident(id, fullName, gender, dob, mobile, email, civilStatus, residentType, isSenior, isPwd, isVoter, placeOfBirth, nationality, religion, householdId, householdRole, householdCode, addressLine) {
   document.getElementById('edit-res-id').value = id;
   document.getElementById('edit-res-name').value = fullName;
   document.getElementById('edit-res-gender').value = gender;
@@ -2465,8 +2602,9 @@ function openEditResident(id, fullName, gender, dob, mobile, email, civilStatus,
   document.getElementById('edit-res-voter').checked = isVoter == 1;
   document.getElementById('edit-res-pob').value = placeOfBirth || '';
   document.getElementById('edit-res-nationality').value = nationality || 'Filipino';
-  // Populate religion dropdown
-  const religionSelect = document.getElementById('edit-res-religion-choice');
+
+  // Religion dropdown
+  const religionSelect     = document.getElementById('edit-res-religion-choice');
   const religionOtherGroup = document.getElementById('edit-res-religion-other-group');
   const religionOtherInput = document.getElementById('edit-res-religion-other');
   if (KNOWN_RELIGIONS.includes(religion)) {
@@ -2484,13 +2622,69 @@ function openEditResident(id, fullName, gender, dob, mobile, email, civilStatus,
     religionOtherGroup.style.display = 'none';
     religionOtherInput.required = false;
   }
+
+  // ── Household section ──────────────────────────────────────────────────────
+  // Store current values as data attrs for use in handleEditResident
+  const hhMode = document.getElementById('edit-hh-mode');
+  const hhCurrentBox = document.getElementById('edit-hh-current-box');
+  const hhCurrentInfo = document.getElementById('edit-hh-current-info');
+
+  if (householdId && householdId !== 'null') {
+    // Resident IS in a household — show current assignment
+    hhCurrentBox.style.display = 'block';
+    hhCurrentInfo.innerHTML =
+      '<strong>' + (householdCode || 'HH-??') + '</strong> &mdash; ' + (addressLine || '') +
+      ' &nbsp;<span class="status-badge resident" style="font-size:.72rem;text-transform:capitalize">' + (householdRole || 'member') + '</span>';
+    hhMode.value = 'keep';
+  } else {
+    // Not yet assigned
+    hhCurrentBox.style.display = 'none';
+    hhMode.value = 'skip';
+  }
+
+  // Store originals
+  document.getElementById('edit-hh-orig-id').value   = householdId || '';
+  document.getElementById('edit-hh-orig-role').value = householdRole || '';
+  editHhTogglePanel();
+  // Load household dropdown in background
+  editHhLoadDropdown(householdId);
+
   document.getElementById('modal-edit-resident').style.display = 'flex';
 }
+
+function editHhTogglePanel() {
+  const mode       = document.getElementById('edit-hh-mode')?.value || 'keep';
+  const movePanel  = document.getElementById('edit-hh-panel-move');
+  const newPanel   = document.getElementById('edit-hh-panel-new');
+  if (movePanel) movePanel.style.display = (mode === 'move')   ? 'block' : 'none';
+  if (newPanel)  newPanel.style.display  = (mode === 'new')    ? 'block' : 'none';
+  const newAddr = document.getElementById('edit-hh-new-address');
+  if (newAddr)   newAddr.required = (mode === 'new');
+}
+
+async function editHhLoadDropdown(currentHhId) {
+  const sel = document.getElementById('edit-hh-move-select');
+  if (!sel) return;
+  sel.innerHTML = '<option value="">Loading\u2026</option>';
+  try {
+    const res  = await fetch(`${API}/households/index.php`, { headers: authHeaders() });
+    const data = await res.json();
+    if (!data.success) throw new Error(data.message);
+    sel.innerHTML = '<option value="">-- Select household --</option>'
+      + data.data.map(h =>
+          `<option value="${h.id}"${h.id == currentHhId ? ' selected' : ''}>${h.household_code} &mdash; ${h.address_line}${h.head_name ? ' (' + h.head_name + ')' : ''}</option>`
+        ).join('');
+  } catch(e) {
+    sel.innerHTML = '<option value="">Failed to load</option>';
+  }
+}
+
 function closeEditResident() {
-  document.getElementById('modal-edit-resident').style.display='none';
+  document.getElementById('modal-edit-resident').style.display = 'none';
   document.getElementById('edit-res-religion-other-group').style.display = 'none';
   document.getElementById('edit-res-religion-other').required = false;
 }
+
 function toggleEditReligionOther() {
   const choice = document.getElementById('edit-res-religion-choice').value;
   const otherGroup = document.getElementById('edit-res-religion-other-group');
@@ -2504,38 +2698,93 @@ function toggleEditReligionOther() {
     otherInput.value = '';
   }
 }
+
 async function handleEditResident(e) {
   e.preventDefault();
-  const id = document.getElementById('edit-res-id').value;
-  // Resolve religion value
+  const id  = document.getElementById('edit-res-id').value;
+  const btn = e.target.querySelector('button[type="submit"]');
+  btn.textContent = 'Saving\u2026'; btn.disabled = true;
+
+  // Resolve religion
   const editReligionChoice = document.getElementById('edit-res-religion-choice').value;
-  const editReligionOther = document.getElementById('edit-res-religion-other').value.trim();
+  const editReligionOther  = document.getElementById('edit-res-religion-other').value.trim();
   let resolvedReligion = '';
   if (editReligionChoice === 'Others') {
-    if (!editReligionOther) { alert('Please specify your religion.'); return; }
+    if (!editReligionOther) { alert('Please specify your religion.'); btn.textContent='Save Changes'; btn.disabled=false; return; }
     resolvedReligion = editReligionOther;
   } else {
     resolvedReligion = editReligionChoice;
   }
+
   const payload = {
-    full_name: document.getElementById('edit-res-name').value,
-    gender: document.getElementById('edit-res-gender').value,
-    date_of_birth: document.getElementById('edit-res-dob').value,
-    contact_mobile: document.getElementById('edit-res-mobile').value,
-    contact_email: document.getElementById('edit-res-email').value,
-    civil_status: document.getElementById('edit-res-civil').value,
-    resident_type: document.getElementById('edit-res-type').value,
-    place_of_birth: document.getElementById('edit-res-pob').value,
-    nationality: document.getElementById('edit-res-nationality').value,
-    religion: resolvedReligion,
+    full_name:        document.getElementById('edit-res-name').value,
+    gender:           document.getElementById('edit-res-gender').value,
+    date_of_birth:    document.getElementById('edit-res-dob').value,
+    contact_mobile:   document.getElementById('edit-res-mobile').value,
+    contact_email:    document.getElementById('edit-res-email').value,
+    civil_status:     document.getElementById('edit-res-civil').value,
+    resident_type:    document.getElementById('edit-res-type').value,
+    place_of_birth:   document.getElementById('edit-res-pob').value,
+    nationality:      document.getElementById('edit-res-nationality').value,
+    religion:         resolvedReligion,
     is_senior_citizen: document.getElementById('edit-res-senior').checked ? 1 : 0,
-    is_pwd: document.getElementById('edit-res-pwd').checked ? 1 : 0,
-    registered_voter: document.getElementById('edit-res-voter').checked ? 1 : 0,
+    is_pwd:            document.getElementById('edit-res-pwd').checked   ? 1 : 0,
+    registered_voter:  document.getElementById('edit-res-voter').checked ? 1 : 0,
   };
-  const res = await fetch(`${API}/residents/index.php?id=${id}`, { method:'PUT', headers: authHeaders(), body: JSON.stringify(payload) });
-  const data = await res.json();
-  if (data.success) { await logActivity('Updated', 'Resident', 'RES-' + id); closeEditResident(); loadResidents(); }
-  else alert(data.message || 'Update failed');
+
+  // ── Household assignment ──────────────────────────────────────────────────
+  const hhMode = document.getElementById('edit-hh-mode')?.value || 'keep';
+
+  if (hhMode === 'keep') {
+    // No change — pass existing values so PHP keeps them
+    payload.household_id   = document.getElementById('edit-hh-orig-id').value   || null;
+    payload.household_role = document.getElementById('edit-hh-orig-role').value || null;
+
+  } else if (hhMode === 'move') {
+    const hhId   = document.getElementById('edit-hh-move-select')?.value;
+    const hhRole = document.getElementById('edit-hh-move-role')?.value || 'other';
+    if (!hhId) { alert('Please select a household.'); btn.textContent='Save Changes'; btn.disabled=false; return; }
+    payload.household_id   = hhId;
+    payload.household_role = hhRole;
+
+  } else if (hhMode === 'new') {
+    const newAddr  = document.getElementById('edit-hh-new-address')?.value.trim();
+    const newPurok = document.getElementById('edit-hh-new-purok')?.value.trim();
+    if (!newAddr) { alert('Please enter the new household address.'); btn.textContent='Save Changes'; btn.disabled=false; return; }
+    try {
+      const hhRes  = await fetch(`${API}/households/index.php`, {
+        method: 'POST', headers: authHeaders(),
+        body: JSON.stringify({ address_line: newAddr, purok_sitio: newPurok||null,
+          zone:'Zone 93', barangay:'Barangay 853', city:'Pandacan, Manila',
+          province:'Metro Manila', postal_code:'1011' })
+      });
+      const hhData = await hhRes.json();
+      if (!hhData.success) throw new Error(hhData.message || 'Could not create household');
+      payload.household_id   = hhData.id;
+      payload.household_role = 'head';
+    } catch(err) {
+      alert('Household creation failed: ' + err.message);
+      btn.textContent='Save Changes'; btn.disabled=false; return;
+    }
+
+  } else if (hhMode === 'remove') {
+    payload.household_id   = null;
+    payload.household_role = null;
+  }
+
+  try {
+    const res  = await fetch(`${API}/residents/index.php?id=${id}`, { method:'PUT', headers: authHeaders(), body: JSON.stringify(payload) });
+    const data = await res.json();
+    if (data.success) {
+      await logActivity('Updated', 'Resident', 'RES-' + id);
+      showToast('\u2705 Resident updated successfully!', 'success');
+      closeEditResident();
+      loadResidents();
+    } else {
+      alert(data.message || 'Update failed');
+    }
+  } catch(err) { console.error(err); }
+  finally { btn.textContent = 'Save Changes'; btn.disabled = false; }
 }
 
 
@@ -2774,10 +3023,12 @@ document.addEventListener('DOMContentLoaded', () => {
 </script>
 
 <div id="modal-add-resident" class="modal-backdrop" style="display:none">
-  <div class="modal" style="max-width:560px">
+  <div class="modal" style="max-width:580px">
     <button class="modal-close" onclick="closeAddResident()">&times;</button>
     <h2 style="margin-bottom:1.5rem;font-size:1.25rem">Add New Resident</h2>
     <form id="form-add-resident" onsubmit="handleAddResident(event)">
+
+      <!-- ── Personal Info ── -->
       <div class="form-grid">
         <div class="form-group" style="grid-column:1/-1"><label>Full Name *</label><input type="text" name="full_name" placeholder="Full name" required></div>
         <div class="form-group"><label>Gender *</label><select name="gender" required><option value="">Select</option><option>Male</option><option>Female</option><option>Other</option></select></div>
@@ -2805,11 +3056,64 @@ document.addEventListener('DOMContentLoaded', () => {
         </div>
         <input type="hidden" name="religion" id="religion-hidden">
       </div>
+
       <div style="display:flex;gap:1.5rem;margin-top:1rem;flex-wrap:wrap">
         <label style="display:flex;align-items:center;gap:.5rem;font-size:.88rem;cursor:pointer"><input type="checkbox" name="is_senior_citizen" value="1"> Senior Citizen</label>
         <label style="display:flex;align-items:center;gap:.5rem;font-size:.88rem;cursor:pointer"><input type="checkbox" name="is_pwd" value="1"> PWD</label>
         <label style="display:flex;align-items:center;gap:.5rem;font-size:.88rem;cursor:pointer"><input type="checkbox" name="registered_voter" value="1"> Registered Voter</label>
       </div>
+
+      <!-- ── Household Assignment ── -->
+      <div style="margin-top:1.5rem;border-top:1px solid #f1f5f9;padding-top:1.25rem">
+        <p style="font-size:.8rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#64748b;margin-bottom:.85rem">&#127968; Household Assignment</p>
+        <div class="form-group" style="margin-bottom:.85rem">
+          <label>Assign this resident to a household?</label>
+          <select id="hh-assign-mode" onchange="hhToggleAssignPanel()" style="border:1px solid #d5d8f0;border-radius:.75rem;padding:.65rem 1rem;font-size:.9rem;width:100%">
+            <option value="skip">&#9744; Skip for now — assign later</option>
+            <option value="existing">&#127968; Add to an existing household</option>
+            <option value="new">&#10133; Create a new household (this person is the Head)</option>
+          </select>
+        </div>
+
+        <!-- Existing household panel -->
+        <div id="hh-panel-existing" style="display:none;background:#f8f9ff;border:1px solid #e0e7ff;border-radius:.875rem;padding:1rem;display:none">
+          <div class="form-grid" style="margin-bottom:0">
+            <div class="form-group" style="grid-column:1/-1">
+              <label>Select Household *</label>
+              <select id="hh-existing-select" style="border:1px solid #d5d8f0;border-radius:.75rem;padding:.65rem 1rem;font-size:.875rem;width:100%">
+                <option value="">Loading households&hellip;</option>
+              </select>
+            </div>
+            <div class="form-group" style="grid-column:1/-1">
+              <label>Role in this household *</label>
+              <select id="hh-existing-role" style="border:1px solid #d5d8f0;border-radius:.75rem;padding:.65rem 1rem;font-size:.875rem;width:100%">
+                <option value="spouse">Spouse</option>
+                <option value="child">Child</option>
+                <option value="sibling">Sibling</option>
+                <option value="extended">Extended family member</option>
+                <option value="boarder">Boarder / renter</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- New household panel -->
+        <div id="hh-panel-new" style="display:none;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:.875rem;padding:1rem">
+          <p style="font-size:.78rem;color:#166534;margin-bottom:.75rem;font-weight:600">&#10003; This resident will be saved as the <strong>Head of household</strong> for the new address below.</p>
+          <div class="form-grid" style="margin-bottom:0">
+            <div class="form-group" style="grid-column:1/-1">
+              <label>House / Street Address *</label>
+              <input type="text" id="hh-new-address" placeholder="e.g. 2888 Kahilom III" style="border:1px solid #d5d8f0;border-radius:.75rem;padding:.65rem 1rem;font-size:.9rem;width:100%">
+            </div>
+            <div class="form-group" style="grid-column:1/-1">
+              <label>Purok / Sitio <span style="color:#94a3b8;font-weight:400">(optional)</span></label>
+              <input type="text" id="hh-new-purok" placeholder="e.g. Purok 3" style="border:1px solid #d5d8f0;border-radius:.75rem;padding:.65rem 1rem;font-size:.9rem;width:100%">
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div style="display:flex;gap:1rem;margin-top:1.5rem">
         <button type="button" class="btn-secondary" onclick="closeAddResident()">Cancel</button>
         <button type="submit" class="btn-primary" style="flex:1" id="btn-submit-resident">Add Resident</button>
@@ -2965,11 +3269,15 @@ document.addEventListener('DOMContentLoaded', () => {
 </div>
 
 <div id="modal-edit-resident" class="modal-backdrop" style="display:none">
-  <div class="modal" style="max-width:560px">
+  <div class="modal" style="max-width:580px">
     <button class="modal-close" onclick="closeEditResident()">&times;</button>
     <h2 style="margin-bottom:1.5rem;font-size:1.25rem">Edit Resident</h2>
     <form onsubmit="handleEditResident(event)">
       <input type="hidden" id="edit-res-id">
+      <input type="hidden" id="edit-hh-orig-id">
+      <input type="hidden" id="edit-hh-orig-role">
+
+      <!-- ── Personal Info ── -->
       <div class="form-grid">
         <div class="form-group" style="grid-column:1/-1"><label>Full Name *</label><input type="text" id="edit-res-name" placeholder="Full name" required></div>
         <div class="form-group"><label>Gender *</label>
@@ -3002,11 +3310,77 @@ document.addEventListener('DOMContentLoaded', () => {
           <input type="text" id="edit-res-religion-other" placeholder="Enter your religion">
         </div>
       </div>
+
       <div style="display:flex;gap:1.5rem;margin-top:1rem;flex-wrap:wrap">
         <label style="display:flex;align-items:center;gap:.5rem;font-size:.88rem;cursor:pointer"><input type="checkbox" id="edit-res-senior"> Senior Citizen</label>
         <label style="display:flex;align-items:center;gap:.5rem;font-size:.88rem;cursor:pointer"><input type="checkbox" id="edit-res-pwd"> PWD</label>
         <label style="display:flex;align-items:center;gap:.5rem;font-size:.88rem;cursor:pointer"><input type="checkbox" id="edit-res-voter"> Registered Voter</label>
       </div>
+
+      <!-- ── Household Assignment ── -->
+      <div style="margin-top:1.5rem;border-top:1px solid #f1f5f9;padding-top:1.25rem">
+        <p style="font-size:.8rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#64748b;margin-bottom:.85rem">&#127968; Household Assignment</p>
+
+        <!-- Current assignment display (shown only if already assigned) -->
+        <div id="edit-hh-current-box" style="display:none;background:#f8f9ff;border:1px solid #e0e7ff;border-radius:.75rem;padding:.75rem 1rem;margin-bottom:.85rem;font-size:.875rem">
+          <span style="color:#64748b;font-weight:600;font-size:.75rem;text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:.3rem">Currently assigned to</span>
+          <span id="edit-hh-current-info"></span>
+        </div>
+
+        <div class="form-group" style="margin-bottom:.85rem">
+          <label>What would you like to do?</label>
+          <select id="edit-hh-mode" onchange="editHhTogglePanel()" style="border:1px solid #d5d8f0;border-radius:.75rem;padding:.65rem 1rem;font-size:.9rem;width:100%">
+            <option value="keep">&#10003; Keep current household assignment</option>
+            <option value="move">&#8596; Move to a different household</option>
+            <option value="new">&#10133; Create a new household (this person becomes Head)</option>
+            <option value="remove">&#10006; Remove from household (unassign)</option>
+            <option value="skip">&#9744; Not assigned to any household</option>
+          </select>
+        </div>
+
+        <!-- Move to existing household -->
+        <div id="edit-hh-panel-move" style="display:none;background:#f8f9ff;border:1px solid #e0e7ff;border-radius:.875rem;padding:1rem">
+          <div class="form-grid" style="margin-bottom:0">
+            <div class="form-group" style="grid-column:1/-1">
+              <label>Select Household *</label>
+              <select id="edit-hh-move-select" style="border:1px solid #d5d8f0;border-radius:.75rem;padding:.65rem 1rem;font-size:.875rem;width:100%">
+                <option value="">Loading households&hellip;</option>
+              </select>
+            </div>
+            <div class="form-group" style="grid-column:1/-1">
+              <label>New role in this household *</label>
+              <select id="edit-hh-move-role" style="border:1px solid #d5d8f0;border-radius:.75rem;padding:.65rem 1rem;font-size:.875rem;width:100%">
+                <option value="head">Head of household</option>
+                <option value="spouse">Spouse</option>
+                <option value="child">Child</option>
+                <option value="sibling">Sibling</option>
+                <option value="extended">Extended family member</option>
+                <option value="boarder">Boarder / renter</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Create new household -->
+        <div id="edit-hh-panel-new" style="display:none;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:.875rem;padding:1rem">
+          <p style="font-size:.78rem;color:#166534;margin-bottom:.75rem;font-weight:600">&#10003; This resident will become the <strong>Head of household</strong> for the new address below.</p>
+          <div class="form-grid" style="margin-bottom:0">
+            <div class="form-group" style="grid-column:1/-1">
+              <label>House / Street Address *</label>
+              <input type="text" id="edit-hh-new-address" placeholder="e.g. 2888 Kahilom III" style="border:1px solid #d5d8f0;border-radius:.75rem;padding:.65rem 1rem;font-size:.9rem;width:100%">
+            </div>
+            <div class="form-group" style="grid-column:1/-1">
+              <label>Purok / Sitio <span style="color:#94a3b8;font-weight:400">(optional)</span></label>
+              <input type="text" id="edit-hh-new-purok" placeholder="e.g. Purok 3" style="border:1px solid #d5d8f0;border-radius:.75rem;padding:.65rem 1rem;font-size:.9rem;width:100%">
+            </div>
+          </div>
+        </div>
+
+        <!-- Remove warning -->
+        <div id="edit-hh-panel-remove" style="display:none"></div>
+      </div>
+
       <div style="display:flex;gap:1rem;margin-top:1.5rem">
         <button type="button" class="btn-secondary" onclick="closeEditResident()">Cancel</button>
         <button type="submit" class="btn-primary" style="flex:1">Save Changes</button>
@@ -3112,6 +3486,47 @@ document.addEventListener('DOMContentLoaded', () => {
     <div style="display:flex;gap:1rem;">
       <button type="button" class="btn-secondary" style="flex:1" onclick="closeDeleteAnnouncementModal()">Cancel</button>
       <button type="button" class="btn-primary" id="btn-confirm-delete-announcement" style="flex:1; background:#dc2626;" onclick="executeDeleteAnnouncement()">Delete</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── OFFICIALS ADD/EDIT MODAL ──────────────────────────────────────────── -->
+<div id="modal-official" class="modal-backdrop" style="display:none">
+  <div class="modal" style="max-width:480px">
+    <button class="modal-close" onclick="closeOfficialModal()">&times;</button>
+    <h2 id="official-modal-title" style="margin-bottom:1.25rem">Add Official</h2>
+    <input type="hidden" id="official-id">
+    <div style="display:grid;gap:1rem;">
+      <div class="form-group">
+        <label>Full Name <span style="color:#ef4444">*</span></label>
+        <input type="text" id="official-name" class="input" placeholder="e.g. Hon. Roger Ferrer">
+      </div>
+      <div class="form-group">
+        <label>Position <span style="color:#ef4444">*</span></label>
+        <input type="text" id="official-position" class="input" placeholder="e.g. Barangay Chairman">
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+        <div class="form-group">
+          <label>Gender</label>
+          <select id="official-gender" class="input">
+            <option value="Male">Male</option>
+            <option value="Female">Female</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Sort Order</label>
+          <input type="number" id="official-sort" class="input" value="0" min="0" placeholder="0">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Photo URL <span style="color:#94a3b8;font-size:.8rem">(optional — leave blank for default avatar)</span></label>
+        <input type="text" id="official-photo" class="input" placeholder="assets/officials/photo.jpg">
+      </div>
+      <div id="official-error" style="color:#dc2626;font-size:.85rem;display:none"></div>
+      <div style="display:flex;gap:1rem;margin-top:.5rem">
+        <button type="button" class="btn-secondary" style="flex:1" onclick="closeOfficialModal()">Cancel</button>
+        <button type="button" class="btn-primary" style="flex:1" id="official-save-btn" onclick="saveOfficial()">Save Official</button>
+      </div>
     </div>
   </div>
 </div>
@@ -3398,6 +3813,240 @@ async function executeDeleteExpense() {
   const el = document.getElementById(id);
   if (el) el.addEventListener('click', function(e) { if (e.target === this) this.style.display = 'none'; });
 });
+
+// ── FAMILY TREE ───────────────────────────────────────────────────────────────
+async function loadFamilyTree() {
+  const search = (document.getElementById('familytree-search')?.value || '').trim().toLowerCase();
+  const container = document.getElementById('familytree-result');
+  container.innerHTML = '<p class="muted" style="text-align:center;padding:2rem;">Loading households…</p>';
+  try {
+    const res = await fetch(`${API}/households/index.php`, { headers: authHeaders() });
+    const data = await res.json();
+    if (!data.success || !data.data.length) {
+      container.innerHTML = '<p class="muted" style="text-align:center;padding:2rem;">No households found.</p>';
+      return;
+    }
+    const filtered = search
+      ? data.data.filter(h =>
+          (h.household_code || '').toLowerCase().includes(search) ||
+          (h.head_name || '').toLowerCase().includes(search) ||
+          (h.address_line || '').toLowerCase().includes(search) ||
+          (h.purok_sitio || '').toLowerCase().includes(search))
+      : data.data;
+
+    if (!filtered.length) {
+      container.innerHTML = '<p class="muted" style="text-align:center;padding:2rem;">No households match your search.</p>';
+      return;
+    }
+
+    container.innerHTML = `
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1rem;">
+        ${filtered.map(h => `
+          <div onclick="loadHouseholdTree(${h.id})"
+               style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:1.1rem 1.25rem;
+                      cursor:pointer;transition:box-shadow .18s,border-color .18s;"
+               onmouseover="this.style.boxShadow='0 4px 16px rgba(11,34,80,.10)';this.style.borderColor='#2563eb'"
+               onmouseout="this.style.boxShadow='none';this.style.borderColor='#e2e8f0'">
+            <div style="display:flex;align-items:center;gap:.6rem;margin-bottom:.5rem;">
+              <span style="font-size:1.3rem;">🏠</span>
+              <span style="font-weight:700;color:#0b2250;font-size:.95rem;">${h.household_code}</span>
+            </div>
+            <div style="font-size:.82rem;color:#64748b;margin-bottom:.4rem;">${h.address_line || ''}${h.purok_sitio ? ' · ' + h.purok_sitio : ''}</div>
+            <div style="font-size:.82rem;">
+              👤 <strong>${h.head_name || '<em>No head assigned</em>'}</strong>
+            </div>
+            <div style="font-size:.78rem;color:#64748b;margin-top:.25rem;">👥 ${h.member_count} member${h.member_count != 1 ? 's' : ''}</div>
+          </div>`).join('')}
+      </div>`;
+  } catch(e) {
+    container.innerHTML = `<p style="color:#dc2626;padding:1rem;">Error loading households: ${e.message}</p>`;
+  }
+}
+
+async function loadHouseholdTree(householdId) {
+  const container = document.getElementById('familytree-result');
+  container.innerHTML = '<p class="muted" style="text-align:center;padding:2rem;">Loading family tree…</p>';
+  try {
+    const res = await fetch(`${API}/households/index.php?id=${householdId}`, { headers: authHeaders() });
+    const data = await res.json();
+    if (!data.success) {
+      container.innerHTML = '<p style="color:#dc2626;padding:1rem;">Failed to load household details.</p>';
+      return;
+    }
+    const { household, members } = data;
+    const roleOrder = ['head','spouse','child','sibling','extended','boarder','other'];
+    const roleLabel = { head:'Head of Family', spouse:'Spouse', child:'Children', sibling:'Siblings', extended:'Extended Family', boarder:'Boarders', other:'Others' };
+    const grouped = {};
+    roleOrder.forEach(r => grouped[r] = []);
+    members.forEach(m => { const key = roleOrder.includes(m.household_role) ? m.household_role : 'other'; grouped[key].push(m); });
+
+    const memberCard = m => `
+      <div style="background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:.85rem 1rem;
+                  min-width:150px;max-width:180px;text-align:center;flex:0 0 auto;">
+        <div style="font-size:2rem;margin-bottom:.3rem;">${m.gender === 'Female' ? '👩' : '👨'}</div>
+        <div style="font-weight:700;font-size:.85rem;color:#0f172a;line-height:1.3;">${m.full_name}</div>
+        <div style="font-size:.75rem;color:#64748b;margin:.2rem 0;">${m.civil_status || ''}${m.date_of_birth ? ' · ' + (new Date().getFullYear() - new Date(m.date_of_birth).getFullYear()) + ' yrs' : ''}</div>
+        <div style="display:flex;flex-wrap:wrap;justify-content:center;gap:3px;margin-top:.3rem;">
+          ${m.is_senior_citizen ? '<span style="font-size:.68rem;background:#fef3c7;color:#b45309;padding:1px 6px;border-radius:4px;">Senior</span>' : ''}
+          ${m.is_pwd ? '<span style="font-size:.68rem;background:#ede9fe;color:#6d28d9;padding:1px 6px;border-radius:4px;">PWD</span>' : ''}
+          ${m.registered_voter ? '<span style="font-size:.68rem;background:#dcfce7;color:#15803d;padding:1px 6px;border-radius:4px;">Voter</span>' : ''}
+        </div>
+      </div>`;
+
+    const roleBlocks = roleOrder.filter(r => grouped[r].length > 0).map(role => `
+      <div style="margin-bottom:1.5rem;">
+        <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;
+                    color:#94a3b8;margin-bottom:.65rem;padding-bottom:.35rem;border-bottom:1px solid #f1f5f9;">
+          ${roleLabel[role]} (${grouped[role].length})
+        </div>
+        <div style="display:flex;flex-wrap:wrap;gap:.75rem;">
+          ${grouped[role].map(memberCard).join('')}
+        </div>
+      </div>`).join('');
+
+    container.innerHTML = `
+      <button onclick="loadFamilyTree()"
+        style="background:none;border:none;color:#2563eb;cursor:pointer;font-size:.88rem;
+               font-weight:600;margin-bottom:1.25rem;display:flex;align-items:center;gap:.3rem;padding:0;">
+        ← Back to all households
+      </button>
+      <div style="background:#0b2250;color:#fff;border-radius:12px;padding:1.1rem 1.4rem;margin-bottom:1.5rem;
+                  display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.5rem;">
+        <div>
+          <div style="font-weight:800;font-size:1.05rem;">${household.household_code}</div>
+          <div style="font-size:.83rem;opacity:.8;margin-top:.15rem;">
+            ${household.address_line || ''}${household.purok_sitio ? ' · ' + household.purok_sitio : ''}, ${household.zone || ''}
+          </div>
+        </div>
+        <div style="font-size:.85rem;opacity:.85;">👥 ${members.length} member${members.length !== 1 ? 's' : ''}</div>
+      </div>
+      ${members.length === 0
+        ? '<p class="muted" style="text-align:center;padding:2rem;">No members in this household yet.</p>'
+        : roleBlocks}`;
+  } catch(e) {
+    container.innerHTML = `<p style="color:#dc2626;padding:1rem;">Error loading family tree: ${e.message}</p>`;
+  }
+}
+
+// ── BARANGAY OFFICIALS ────────────────────────────────────────────────────────
+const MALE_AVATAR_URL   = 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png';
+const FEMALE_AVATAR_URL = 'https://cdn-icons-png.flaticon.com/512/3135/3135789.png';
+
+async function loadOfficials() {
+  const tbody = document.getElementById('officials-tbody');
+  tbody.innerHTML = '<tr><td colspan="6" class="loading">Loading…</td></tr>';
+  try {
+    const res  = await fetch(`${API}/officials/index.php`, { headers: authHeaders() });
+    const data = await res.json();
+    if (!data.success || !data.data.length) {
+      tbody.innerHTML = '<tr><td colspan="6" class="empty-state">No officials yet. Add one to get started.</td></tr>';
+      return;
+    }
+    tbody.innerHTML = data.data.map(o => {
+      const avatar = o.photo_url
+        ? `${API}/${o.photo_url}`
+        : (o.gender === 'Female' ? FEMALE_AVATAR_URL : MALE_AVATAR_URL);
+      return `<tr>
+        <td><img src="${avatar}" alt="${o.name}"
+              style="width:40px;height:40px;border-radius:50%;object-fit:cover;border:2px solid #e2e8f0;"
+              onerror="this.src='${o.gender === 'Female' ? FEMALE_AVATAR_URL : MALE_AVATAR_URL}'"></td>
+        <td style="font-weight:600">${o.name}</td>
+        <td>${o.position}</td>
+        <td>${o.gender || '—'}</td>
+        <td style="text-align:center">${o.sort_order ?? 0}</td>
+        <td style="text-align:center;white-space:nowrap">
+          <button class="btn-secondary" style="padding:.3rem .75rem;font-size:.8rem;margin-right:.4rem"
+            onclick="editOfficial(${o.id},'${(o.name||'').replace(/'/g,"\\'")}','${(o.position||'').replace(/'/g,"\\'")}','${o.gender||'Male'}',${o.sort_order??0},'${o.photo_url||''}')">
+            Edit
+          </button>
+          <button class="text-link" style="color:#ef4444;font-size:.85rem" onclick="deleteOfficial(${o.id})">Delete</button>
+        </td>
+      </tr>`;
+    }).join('');
+  } catch(e) {
+    tbody.innerHTML = `<tr><td colspan="6" style="color:#dc2626;padding:1rem;">Error: ${e.message}</td></tr>`;
+  }
+}
+
+function showOfficialModal() {
+  document.getElementById('official-modal-title').textContent = 'Add Official';
+  document.getElementById('official-id').value       = '';
+  document.getElementById('official-name').value     = '';
+  document.getElementById('official-position').value = '';
+  document.getElementById('official-gender').value   = 'Male';
+  document.getElementById('official-sort').value     = '0';
+  document.getElementById('official-photo').value    = '';
+  document.getElementById('official-error').style.display = 'none';
+  document.getElementById('official-save-btn').textContent = 'Save Official';
+  document.getElementById('modal-official').style.display = 'flex';
+}
+
+function editOfficial(id, name, position, gender, sort, photo) {
+  document.getElementById('official-modal-title').textContent = 'Edit Official';
+  document.getElementById('official-id').value       = id;
+  document.getElementById('official-name').value     = name;
+  document.getElementById('official-position').value = position;
+  document.getElementById('official-gender').value   = gender;
+  document.getElementById('official-sort').value     = sort;
+  document.getElementById('official-photo').value    = photo;
+  document.getElementById('official-error').style.display = 'none';
+  document.getElementById('official-save-btn').textContent = 'Update Official';
+  document.getElementById('modal-official').style.display = 'flex';
+}
+
+function closeOfficialModal() {
+  document.getElementById('modal-official').style.display = 'none';
+}
+
+async function saveOfficial() {
+  const id       = document.getElementById('official-id').value;
+  const name     = document.getElementById('official-name').value.trim();
+  const position = document.getElementById('official-position').value.trim();
+  const gender   = document.getElementById('official-gender').value;
+  const sort     = parseInt(document.getElementById('official-sort').value) || 0;
+  const photo    = document.getElementById('official-photo').value.trim();
+  const errEl    = document.getElementById('official-error');
+  const btn      = document.getElementById('official-save-btn');
+
+  errEl.style.display = 'none';
+  if (!name)     { errEl.textContent = 'Full name is required.';  errEl.style.display = 'block'; return; }
+  if (!position) { errEl.textContent = 'Position is required.';   errEl.style.display = 'block'; return; }
+
+  btn.disabled = true; btn.textContent = 'Saving…';
+  try {
+    const method = id ? 'PUT' : 'POST';
+    const url    = id ? `${API}/officials/index.php?id=${id}` : `${API}/officials/index.php`;
+    const res    = await fetch(url, {
+      method,
+      headers: { ...authHeaders(), 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, position, gender, sort_order: sort, photo_url: photo || null })
+    });
+    const data = await res.json();
+    if (data.success) {
+      closeOfficialModal();
+      loadOfficials();
+    } else {
+      errEl.textContent = data.message || 'Failed to save.';
+      errEl.style.display = 'block';
+    }
+  } catch(e) {
+    errEl.textContent = 'Server error: ' + e.message;
+    errEl.style.display = 'block';
+  } finally {
+    btn.disabled = false;
+    btn.textContent = id ? 'Update Official' : 'Save Official';
+  }
+}
+
+async function deleteOfficial(id) {
+  if (!confirm('Delete this official? This cannot be undone.')) return;
+  try {
+    const res  = await fetch(`${API}/officials/index.php?id=${id}`, { method:'DELETE', headers: authHeaders() });
+    const data = await res.json();
+    if (data.success) loadOfficials();
+    else alert(data.message || 'Delete failed.');
+  } catch(e) { alert('Error: ' + e.message); }
+}
 </script>
 </body>
 </html>
