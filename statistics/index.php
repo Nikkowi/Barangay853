@@ -1,11 +1,14 @@
 <?php
+ob_start();
 require_once '../config/database.php';
+header('Content-Type: application/json');
 
 $headers = getallheaders();
 $authHeader = isset($headers['Authorization']) ? $headers['Authorization'] : '';
 
 if (!$authHeader || !str_starts_with($authHeader, 'Bearer ')) {
     http_response_code(401);
+    ob_end_clean();
     echo json_encode(['success' => false, 'message' => 'Unauthorized']);
     exit();
 }
@@ -56,6 +59,14 @@ function safeCount($conn, $sql) {
     $row = $r->fetch_assoc();
     return $row ? intval(reset($row)) : 0;
 }
+
+// ─── Column existence guard ─────────────────────────────────────────────────
+function columnExists($conn, $table, $column) {
+    $r = $conn->query("SHOW COLUMNS FROM `{$table}` LIKE '{$column}'");
+    return $r && $r->num_rows > 0;
+}
+$hasEvidenceCols = columnExists($conn, 'blotter_cases', 'has_evidence');
+$hasSummonCol    = columnExists($conn, 'blotter_cases', 'summon_count');
 
 // ============================================================
 // OVERVIEW COUNTS
@@ -183,7 +194,7 @@ $blotterRepeatReporters = safeRows($conn, "
     FROM blotter_cases
     WHERE reporter_name IS NOT NULL AND reporter_name != ''
     GROUP BY reporter_name, reporter_contact
-    HAVING total_cases > 1
+    HAVING COUNT(*) > 1
     ORDER BY total_cases DESC
     LIMIT 10
 ");
@@ -236,18 +247,25 @@ $blotterMonthlyTrend = safeRows($conn, "
     ORDER BY month ASC
 ");
 
-// KPIs — uses safeRow since it returns one row
+// KPIs — build dynamically based on which columns exist
+$kpiExtraCols = '';
+if ($hasEvidenceCols) {
+    $kpiExtraCols .= ",\n        SUM(CASE WHEN has_evidence = 1 THEN 1 ELSE 0 END) AS with_evidence";
+}
+if ($hasSummonCol) {
+    $kpiExtraCols .= ",\n        SUM(CASE WHEN summon_count > 0 THEN 1 ELSE 0 END) AS with_summons";
+    $kpiExtraCols .= ",\n        SUM(CASE WHEN status = 'For Summons' THEN 1 ELSE 0 END) AS for_summons";
+    $kpiExtraCols .= ",\n        SUM(CASE WHEN status LIKE '%Summon Issued%' THEN 1 ELSE 0 END) AS summon_issued";
+}
 $blotterKPIs = safeRow($conn, "
     SELECT
         COUNT(*) AS total_cases,
-        SUM(CASE WHEN status = 'Pending'             THEN 1 ELSE 0 END) AS pending,
-        SUM(CASE WHEN status = 'Active'              THEN 1 ELSE 0 END) AS active,
-        SUM(CASE WHEN status = 'Under Investigation' THEN 1 ELSE 0 END) AS under_investigation,
+        SUM(CASE WHEN status = 'Pending' THEN 1 ELSE 0 END) AS pending,
         SUM(CASE WHEN status IN ('Resolved','Closed') THEN 1 ELSE 0 END) AS resolved_closed,
-        SUM(CASE WHEN priority = 'Urgent'            THEN 1 ELSE 0 END) AS urgent,
-        SUM(CASE WHEN priority = 'High'              THEN 1 ELSE 0 END) AS high_priority,
+        SUM(CASE WHEN priority = 'Urgent' THEN 1 ELSE 0 END) AS urgent,
+        SUM(CASE WHEN priority = 'High' THEN 1 ELSE 0 END) AS high_priority,
         SUM(CASE WHEN investigator_name IS NULL OR investigator_name = '' THEN 1 ELSE 0 END) AS unassigned,
-        ROUND(AVG(CASE WHEN status IN ('Resolved','Closed') AND updated_at > created_at 
+        ROUND(AVG(CASE WHEN status IN ('Resolved','Closed') AND updated_at > created_at
                        THEN DATEDIFF(updated_at, created_at) END), 1) AS avg_resolution_days
     FROM blotter_cases
 ");
@@ -286,6 +304,7 @@ $recentLogs     = safeRows($conn, 'SELECT id, actor_name, action, module, refere
 
 $conn->close();
 
+ob_end_clean();
 echo json_encode([
     'success' => true,
     'data' => [
@@ -308,6 +327,8 @@ echo json_encode([
             'by_status'             => $blotterByStatus,
             'by_category'           => $blotterCatRows,
             'kpis'                  => $blotterKPIs,
+            'has_evidence_cols'     => $hasEvidenceCols,
+            'has_summon_col'        => $hasSummonCol,
             'monthly_by_category'   => $blotterMonthlyByCat,
             'monthly_trend'         => $blotterMonthlyTrend,
             'by_priority'           => $blotterByPriority,

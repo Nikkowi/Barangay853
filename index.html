@@ -151,6 +151,35 @@
       .fund-table th:nth-child(4),
       .fund-table td:nth-child(4) { display: none; }
     }
+  
+    /* ── Disbursed Breakdown Modal ── */
+    .disbursed-clickable { cursor: pointer; transition: box-shadow 0.18s, transform 0.18s; }
+    .disbursed-clickable:hover { box-shadow: 0 6px 22px rgba(220,38,38,0.15); transform: translateY(-2px); }
+    .fund-stat-cta { font-size: 0.72rem; font-weight: 700; color: #dc2626; margin-top: 5px; }
+    .disbursed-modal-backdrop { position: fixed; inset: 0; background: rgba(15,23,42,0.55); display: flex; align-items: center; justify-content: center; z-index: 9000; padding: 1rem; }
+    .disbursed-modal { background: #fff; border-radius: 1.25rem; width: 100%; max-width: 580px; max-height: 85vh; display: flex; flex-direction: column; box-shadow: 0 24px 50px rgba(15,23,42,0.18); overflow: hidden; }
+    .disbursed-modal-head { padding: 1.5rem 1.75rem 1.1rem; border-bottom: 1px solid #f1f5f9; display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; }
+    .disbursed-modal-head h2 { font-size: 1.15rem; font-weight: 800; color: #111; margin: 0; }
+    .disbursed-modal-head p { font-size: 0.78rem; color: #94a3b8; margin: 0.2rem 0 0; }
+    .disbursed-close-btn { background: #f1f5f9; border: none; border-radius: 50%; width: 32px; height: 32px; font-size: 1rem; cursor: pointer; flex-shrink: 0; color: #64748b; transition: background 0.15s; }
+    .disbursed-close-btn:hover { background: #e2e8f0; }
+    .disbursed-modal-body { overflow-y: auto; padding: 1.25rem 1.75rem; flex: 1; }
+    .disbursed-cat-group { margin-bottom: 1.5rem; }
+    .disbursed-cat-label { font-size: 0.7rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; color: #64748b; margin-bottom: 0.55rem; display: flex; align-items: center; gap: 0.5rem; }
+    .disbursed-cat-label::after { content: ''; flex: 1; height: 1px; background: #e2e8f0; }
+    .disbursed-row { display: grid; grid-template-columns: 1fr auto auto; gap: 0.4rem 1rem; padding: 0.55rem 0.75rem; border-radius: 0.65rem; font-size: 0.85rem; align-items: start; }
+    .disbursed-row:nth-child(even) { background: #f8fafc; }
+    .disbursed-row-title { font-weight: 600; color: #0f172a; }
+    .disbursed-row-date { font-size: 0.75rem; color: #94a3b8; margin-top: 2px; }
+    .disbursed-row-amt { font-weight: 700; color: #dc2626; white-space: nowrap; text-align: right; }
+    .disbursed-row-bal { font-size: 0.72rem; color: #94a3b8; text-align: right; white-space: nowrap; }
+    .disbursed-cat-subtotal { display: flex; justify-content: space-between; padding: 0.45rem 0.75rem; font-size: 0.8rem; font-weight: 700; color: #475569; border-top: 1px dashed #e2e8f0; margin-top: 0.3rem; }
+    .disbursed-cat-subtotal span:last-child { color: #dc2626; }
+    .disbursed-modal-foot { padding: 1rem 1.75rem; border-top: 2px solid #e2e8f0; background: #f8fafc; display: flex; justify-content: space-between; align-items: center; }
+    .disbursed-modal-foot .foot-label { font-size: 0.85rem; font-weight: 700; color: #111; }
+    .disbursed-modal-foot .foot-total { font-size: 1.35rem; font-weight: 900; color: #dc2626; }
+    .disbursed-empty { text-align: center; padding: 2.5rem 1rem; color: #94a3b8; font-size: 0.875rem; }
+
   </style>
 </head>
 <body class="public-page">
@@ -244,11 +273,12 @@
           <div class="fund-stat-value" id="f-budget">—</div>
           <div class="fund-stat-sub">Allocated this year</div>
         </div>
-        <div class="fund-stat-card">
+        <div class="fund-stat-card disbursed-clickable" onclick="openDisbursedModal()" title="Click to see full breakdown">
           <div class="fund-stat-icon">📤</div>
           <div class="fund-stat-label">Total Disbursed</div>
           <div class="fund-stat-value red" id="f-spent">—</div>
           <div class="fund-stat-sub" id="f-pct">—</div>
+          <div class="fund-stat-cta">🔍 View breakdown →</div>
         </div>
         <div class="fund-stat-card">
           <div class="fund-stat-icon">💵</div>
@@ -317,7 +347,7 @@
   <script src="public.js"></script>
   <script>
     // ── Fund Transparency Preview ─────────────────────────────────────────────
-    const API = window.location.origin + '/Barangay853';
+    const API = window.API || window.location.origin + '/Barangay853';
 
     const CAT = {
       senior: { label: 'Senior Aid',     cls: 'cat-senior' },
@@ -332,8 +362,87 @@
       return '₱' + Number(n).toLocaleString('en-PH', { minimumFractionDigits: 2 });
     }
     function fmtDate(d) {
-      return new Date(d).toLocaleDateString('en-PH', { year: 'numeric', month: 'short', day: 'numeric' });
+      return new Date(d + 'T00:00:00').toLocaleDateString('en-PH', { year: 'numeric', month: 'short', day: 'numeric' });
     }
+
+
+    // ── Disbursed Breakdown Modal ─────────────────────────────────────────────
+    let _allDisbursedRows = [];
+
+    const CAT_LABELS = {
+      senior: 'Senior Aid', event: 'Events', infra: 'Infrastructure',
+      health: 'Health',     admin: 'Administrative',
+    };
+
+    function openDisbursedModal() {
+      if (_allDisbursedRows.length === 0) {
+        document.getElementById('disbursed-modal-body').innerHTML =
+          '<div class="disbursed-empty">No expense data loaded yet. Please wait for the page to finish loading.</div>';
+        document.getElementById('disbursed-grand-total').textContent = '\u20b10.00';
+      } else {
+        renderDisbursedModal(_allDisbursedRows);
+      }
+      document.getElementById('disbursed-modal').style.display = 'flex';
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeDisbursedModal() {
+      document.getElementById('disbursed-modal').style.display = 'none';
+      document.body.style.overflow = '';
+    }
+
+    function renderDisbursedModal(rows) {
+      const body = document.getElementById('disbursed-modal-body');
+      const grandTotalEl = document.getElementById('disbursed-grand-total');
+
+      if (!rows || rows.length === 0) {
+        body.innerHTML = '<div class="disbursed-empty">No expense records found.</div>';
+        grandTotalEl.textContent = '\u20b10.00';
+        return;
+      }
+
+      const groups = {};
+      const order  = [];
+      rows.forEach(r => {
+        const cat = r.category || 'other';
+        if (!groups[cat]) { groups[cat] = []; order.push(cat); }
+        groups[cat].push(r);
+      });
+
+      let html = '';
+      let grandTotal = 0;
+
+      order.forEach(cat => {
+        const entries  = groups[cat];
+        const label    = CAT_LABELS[cat] || (cat.charAt(0).toUpperCase() + cat.slice(1));
+        const subtotal = entries.reduce((s, e) => s + parseFloat(e.amount), 0);
+        grandTotal += subtotal;
+
+        html += '<div class="disbursed-cat-group">'
+          + '<div class="disbursed-cat-label">' + label + '</div>';
+
+        entries.forEach(e => {
+          const dateStr = new Date(e.date + 'T00:00:00').toLocaleDateString('en-PH', { year:'numeric', month:'short', day:'numeric' });
+          const meta = dateStr + (e.approved_by ? ' &middot; ' + e.approved_by : '');
+          html += '<div class="disbursed-row">'
+            + '<div><div class="disbursed-row-title">' + e.title + '</div>'
+            + '<div class="disbursed-row-date">' + meta + '</div></div>'
+            + '<div class="disbursed-row-bal">' + phpFmt(e.balance_after) + '<br>bal. after</div>'
+            + '<div class="disbursed-row-amt">\u2212' + phpFmt(e.amount) + '</div>'
+            + '</div>';
+        });
+
+        html += '<div class="disbursed-cat-subtotal">'
+          + '<span>' + label + ' subtotal (' + entries.length + ' item' + (entries.length !== 1 ? 's' : '') + ')</span>'
+          + '<span>\u2212' + phpFmt(subtotal) + '</span>'
+          + '</div></div>';
+      });
+
+      body.innerHTML = html;
+      grandTotalEl.textContent = '\u2212' + phpFmt(grandTotal);
+    }
+
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDisbursedModal(); });
 
     async function loadFundPreview() {
       const year = new Date().getFullYear();
@@ -341,12 +450,13 @@
 
       try {
         const res  = await fetch(`${API}/expenses/index.php?public=1&year=${year}`);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
 
         if (!data.success) throw new Error(data.message || 'Failed to load');
 
         // ── Stats ──
-        const budget  = parseFloat(data.annual_budget || 150000);
+        const budget  = parseFloat(data.annual_budget || 0);
         const spent   = parseFloat(data.total_spent   || 0);
         const balance = budget - spent;
         const pct     = budget > 0 ? Math.min((spent / budget) * 100, 100).toFixed(1) : 0;
@@ -365,11 +475,12 @@
         document.getElementById('f-bar-right').textContent = pct + '% utilized';
 
         // ── Recent 5 posted records ──
-        const rows   = (data.data || []).slice(0, 5);
+        _allDisbursedRows = data.data || [];
+        const rows      = (data.data || []).slice(0, 5);
         const container = document.getElementById('fund-table-container');
 
         if (rows.length === 0) {
-          container.innerHTML = '<div class="fund-loading">No expense records available.</div>';
+          container.innerHTML = '<div class="fund-loading">No expense records available yet.</div>';
           return;
         }
 
@@ -406,11 +517,47 @@
       } catch (e) {
         document.getElementById('fund-table-container').innerHTML =
           `<div class="fund-error">Unable to load fund data. Please try again later.</div>`;
+        // Zero out stats on error so stale numbers aren't shown
+        ['f-budget','f-spent','f-balance'].forEach(id => document.getElementById(id).textContent = '₱0.00');
+        document.getElementById('f-pct').textContent   = '—';
+        document.getElementById('f-count').textContent = '—';
+        document.getElementById('f-bar-right').textContent = '—';
         console.error('Fund preview error:', e);
       }
     }
 
     loadFundPreview();
+
+    // ── Auto-refresh when admin dashboard makes changes ───────────────────────
+    try {
+      const _ch = new BroadcastChannel('brgy853_expenses');
+      _ch.onmessage = (e) => {
+        if (e.data && e.data.type === 'expenses_updated') {
+          loadFundPreview();
+        }
+      };
+    } catch(e) {}
   </script>
+
+  <!-- Disbursed Breakdown Modal -->
+  <div class="disbursed-modal-backdrop" id="disbursed-modal" style="display:none" onclick="if(event.target===this)closeDisbursedModal()">
+    <div class="disbursed-modal">
+      <div class="disbursed-modal-head">
+        <div>
+          <h2>&#x1f4b8; Disbursement Breakdown</h2>
+          <p id="disbursed-modal-subtitle">All recorded expenditures for this fiscal year</p>
+        </div>
+        <button class="disbursed-close-btn" onclick="closeDisbursedModal()" aria-label="Close">&#x2715;</button>
+      </div>
+      <div class="disbursed-modal-body" id="disbursed-modal-body">
+        <div class="disbursed-empty">Loading&hellip;</div>
+      </div>
+      <div class="disbursed-modal-foot">
+        <span class="foot-label">Grand Total Disbursed</span>
+        <span class="foot-total" id="disbursed-grand-total">&#x20b10.00</span>
+      </div>
+    </div>
+  </div>
+
 </body>
 </html>

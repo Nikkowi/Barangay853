@@ -283,6 +283,35 @@
       .summary-cards { grid-template-columns: 1fr 1fr; }
       .transparency-header h1 { font-size: 1.7rem; }
     }
+  
+    /* ── Disbursed Breakdown Modal ── */
+    .disbursed-clickable { cursor: pointer; transition: box-shadow 0.18s, transform 0.18s; }
+    .disbursed-clickable:hover { box-shadow: 0 6px 24px rgba(198,40,40,0.18); transform: translateY(-2px); }
+    .s-cta { font-size: 0.72rem; font-weight: 700; color: #c62828; margin-top: 4px; display: block; }
+    .disbursed-modal-backdrop { position: fixed; inset: 0; background: rgba(15,23,42,0.55); display: flex; align-items: center; justify-content: center; z-index: 9000; padding: 1rem; }
+    .disbursed-modal { background: #fff; border-radius: 1.25rem; width: 100%; max-width: 580px; max-height: 85vh; display: flex; flex-direction: column; box-shadow: 0 24px 50px rgba(15,23,42,0.18); overflow: hidden; }
+    .disbursed-modal-head { padding: 1.5rem 1.75rem 1.1rem; border-bottom: 1px solid #f1f5f9; display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; }
+    .disbursed-modal-head h2 { font-size: 1.15rem; font-weight: 800; color: #1a237e; margin: 0; }
+    .disbursed-modal-head p { font-size: 0.78rem; color: #94a3b8; margin: 0.2rem 0 0; }
+    .disbursed-close-btn { background: #f1f5f9; border: none; border-radius: 50%; width: 32px; height: 32px; font-size: 1rem; cursor: pointer; flex-shrink: 0; color: #64748b; transition: background 0.15s; }
+    .disbursed-close-btn:hover { background: #e2e8f0; }
+    .disbursed-modal-body { overflow-y: auto; padding: 1.25rem 1.75rem; flex: 1; }
+    .disbursed-cat-group { margin-bottom: 1.5rem; }
+    .disbursed-cat-label { font-size: 0.7rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; color: #64748b; margin-bottom: 0.55rem; display: flex; align-items: center; gap: 0.5rem; }
+    .disbursed-cat-label::after { content: ''; flex: 1; height: 1px; background: #e2e8f0; }
+    .disbursed-row { display: grid; grid-template-columns: 1fr auto auto; gap: 0.4rem 1rem; padding: 0.55rem 0.75rem; border-radius: 0.65rem; font-size: 0.85rem; align-items: start; }
+    .disbursed-row:nth-child(even) { background: #f8fafc; }
+    .disbursed-row-title { font-weight: 600; color: #0f172a; }
+    .disbursed-row-date { font-size: 0.75rem; color: #94a3b8; margin-top: 2px; }
+    .disbursed-row-amt { font-weight: 700; color: #c62828; white-space: nowrap; text-align: right; }
+    .disbursed-row-bal { font-size: 0.72rem; color: #94a3b8; text-align: right; white-space: nowrap; }
+    .disbursed-cat-subtotal { display: flex; justify-content: space-between; padding: 0.45rem 0.75rem; font-size: 0.8rem; font-weight: 700; color: #475569; border-top: 1px dashed #e2e8f0; margin-top: 0.3rem; }
+    .disbursed-cat-subtotal span:last-child { color: #c62828; }
+    .disbursed-modal-foot { padding: 1rem 1.75rem; border-top: 2px solid #e2e8f0; background: #f8fafc; display: flex; justify-content: space-between; align-items: center; }
+    .disbursed-modal-foot .foot-label { font-size: 0.85rem; font-weight: 700; color: #1a237e; }
+    .disbursed-modal-foot .foot-total { font-size: 1.35rem; font-weight: 900; color: #c62828; }
+    .disbursed-empty { text-align: center; padding: 2.5rem 1rem; color: #94a3b8; font-size: 0.875rem; }
+
   </style>
 </head>
 <body class="public-page">
@@ -323,10 +352,11 @@
           <span class="s-value" id="s-budget">₱0.00</span>
           <span class="s-sub">Fiscal Year 2025</span>
         </div>
-        <div class="summary-card red">
+        <div class="summary-card red disbursed-clickable" onclick="openDisbursedModal()" title="Click to see full breakdown">
           <span class="s-label">Total Disbursed</span>
           <span class="s-value" id="s-spent">₱0.00</span>
           <span class="s-sub" id="s-spent-pct">0% of budget used</span>
+          <span class="s-cta">🔍 View breakdown →</span>
         </div>
         <div class="summary-card green">
           <span class="s-label">Remaining Balance</span>
@@ -409,152 +439,63 @@
 
   <script src="public.js"></script>
   <script>
-    // ── Static placeholder data (replace with API call when backend is ready) ──
-    // Each entry: { id, date, category, title, description, amount, balance, approved_by }
-    const ANNUAL_BUDGET = 150000;
+    // ── Config ────────────────────────────────────────────────────────────────
+    const BASE_URL = window.API || window.location.origin + '/Barangay853';
 
-    const staticExpenses = [
-      {
-        id: 1,
-        date: '2025-04-15',
-        category: 'senior',
-        title: 'Senior Citizen Cash Assistance',
-        description: 'Monthly cash aid distribution for registered senior citizens (60+) in Barangay 853.',
-        amount: 12500,
-        balance: 412300,
-        approved_by: 'Brgy. Captain Juan dela Cruz'
-      },
-      {
-        id: 2,
-        date: '2025-04-10',
-        category: 'health',
-        title: 'Free Medical Mission Supplies',
-        description: 'Purchase of medicines, bandages, and consumables for the quarterly medical mission.',
-        amount: 8750,
-        balance: 424800,
-        approved_by: 'Brgy. Treasurer Maria Santos'
-      },
-      {
-        id: 3,
-        date: '2025-04-02',
-        category: 'infra',
-        title: 'Street Light Repair — Zone 95',
-        description: 'Replacement of 6 defective street lights along Zone 95 main road.',
-        amount: 4200,
-        balance: 433550,
-        approved_by: 'Brgy. Captain Juan dela Cruz'
-      },
-      {
-        id: 4,
-        date: '2025-03-15',
-        category: 'senior',
-        title: 'Senior Citizen Cash Assistance',
-        description: 'Monthly cash aid distribution for registered senior citizens (60+) in Barangay 853.',
-        amount: 12500,
-        balance: 437750,
-        approved_by: 'Brgy. Captain Juan dela Cruz'
-      },
-      {
-        id: 5,
-        date: '2025-03-08',
-        category: 'event',
-        title: "National Women's Month Celebration",
-        description: "Program expenses for the Barangay's Women's Month activities including materials and food.",
-        amount: 6300,
-        balance: 450250,
-        approved_by: 'Brgy. Treasurer Maria Santos'
-      },
-      {
-        id: 6,
-        date: '2025-03-01',
-        category: 'admin',
-        title: 'Office Supplies & Printing',
-        description: 'Quarterly replenishment of office supplies, ink, and document printing for barangay operations.',
-        amount: 3200,
-        balance: 456550,
-        approved_by: 'Brgy. Secretary Ana Reyes'
-      },
-      {
-        id: 7,
-        date: '2025-02-15',
-        category: 'senior',
-        title: 'Senior Citizen Cash Assistance',
-        description: 'Monthly cash aid distribution for registered senior citizens (60+) in Barangay 853.',
-        amount: 12500,
-        balance: 459750,
-        approved_by: 'Brgy. Captain Juan dela Cruz'
-      },
-      {
-        id: 8,
-        date: '2025-02-10',
-        category: 'health',
-        title: 'Dengue Prevention Materials',
-        description: 'Purchase of larvicides, fogging equipment rental, and IEC materials for dengue drive.',
-        amount: 5500,
-        balance: 472250,
-        approved_by: 'Brgy. Captain Juan dela Cruz'
-      },
-      {
-        id: 9,
-        date: '2025-01-28',
-        category: 'infra',
-        title: 'Barangay Hall Painting & Maintenance',
-        description: 'Annual repainting and minor repairs of the Barangay Hall exterior and interior.',
-        amount: 9800,
-        balance: 477750,
-        approved_by: 'Brgy. Treasurer Maria Santos'
-      },
-      {
-        id: 10,
-        date: '2025-01-15',
-        category: 'senior',
-        title: 'Senior Citizen Cash Assistance',
-        description: 'Monthly cash aid distribution for registered senior citizens (60+) in Barangay 853.',
-        amount: 12500,
-        balance: 487550,
-        approved_by: 'Brgy. Captain Juan dela Cruz'
-      }
-    ];
-
-    let allExpenses = [];
+    let allExpenses  = [];
+    let annualBudget = 0;
+    let activeFilter = 'all';
 
     const categoryConfig = {
-      senior: { label: 'Senior Aid',    dot: 'senior', badge: 'badge-senior' },
-      event:  { label: 'Events',        dot: 'event',  badge: 'badge-event'  },
-      infra:  { label: 'Infrastructure',dot: 'infra',  badge: 'badge-infra'  },
-      health: { label: 'Health',        dot: 'health', badge: 'badge-health' },
-      admin:  { label: 'Administrative',dot: 'admin',  badge: 'badge-admin'  },
+      senior: { label: 'Senior Aid',     dot: 'senior', badge: 'badge-senior' },
+      event:  { label: 'Events',         dot: 'event',  badge: 'badge-event'  },
+      infra:  { label: 'Infrastructure', dot: 'infra',  badge: 'badge-infra'  },
+      health: { label: 'Health',         dot: 'health', badge: 'badge-health' },
+      admin:  { label: 'Administrative', dot: 'admin',  badge: 'badge-admin'  },
     };
 
+    // ── Formatters ────────────────────────────────────────────────────────────
     function formatPHP(amount) {
       return '₱' + Number(amount).toLocaleString('en-PH', { minimumFractionDigits: 2 });
     }
-
     function formatDate(dateStr) {
-      return new Date(dateStr).toLocaleDateString('en-PH', {
+      return new Date(dateStr + 'T00:00:00').toLocaleDateString('en-PH', {
         year: 'numeric', month: 'long', day: 'numeric'
       });
     }
-
     function getMonthLabel(dateStr) {
-      return new Date(dateStr).toLocaleDateString('en-PH', { year: 'numeric', month: 'long' });
+      return new Date(dateStr + 'T00:00:00').toLocaleDateString('en-PH', { year: 'numeric', month: 'long' });
+    }
+    function getYYYYMM(dateStr) { return dateStr.substring(0, 7); }
+
+    // ── Build dynamic period tabs from actual data ────────────────────────────
+    function buildPeriodTabs(data) {
+      const months = [...new Set(data.map(e => getYYYYMM(e.date)))].sort().reverse();
+      const tabsEl = document.getElementById('period-tabs');
+      const monthNames = months.map(m => {
+        const [y, mo] = m.split('-');
+        return new Date(+y, +mo - 1, 1).toLocaleDateString('en-PH', { year: 'numeric', month: 'long' });
+      });
+      tabsEl.innerHTML = `<button class="period-tab${activeFilter === 'all' ? ' active' : ''}" onclick="filterByPeriod('all', this)">All Records</button>`
+        + months.map((m, i) => `<button class="period-tab${activeFilter === m ? ' active' : ''}" onclick="filterByPeriod('${m}', this)">${monthNames[i]}</button>`).join('');
     }
 
+    // ── Summary cards ─────────────────────────────────────────────────────────
     function updateSummary(data) {
-      const totalSpent  = data.reduce((s, e) => s + Number(e.amount), 0);
-      const remaining   = data.length > 0 ? Number(data[0].balance) : ANNUAL_BUDGET;
-      const pct         = ((totalSpent / ANNUAL_BUDGET) * 100).toFixed(1);
+      const totalSpent = data.reduce((s, e) => s + Number(e.amount), 0);
+      const remaining  = annualBudget - totalSpent;
+      const pct        = annualBudget > 0 ? ((totalSpent / annualBudget) * 100).toFixed(1) : '0.0';
 
-      document.getElementById('s-budget').textContent  = formatPHP(ANNUAL_BUDGET);
-      document.getElementById('s-spent').textContent   = formatPHP(totalSpent);
+      document.getElementById('s-budget').textContent    = formatPHP(annualBudget);
+      document.getElementById('s-spent').textContent     = formatPHP(totalSpent);
       document.getElementById('s-spent-pct').textContent = pct + '% of budget used';
-      document.getElementById('s-balance').textContent = formatPHP(remaining);
-      document.getElementById('s-count').textContent   = data.length;
+      document.getElementById('s-balance').textContent   = formatPHP(remaining);
+      document.getElementById('s-count').textContent     = data.length;
     }
 
+    // ── Timeline renderer ─────────────────────────────────────────────────────
     function renderTimeline(data) {
       const container = document.getElementById('timeline-container');
-
       if (!data || data.length === 0) {
         container.innerHTML = `
           <div class="empty-expenses">
@@ -565,7 +506,6 @@
         return;
       }
 
-      // Group by month
       const groups = {};
       data.forEach(e => {
         const m = getMonthLabel(e.date);
@@ -589,8 +529,8 @@
                     <span class="tc-date">${formatDate(e.date)}</span>
                   </div>
                   <div class="tc-title">${e.title}</div>
-                  <div class="tc-desc">${e.description}</div>
-                  <div class="tc-approved">✅ Approved by: ${e.approved_by}</div>
+                  <div class="tc-desc">${e.description || ''}</div>
+                  ${e.approved_by ? `<div class="tc-approved">✅ Approved by: ${e.approved_by}</div>` : ''}
                 </div>
                 <div class="tc-right">
                   <div class="tc-amount">−${formatPHP(e.amount)}</div>
@@ -601,52 +541,181 @@
           itemIndex++;
         });
       });
-
       container.innerHTML = html;
     }
 
+    // ── Filter ────────────────────────────────────────────────────────────────
     function filterByPeriod(period, el) {
+      activeFilter = period;
       document.querySelectorAll('.period-tab').forEach(t => t.classList.remove('active'));
       el.classList.add('active');
-
-      let filtered = allExpenses;
-      if (period !== 'all') {
-        filtered = allExpenses.filter(e => e.date.startsWith(period));
-      }
+      const filtered = period === 'all' ? allExpenses : allExpenses.filter(e => e.date.startsWith(period));
       renderTimeline(filtered);
       updateSummary(filtered);
     }
 
+    // ── Main loader — always fetches live from API ────────────────────────────
     async function loadExpenses() {
-  try {
-    const BASE_URL = window.API || window.location.origin + '/Barangay853';
-    const res  = await fetch(`${BASE_URL}/expenses/index.php?public=1`);
-    const data = await res.json();
-    if (data.success && data.data && data.data.length > 0) {
-      allExpenses = data.data.map(r => ({
-        id:          r.id,
-        date:        r.date,
-        category:    r.category,
-        title:       r.title,
-        description: r.description,
-        amount:      parseFloat(r.amount),
-        balance:     parseFloat(r.balance_after),
-        approved_by: r.approved_by
-      }));
-    } else {
-      allExpenses = staticExpenses; // fallback if DB is empty
-    }
-  } catch (err) {
-    console.error('Failed to load expenses:', err);
-    allExpenses = staticExpenses;
-  }
+      const container = document.getElementById('timeline-container');
+      container.innerHTML = `<div class="empty-expenses"><div class="icon">⏳</div><h3>Loading records…</h3></div>`;
 
-  renderTimeline(allExpenses);
-  updateSummary(allExpenses);
-  
+      try {
+        const res  = await fetch(`${BASE_URL}/expenses/index.php?public=1`);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+
+        if (!data.success) throw new Error(data.message || 'Server error');
+
+        annualBudget = parseFloat(data.annual_budget || 0);
+
+        allExpenses = (data.data || []).map(r => ({
+          id:          r.id,
+          date:        r.date,
+          category:    r.category,
+          title:       r.title,
+          description: r.description,
+          amount:      parseFloat(r.amount),
+          balance:     parseFloat(r.balance_after),
+          approved_by: r.approved_by
+        }));
+
+        buildPeriodTabs(allExpenses);
+
+        const filtered = activeFilter === 'all' ? allExpenses : allExpenses.filter(e => e.date.startsWith(activeFilter));
+        renderTimeline(filtered);
+        updateSummary(filtered);
+
+      } catch (err) {
+        console.error('Failed to load expenses:', err);
+        container.innerHTML = `
+          <div class="empty-expenses">
+            <div class="icon">⚠️</div>
+            <h3>Unable to load expense records</h3>
+            <p style="font-size:0.82rem;color:#aaa">Could not reach the server. Please try again later.</p>
+          </div>`;
+        // Zero out the summary cards on error
+        ['s-budget','s-spent','s-balance'].forEach(id => document.getElementById(id).textContent = '₱0.00');
+        document.getElementById('s-spent-pct').textContent = '0% of budget used';
+        document.getElementById('s-count').textContent = '0';
+      }
     }
+
     // Initial load
     loadExpenses();
+
+
+    // ── Disbursed Breakdown Modal ─────────────────────────────────────────────
+    const CAT_LABELS = {
+      senior: 'Senior Aid', event: 'Events', infra: 'Infrastructure',
+      health: 'Health',     admin: 'Administrative',
+    };
+
+    function openDisbursedModal() {
+      const data = (activeFilter === 'all')
+        ? allExpenses
+        : allExpenses.filter(e => e.date.startsWith(activeFilter));
+
+      const subtitle = (activeFilter === 'all')
+        ? 'All recorded expenditures'
+        : 'Expenditures for ' + new Date(activeFilter + '-01T00:00:00').toLocaleDateString('en-PH', { year:'numeric', month:'long' });
+
+      document.getElementById('disbursed-modal-subtitle').textContent = subtitle;
+      renderDisbursedModal(data);
+      document.getElementById('disbursed-modal').style.display = 'flex';
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeDisbursedModal() {
+      document.getElementById('disbursed-modal').style.display = 'none';
+      document.body.style.overflow = '';
+    }
+
+    function renderDisbursedModal(data) {
+      const body = document.getElementById('disbursed-modal-body');
+      const grandTotalEl = document.getElementById('disbursed-grand-total');
+
+      if (!data || data.length === 0) {
+        body.innerHTML = '<div class="disbursed-empty">No expense records for this period.</div>';
+        grandTotalEl.textContent = '\u20b10.00';
+        return;
+      }
+
+      // Group by category, preserving order of first appearance
+      const groups = {};
+      const order  = [];
+      data.forEach(e => {
+        const cat = e.category || 'other';
+        if (!groups[cat]) { groups[cat] = []; order.push(cat); }
+        groups[cat].push(e);
+      });
+
+      let html = '';
+      let grandTotal = 0;
+
+      order.forEach(cat => {
+        const entries  = groups[cat];
+        const label    = CAT_LABELS[cat] || (cat.charAt(0).toUpperCase() + cat.slice(1));
+        const subtotal = entries.reduce((s, e) => s + Number(e.amount), 0);
+        grandTotal += subtotal;
+
+        html += '<div class="disbursed-cat-group">'
+          + '<div class="disbursed-cat-label">' + label + '</div>';
+
+        entries.forEach(e => {
+          const meta = formatDate(e.date) + (e.approved_by ? ' &middot; ' + e.approved_by : '');
+          html += '<div class="disbursed-row">'
+            + '<div><div class="disbursed-row-title">' + e.title + '</div>'
+            + '<div class="disbursed-row-date">' + meta + '</div></div>'
+            + '<div class="disbursed-row-bal">' + formatPHP(e.balance) + '<br>bal. after</div>'
+            + '<div class="disbursed-row-amt">\u2212' + formatPHP(e.amount) + '</div>'
+            + '</div>';
+        });
+
+        html += '<div class="disbursed-cat-subtotal">'
+          + '<span>' + label + ' subtotal (' + entries.length + ' item' + (entries.length !== 1 ? 's' : '') + ')</span>'
+          + '<span>\u2212' + formatPHP(subtotal) + '</span>'
+          + '</div></div>';
+      });
+
+      body.innerHTML = html;
+      grandTotalEl.textContent = '\u2212' + formatPHP(grandTotal);
+    }
+
+    // Close on Escape key
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') closeDisbursedModal();
+    });
+
+    // ── Auto-refresh when admin dashboard makes changes ───────────────────────
+    try {
+      const _ch = new BroadcastChannel('brgy853_expenses');
+      _ch.onmessage = (e) => {
+        if (e.data && e.data.type === 'expenses_updated') {
+          loadExpenses();
+        }
+      };
+    } catch(e) {}
   </script>
+
+  <!-- Disbursed Breakdown Modal -->
+  <div class="disbursed-modal-backdrop" id="disbursed-modal" style="display:none" onclick="if(event.target===this)closeDisbursedModal()">
+    <div class="disbursed-modal">
+      <div class="disbursed-modal-head">
+        <div>
+          <h2>&#x1f4b8; Disbursement Breakdown</h2>
+          <p id="disbursed-modal-subtitle">All recorded expenditures</p>
+        </div>
+        <button class="disbursed-close-btn" onclick="closeDisbursedModal()" aria-label="Close">&#x2715;</button>
+      </div>
+      <div class="disbursed-modal-body" id="disbursed-modal-body">
+        <div class="disbursed-empty">Loading&hellip;</div>
+      </div>
+      <div class="disbursed-modal-foot">
+        <span class="foot-label">Grand Total Disbursed</span>
+        <span class="foot-total" id="disbursed-grand-total">&#x20b10.00</span>
+      </div>
+    </div>
+  </div>
+
 </body>
 </html>

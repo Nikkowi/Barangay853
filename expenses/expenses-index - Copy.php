@@ -126,16 +126,12 @@ switch ($method) {
         $totalSpent = array_sum(array_column($rows, 'amount'));
         $latestBal  = !empty($rows) ? $rows[0]['balance_after'] : 0;
 
-        // Annual budget - try exact fiscal year, fall back to most recently saved
+        // Annual budget
         $budgetYear = $year ?: date('Y');
         $bStmt = $conn->prepare('SELECT annual_budget FROM budget_config WHERE fiscal_year = ?');
         $bStmt->bind_param('i', $budgetYear);
         $bStmt->execute();
         $bRow = $bStmt->get_result()->fetch_assoc();
-        if (!$bRow) {
-            $bFallback = $conn->query('SELECT annual_budget FROM budget_config ORDER BY updated_at DESC, fiscal_year DESC LIMIT 1');
-            $bRow = $bFallback ? $bFallback->fetch_assoc() : null;
-        }
         $annualBudget = $bRow ? $bRow['annual_budget'] : 0;
 
         jsonResponse([
