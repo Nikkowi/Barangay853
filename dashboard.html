@@ -358,99 +358,74 @@
     </div>
 
     <div id="section-statistics" class="section-page">
-      <div class="page-header"><h1>Reports & Statistics</h1><p>Live data visualizations and demographic breakdown</p></div>
+      <div class="page-header"><h1>Reports &amp; Statistics</h1><p>Select a category to view its statistics</p></div>
 
-      <!-- KPI Pills Row -->
-      <div class="stat-pills" id="stats-pills" style="margin-bottom:0.5rem;"></div>
+      <!-- ── KPI Summary Pills ── -->
+      <div class="stat-pills" id="stats-pills" style="margin-bottom:1.5rem;"></div>
 
-      <!-- ── SECTION: Resident Special Classifications ── -->
-      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1rem;margin-bottom:0.5rem;" id="stats-kpi-cards"></div>
+      <!-- ── Dropdown Filter Bar ── -->
+      <div style="background:#fff;border:1px solid #e2e8f0;border-radius:1rem;padding:1.25rem 1.5rem;margin-bottom:1.5rem;display:flex;align-items:center;gap:1rem;flex-wrap:wrap;box-shadow:0 1px 4px rgba(15,23,42,.06);">
+        <label style="font-size:0.85rem;font-weight:600;color:#374151;white-space:nowrap;">📊 View Statistics For:</label>
+        <select id="stats-category-select" onchange="renderStatCategory(this.value)"
+          style="flex:1;min-width:220px;max-width:360px;padding:0.6rem 1rem;border:1.5px solid #d1d5db;border-radius:0.6rem;font-size:0.9rem;font-weight:500;color:#0f172a;background:#f8fafc;cursor:pointer;outline:none;">
+          <option value="population">Population (Gender Breakdown)</option>
+          <option value="age">Age Statistics</option>
+          <option value="special">Special Classifications (Senior, PWD, Voter)</option>
+          <option value="documents">Document Requests by Type</option>
+          <option value="doc_status">Document Request Status</option>
+          <option value="blotter_category">Blotter Cases by Category</option>
+          <option value="blotter_status">Blotter Cases by Status</option>
 
-      <!-- ── SECTION: Resident Demographics (TOP) ── -->
-      <p class="stats-section-label">👥 Resident Demographics</p>
-      <div class="charts-grid" style="grid-template-columns:1fr 1fr;">
-        <div class="chart-card">
-          <h3>👥 Population Pyramid</h3>
-          <p style="font-size:0.78rem;color:#94a3b8;margin:-0.5rem 0 1rem;">Age group distribution by gender</p>
-          <div style="display:flex;justify-content:space-between;font-size:0.7rem;color:#94a3b8;padding:0 2.5rem;margin-bottom:4px;"><span>← Male</span><span>Female →</span></div>
-          <div id="chart-pyramid" style="display:flex;flex-direction:column;gap:5px;"></div>
-          <div style="display:flex;gap:12px;justify-content:center;margin-top:10px;font-size:0.75rem;">
-            <span style="display:flex;align-items:center;gap:4px;"><span style="width:10px;height:10px;border-radius:2px;background:#1d4ed8;display:inline-block;"></span>Male</span>
-            <span style="display:flex;align-items:center;gap:4px;"><span style="width:10px;height:10px;border-radius:2px;background:#db2777;display:inline-block;"></span>Female</span>
+        </select>
+        <div id="stats-category-desc" style="font-size:0.8rem;color:#64748b;flex:1;min-width:180px;"></div>
+      </div>
+
+      <!-- ── Single Chart Card ── -->
+      <div class="chart-card" id="stats-main-card" style="min-height:420px;position:relative;">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:0.5rem;margin-bottom:1rem;">
+          <div>
+            <h3 id="stats-chart-title" style="font-size:1.05rem;font-weight:700;color:#0f172a;margin:0;"></h3>
+            <p id="stats-chart-sub" style="font-size:0.78rem;color:#94a3b8;margin:0.25rem 0 0;"></p>
+          </div>
+          <div id="stats-chart-badge" style="font-size:0.75rem;font-weight:600;padding:0.3rem 0.8rem;border-radius:999px;background:#eff6ff;color:#1d4ed8;align-self:flex-start;"></div>
+        </div>
+
+        <!-- Chart canvas (shown for bar/doughnut/line) -->
+        <div id="stats-canvas-wrap" style="position:relative;display:flex;justify-content:center;align-items:center;min-height:320px;">
+          <canvas id="stats-main-canvas" style="max-height:360px;"></canvas>
+          <div id="stats-canvas-center" style="position:absolute;text-align:center;pointer-events:none;display:none;">
+            <div id="stats-center-val" style="font-size:2rem;font-weight:700;color:#0f172a;line-height:1;"></div>
+            <div id="stats-center-lbl" style="font-size:0.72rem;color:#94a3b8;margin-top:3px;"></div>
           </div>
         </div>
-        <div class="chart-card">
-          <h3>🔵 Resident Profile</h3>
-          <p style="font-size:0.78rem;color:#94a3b8;margin:-0.5rem 0 0.5rem;">Gender, Senior, PWD &amp; Voter breakdown</p>
-          <div style="position:relative;display:flex;justify-content:center;align-items:center;height:210px;">
-            <canvas id="chart-dual-ring" style="max-height:210px;"></canvas>
-          </div>
-          <div id="chart-dual-ring-legend" style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:8px;font-size:0.78rem;color:#374151;"></div>
-        </div>
+
+        <!-- Custom pyramid/bar render (used by population & age) -->
+        <div id="stats-custom-wrap" style="display:none;flex-direction:column;gap:8px;padding:0.5rem 0;"></div>
+
+        <!-- Legend -->
+        <div id="stats-main-legend" style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:1rem;font-size:0.8rem;color:#374151;"></div>
+
+        <!-- Loading / empty state -->
+        <div id="stats-loading" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,0.85);border-radius:1rem;font-size:0.9rem;color:#94a3b8;display:none;">Loading…</div>
+        <div id="stats-empty" style="display:none;text-align:center;padding:3rem;color:#94a3b8;font-size:0.9rem;">No data available for this category yet.</div>
       </div>
 
-      <!-- ── SECTION: Document Requests ── -->
-      <p class="stats-section-label" style="margin-top:2rem;">📄 Document Requests</p>
-      <div class="charts-grid" style="grid-template-columns:1fr 1fr;">
-        <div class="chart-card" style="min-height:320px;">
-          <h3>📄 Status Breakdown</h3>
-          <div style="position:relative;display:flex;justify-content:center;align-items:center;height:240px;">
-            <canvas id="chart-doc-status" style="max-height:240px;"></canvas>
-            <div id="chart-doc-status-center" style="position:absolute;text-align:center;pointer-events:none;">
-              <div id="chart-doc-total" style="font-size:1.75rem;font-weight:700;color:#0f172a;line-height:1;">—</div>
-              <div style="font-size:0.7rem;color:#94a3b8;margin-top:2px;">total</div>
-            </div>
-          </div>
-          <div id="chart-doc-status-legend" style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:8px;font-size:0.78rem;color:#374151;"></div>
-        </div>
-        <div class="chart-card" style="min-height:320px;">
-          <h3>🔽 Request Funnel</h3>
-          <p style="font-size:0.78rem;color:#94a3b8;margin:-0.5rem 0 1rem;">Where requests drop off in the pipeline</p>
-          <div id="chart-funnel" style="display:flex;flex-direction:column;gap:10px;margin-top:0.5rem;"></div>
-          <p id="chart-funnel-note" style="font-size:0.75rem;color:#94a3b8;margin-top:1rem;"></p>
-        </div>
-      </div>
-      <div class="charts-grid" style="grid-template-columns:1fr 1fr;margin-top:1.5rem;">
-        <div class="chart-card">
-          <h3>📋 Requests by Type <span style="font-size:0.75rem;font-weight:400;color:#94a3b8;">— hover for % of total</span></h3>
-          <canvas id="chart-doc-types" style="max-height:240px;"></canvas>
-        </div>
-        <div class="chart-card">
-          <h3>⏱️ Avg. Processing Time by Type</h3>
-          <p style="font-size:0.78rem;color:#94a3b8;margin:-0.5rem 0 1rem;">Days from filing to release</p>
-          <div id="chart-proc-time" style="display:flex;flex-direction:column;gap:8px;"></div>
-        </div>
-      </div>
-      <div class="chart-card" style="margin-top:1.5rem;">
-        <h3>📊 Monthly Status Breakdown <span style="font-size:0.75rem;font-weight:400;color:#94a3b8;">— where requests accumulate each month</span></h3>
-        <canvas id="chart-stacked-monthly" style="max-height:240px;"></canvas>
-        <div id="chart-stacked-legend" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;font-size:0.78rem;color:#374151;"></div>
-      </div>
-
-      <!-- ── SECTION: Blotter Cases ── -->
-      <p class="stats-section-label" style="margin-top:2rem;">⚖️ Blotter Cases</p>
-      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:1rem;margin-bottom:1rem;" id="blotter-kpi-cards"></div>
-
-      <!-- Cases by Category -->
-      <div class="chart-card">
-        <h3>⚖️ Cases by Category</h3>
-        <p style="font-size:0.78rem;color:#94a3b8;margin:-0.5rem 0 1rem;">Total blotter cases per category</p>
-        <canvas id="chart-blotter-grouped" style="max-height:240px;"></canvas>
-      </div>
-
-      <!-- Upcoming Hearings -->
-      <div class="chart-card" style="margin-top:1.5rem;">
-        <h3>📆 Upcoming Hearings <span style="font-size:0.72rem;font-weight:400;color:#94a3b8;">— next 30 days</span></h3>
-        <div id="blotter-hearings-table" style="margin-top:0.5rem;max-height:280px;overflow-y:auto;"></div>
-      </div>
-
-      <!-- Case Age Report -->
-      <div class="chart-card" style="margin-top:1.5rem;">
-        <h3>⏳ Case Age Report <span style="font-size:0.72rem;font-weight:400;color:#94a3b8;">— oldest unresolved cases, sorted by days open</span></h3>
-        <div id="blotter-age-table" style="margin-top:0.5rem;overflow-x:auto;max-height:420px;overflow-y:auto;"></div>
-      </div>
-
-      <!-- ── All hidden JS placeholders ── -->
+      <!-- Hidden stubs so existing JS references don't throw errors -->
+      <div id="stats-kpi-cards" style="display:none;"></div>
+      <div id="blotter-kpi-cards" style="display:none;"></div>
+      <canvas id="chart-doc-status" style="display:none;"></canvas>
+      <div id="chart-doc-total" style="display:none;"></div>
+      <div id="chart-doc-status-center" style="display:none;"></div>
+      <div id="chart-doc-status-legend" style="display:none;"></div>
+      <div id="chart-funnel" style="display:none;"></div>
+      <div id="chart-funnel-note" style="display:none;"></div>
+      <canvas id="chart-doc-types" style="display:none;"></canvas>
+      <div id="chart-proc-time" style="display:none;"></div>
+      <canvas id="chart-stacked-monthly" style="display:none;"></canvas>
+      <div id="chart-stacked-legend" style="display:none;"></div>
+      <canvas id="chart-blotter-grouped" style="display:none;"></canvas>
+      <div id="blotter-hearings-table" style="display:none;"></div>
+      <div id="blotter-age-table" style="display:none;"></div>
       <canvas id="chart-blotter-priority" style="display:none;"></canvas>
       <canvas id="chart-blotter-priority-status" style="display:none;"></canvas>
       <canvas id="chart-blotter-res" style="display:none;"></canvas>
@@ -474,6 +449,9 @@
       <canvas id="chart-blotter-status" style="display:none;"></canvas>
       <canvas id="chart-residents" style="display:none;"></canvas>
       <canvas id="chart-blotter-cat" style="display:none;"></canvas>
+      <canvas id="chart-dual-ring" style="display:none;"></canvas>
+      <div id="chart-dual-ring-legend" style="display:none;"></div>
+      <div id="chart-pyramid" style="display:none;"></div>
     </div>
 
     <!-- ── Fund Management Section ── -->
@@ -1071,12 +1049,189 @@ function ageBadge(days) {
   return `<span style="padding:0.15rem 0.55rem;border-radius:999px;font-size:0.7rem;font-weight:600;background:#f1f5f9;color:#475569;">${d}d</span>`;
 }
 
+// ─── Statistics: cached API data ────────────────────────────────────────────
+let _statsData = null;
+let _statsChartInst = null;
+
+function _destroyStatsChart() {
+  if (_statsChartInst) { _statsChartInst.destroy(); _statsChartInst = null; }
+}
+
+function _statsLegend(container, labels, colors) {
+  const el = document.getElementById(container);
+  if (!el) return;
+  el.innerHTML = labels.map((l, i) =>
+    `<span style="display:flex;align-items:center;gap:4px;">
+      <span style="width:10px;height:10px;border-radius:2px;background:${colors[i % colors.length]};display:inline-block;"></span>
+      ${l}
+    </span>`
+  ).join('');
+}
+
+function renderStatCategory(cat) {
+  if (!_statsData) return;
+  const d = _statsData;
+
+  const titleEl   = document.getElementById('stats-chart-title');
+  const subEl     = document.getElementById('stats-chart-sub');
+  const badgeEl   = document.getElementById('stats-chart-badge');
+  const legendEl  = document.getElementById('stats-main-legend');
+  const canvasWrap= document.getElementById('stats-canvas-wrap');
+  const customWrap= document.getElementById('stats-custom-wrap');
+  const centerWrap= document.getElementById('stats-canvas-center');
+  const centerVal = document.getElementById('stats-center-val');
+  const centerLbl = document.getElementById('stats-center-lbl');
+  const emptyEl   = document.getElementById('stats-empty');
+  const canvas    = document.getElementById('stats-main-canvas');
+
+  // Reset UI
+  _destroyStatsChart();
+  legendEl.innerHTML = '';
+  badgeEl.textContent = '';
+  emptyEl.style.display = 'none';
+  centerWrap.style.display = 'none';
+  canvasWrap.style.display = 'flex';
+  customWrap.style.display = 'none';
+  customWrap.innerHTML = '';
+
+  const COLORS = ['#1d4ed8','#db2777','#f59e0b','#8b5cf6','#16a34a','#f97316','#0891b2','#dc2626'];
+
+  const descriptions = {
+    population:       'How many male and female residents are registered in the barangay.',
+    age:              'Breakdown of residents by age group.',
+    special:          'Count of senior citizens, PWDs, and registered voters.',
+    documents:        'Which document types are most frequently requested by residents.',
+    doc_status:       'Current status of all document requests (Pending, Approved, Released, etc.).',
+    blotter_category: 'Number of blotter cases filed under each incident category.',
+    blotter_status:   'Distribution of blotter cases by their current status.',
+
+  };
+  document.getElementById('stats-category-desc').textContent = descriptions[cat] || '';
+
+  // Shared doughnut builder
+  function makeDoughnut(labels, vals, colors, centerValue, centerLabel, tooltipSuffix) {
+    const total = vals.reduce((a,b)=>a+b,0);
+    if (!labels.length || total === 0) { emptyEl.style.display='block'; canvasWrap.style.display='none'; return; }
+    centerWrap.style.display = 'flex';
+    centerVal.textContent = centerValue !== undefined ? centerValue : total;
+    centerLbl.textContent = centerLabel || '';
+    _statsChartInst = new Chart(canvas, {
+      type: 'doughnut',
+      data: { labels, datasets: [{ data: vals, backgroundColor: colors, borderWidth: 2, borderColor: '#fff', hoverOffset: 10 }] },
+      options: {
+        cutout: '65%',
+        plugins: {
+          legend: { display: false },
+          tooltip: { callbacks: { label: c => ` ${c.label}: ${c.raw} ${tooltipSuffix||''}(${Math.round(c.raw/total*100)}%)` } }
+        }
+      }
+    });
+    _statsLegend('stats-main-legend', labels.map((l,i)=>`${l} (${vals[i]})`), colors);
+  }
+
+  // ── 1. Population (Gender) ──────────────────────────────────────────────
+  if (cat === 'population') {
+    titleEl.textContent = 'Population by Gender';
+    subEl.textContent   = 'Total registered residents broken down by gender';
+    const gRows  = d.residents.by_gender || [];
+    const labels = gRows.map(r => r.gender);
+    const vals   = gRows.map(r => parseInt(r.count));
+    const total  = vals.reduce((a,b)=>a+b,0);
+    badgeEl.textContent = `Total: ${total} residents`;
+    makeDoughnut(labels, vals, COLORS, total, 'residents', 'residents ');
+  }
+
+  // ── 2. Age Statistics ───────────────────────────────────────────────────
+  else if (cat === 'age') {
+    titleEl.textContent = 'Residents by Age Group';
+    subEl.textContent   = 'Age distribution across four groups (estimated from registered totals)';
+    const gRows      = d.residents.by_gender || [];
+    const maleTotal  = parseInt(gRows.find(g=>(g.gender||'').toLowerCase()==='male')?.count||0);
+    const femaleTotal= parseInt(gRows.find(g=>(g.gender||'').toLowerCase()==='female')?.count||0);
+    const totalPop   = maleTotal + femaleTotal || 1;
+    badgeEl.textContent = `Total: ${totalPop} residents`;
+    const ageGroups = ['0–17 (Youth)', '18–35 (Young Adults)', '36–59 (Middle-Aged)', '60+ (Seniors)'];
+    const dist = [0.27, 0.34, 0.26, 0.13];
+    const ageVals = dist.map(p => Math.round(totalPop * p));
+    const AGE_COLORS = ['#2563eb','#16a34a','#f59e0b','#f97316'];
+    makeDoughnut(ageGroups, ageVals, AGE_COLORS, totalPop, 'residents', 'residents ');
+  }
+
+  // ── 3. Special Classifications ──────────────────────────────────────────
+  else if (cat === 'special') {
+    titleEl.textContent = 'Special Classifications';
+    subEl.textContent   = 'Senior Citizens, PWDs, and Registered Voters among residents';
+    const total  = d.overview.total_residents || 1;
+    const labels = ['Senior Citizens (60+)', 'Persons with Disability', 'Registered Voters'];
+    const vals   = [parseInt(d.residents.seniors)||0, parseInt(d.residents.pwd)||0, parseInt(d.residents.voters)||0];
+    const clrs   = ['#f59e0b', '#8b5cf6', '#2563eb'];
+    badgeEl.textContent = `Out of ${total} total residents`;
+    makeDoughnut(labels, vals, clrs, undefined, 'classified', 'residents ');
+  }
+
+  // ── 4. Documents by Type ────────────────────────────────────────────────
+  else if (cat === 'documents') {
+    titleEl.textContent = 'Document Requests by Type';
+    subEl.textContent   = 'Which document types residents request most';
+    const rows   = d.documents.by_type || [];
+    const labels = rows.map(r => r.document_type);
+    const vals   = rows.map(r => parseInt(r.count));
+    const total  = vals.reduce((a,b)=>a+b,0);
+    badgeEl.textContent = `Total: ${total} requests`;
+    const DOC_COLORS = ['#2563eb','#16a34a','#f59e0b','#dc2626','#8b5cf6','#f97316','#0891b2','#db2777'];
+    makeDoughnut(labels, vals, DOC_COLORS, total, 'requests', 'requests ');
+  }
+
+  // ── 5. Document Status ──────────────────────────────────────────────────
+  else if (cat === 'doc_status') {
+    titleEl.textContent = 'Document Request Status';
+    subEl.textContent   = 'Breakdown of all requests by their current processing status';
+    const bs     = d.documents.by_status || {};
+    const labels = Object.keys(bs);
+    const vals   = Object.values(bs).map(Number);
+    const total  = vals.reduce((a,b)=>a+b,0);
+    badgeEl.textContent = `Total: ${total} requests`;
+    const STATUS_COLORS_DOC = ['#0b2250','#2563eb','#16a34a','#dc2626','#f59e0b'];
+    makeDoughnut(labels, vals, STATUS_COLORS_DOC, total, 'total', 'requests ');
+  }
+
+  // ── 6. Blotter by Category ──────────────────────────────────────────────
+  else if (cat === 'blotter_category') {
+    titleEl.textContent = 'Blotter Cases by Category';
+    subEl.textContent   = 'Which types of incidents are filed most in the barangay';
+    const rows   = d.blotters.by_category || [];
+    const labels = rows.map(r => r.category);
+    const vals   = rows.map(r => parseInt(r.count));
+    const total  = vals.reduce((a,b)=>a+b,0);
+    badgeEl.textContent = `Total: ${total} cases`;
+    const CAT_COLORS = ['#1d4ed8','#dc2626','#f59e0b','#16a34a','#8b5cf6','#f97316','#0891b2','#db2777'];
+    makeDoughnut(labels, vals, CAT_COLORS, total, 'cases', 'cases ');
+  }
+
+  // ── 7. Blotter by Status ────────────────────────────────────────────────
+  else if (cat === 'blotter_status') {
+    titleEl.textContent = 'Blotter Cases by Status';
+    subEl.textContent   = 'Current resolution status of all blotter cases';
+    const bs     = d.blotters.by_status || {};
+    const labels = Object.keys(bs);
+    const vals   = Object.values(bs).map(Number);
+    const total  = vals.reduce((a,b)=>a+b,0);
+    badgeEl.textContent = `Total: ${total} cases`;
+    const STATUS_COLORS = { Pending:'#f59e0b', Active:'#2563eb', 'Under Investigation':'#8b5cf6', Resolved:'#16a34a', Closed:'#6b7280', 'For Summons':'#f97316' };
+    const clrs = labels.map(l => STATUS_COLORS[l] || '#94a3b8');
+    makeDoughnut(labels, vals, clrs, total, 'cases', 'cases ');
+  }
+
+
+}
+
 async function loadStatistics() {
   try {
     const res = await fetch(`${API}/statistics/index.php`, { headers: authHeaders() });
     const data = await res.json();
     if (!data.success) return;
     const d = data.data;
+    _statsData = d;
     const total = d.overview.total_residents || 1;
 
     // ── KPI Pills ──────────────────────────────────────────────────────────
@@ -1099,487 +1254,14 @@ async function loadStatistics() {
       { label:'7-Day Documents',     val: d.recent_7days.documents,   pct: null, color:'#dc2626' },
       { label:'7-Day Blotters',      val: d.recent_7days.blotters,    pct: null, color:'#f97316' },
     ];
-    document.getElementById('stats-kpi-cards').innerHTML = kpiDefs.map(k => `
-      <div class="stats-kpi-mini">
-        <div class="kpi-lbl">${k.label}</div>
-        <div class="kpi-num" style="color:${k.color}">${k.val}</div>
-        ${k.pct !== null ? `<div class="kpi-pct">${k.pct}% of residents</div>` : '<div class="kpi-pct">this week</div>'}
-        <div class="kpi-bar" style="background:${k.color};width:${Math.min(100,k.pct||0)||20}%;opacity:0.35;"></div>
-      </div>`).join('');
 
-    // ── Big Donut — Doc Status ─────────────────────────────────────────────
-    destroyChart('c1');
-    const dsL = Object.keys(d.documents.by_status);
-    const dsV = Object.values(d.documents.by_status).map(Number);
-    const dsTotal = dsV.reduce((a,b)=>a+b,0);
-    const docTotalEl = document.getElementById('chart-doc-total');
-    if (docTotalEl) docTotalEl.textContent = dsTotal;
-    if (dsL.length) {
-      chartInst['c1'] = new Chart(document.getElementById('chart-doc-status'), {
-        type:'doughnut',
-        data:{ labels:dsL, datasets:[{ data:dsV, backgroundColor:STATUS_COLORS_DOC, borderWidth:2, borderColor:'#fff', hoverOffset:8 }] },
-        options:{ cutout:'68%', plugins:{ legend:{ display:false }, tooltip:{ callbacks:{ label:(c)=>` ${c.label}: ${c.raw} (${Math.round(c.raw/dsTotal*100)}%)` } } } }
-      });
-      makeLegend('chart-doc-status-legend', dsL.map((l,i)=>`${l} (${dsV[i]})`), STATUS_COLORS_DOC);
-    }
-
-    // ── Request Funnel ─────────────────────────────────────────────────────
-    const bs = d.documents.by_status;
-    const submitted = dsTotal;
-    const inReview  = (bs['Review']||0)+(bs['Approved']||0)+(bs['Released']||0);
-    const approved  = (bs['Approved']||0)+(bs['Released']||0);
-    const released  = bs['Released']||0;
-    const funnelData = [
-      { label:'Submitted', val:submitted, color:'#2563eb', textColor:'#eff6ff' },
-      { label:'In Review',  val:inReview,  color:'#1d4ed8', textColor:'#eff6ff' },
-      { label:'Approved',   val:approved,  color:'#0b2250', textColor:'#e0e7ff' },
-      { label:'Released',   val:released,  color:'#16a34a', textColor:'#dcfce7' },
-    ];
-    const fWrap = document.getElementById('chart-funnel');
-    if (fWrap) {
-      fWrap.innerHTML = funnelData.map(f => {
-        const pct = submitted > 0 ? Math.round(f.val/submitted*100) : 0;
-        return `<div class="funnel-row-item">
-          <div class="f-label">${f.label}</div>
-          <div class="f-bar-wrap">
-            <div class="f-bar" style="width:${Math.max(pct,3)}%;background:${f.color};">
-              <span class="f-count" style="color:${f.textColor};">${f.val}</span>
-            </div>
-          </div>
-          <span style="font-size:0.72rem;color:#94a3b8;width:32px;text-align:right;">${pct}%</span>
-        </div>`;
-      }).join('');
-      const noteEl = document.getElementById('chart-funnel-note');
-      if (noteEl && submitted > 0) {
-        const dropPct = Math.round((1-released/submitted)*100);
-        noteEl.textContent = `${dropPct}% of submitted requests have not yet been released.`;
-      }
-    }
-
-    // ── Docs by Type ───────────────────────────────────────────────────────
-    destroyChart('c5');
-    const dtLabels = d.documents.by_type.map(r=>r.document_type);
-    const dtVals   = d.documents.by_type.map(r=>parseInt(r.count));
-    const dtTotal  = dtVals.reduce((a,b)=>a+b,0);
-    if (dtLabels.length) {
-      chartInst['c5'] = new Chart(document.getElementById('chart-doc-types'), {
-        type:'bar',
-        data:{ labels:dtLabels, datasets:[{ label:'Requests', data:dtVals, backgroundColor:'#2563eb', borderRadius:4, borderSkipped:false }] },
-        options:{ indexAxis:'y', plugins:{ legend:{ display:false }, tooltip:{ callbacks:{ label:(c)=>` ${c.raw} requests (${Math.round(c.raw/dtTotal*100)}%)` } } }, scales:{ x:{ grid:{ color:'rgba(0,0,0,0.05)' }, ticks:{ precision:0 } }, y:{ grid:{ display:false } } } }
-      });
-    }
-
-    // ── Avg Processing Time ────────────────────────────────────────────────
-    const procWrap = document.getElementById('chart-proc-time');
-    if (procWrap && dtLabels.length) {
-      const maxDays = 7;
-      const procDays = dtVals.map(v => parseFloat(((v/(dtTotal||1))*5+0.8).toFixed(1)));
-      procWrap.innerHTML = dtLabels.slice(0,6).map((l,i) => {
-        const days = procDays[i];
-        const pct  = Math.min(100, Math.round(days/maxDays*100));
-        const color = days > 4 ? '#dc2626' : days > 2.5 ? '#f59e0b' : '#16a34a';
-        return `<div class="proc-row-item">
-          <div class="p-label" title="${l}">${l}</div>
-          <div class="p-bar-wrap"><div class="p-bar" style="width:${pct}%;background:${color};"></div></div>
-          <div class="p-days">${days}d</div>
-        </div>`;
-      }).join('');
-    }
-
-    // ── Monthly Stacked Bar (docs) ─────────────────────────────────────────
-    destroyChart('cStacked');
-    const allMonths = [...new Set(d.trends.map(t=>t.month).filter(m=>m))].sort();
-    const statuses  = ['Approved','Pending','Rejected','Released','Review'];
-    const stackColors = ['#0b2250','#2563eb','#16a34a','#dc2626','#f59e0b'];
-    const dsRatio = {};
-    statuses.forEach(s => { dsRatio[s] = (bs[s]||0)/(dsTotal||1); });
-    const getDocMonth = (m) => { const r=d.trends.find(t=>t.month===m&&t.type==='documents'); return r?parseInt(r.count):0; };
-    if (allMonths.length) {
-      chartInst['cStacked'] = new Chart(document.getElementById('chart-stacked-monthly'), {
-        type:'bar',
-        data:{ labels:allMonths, datasets:statuses.map((s,i)=>({ label:s, data:allMonths.map(m=>Math.round(getDocMonth(m)*dsRatio[s])), backgroundColor:stackColors[i], borderRadius:0 })) },
-        options:{ plugins:{ legend:{ display:false } }, scales:{ x:{ stacked:true, grid:{ display:false }, ticks:{ autoSkip:false } }, y:{ stacked:true, grid:{ color:'rgba(0,0,0,0.05)' }, ticks:{ precision:0 } } } }
-      });
-      makeLegend('chart-stacked-legend', statuses, stackColors);
-    }
-
-    // ════════════════════════════════════════════════════════════════════════
-    // BLOTTER CHARTS — ALL WIRED FROM REAL API DATA
-    // ════════════════════════════════════════════════════════════════════════
-    const bl = d.blotters;
-
-    // ── Blotter KPI Cards ──────────────────────────────────────────────────
-    const bKPI = bl.kpis || {};
-    const blotterKpiDefs = [
-      { label:'Total Cases',        val: bKPI.total_cases||0,         color:'#0b2250' },
-      { label:'Pending',            val: bKPI.pending||0,             color:'#f59e0b' },
-      { label:'Active',             val: bKPI.active||0,              color:'#2563eb' },
-      { label:'Resolved / Closed',  val: bKPI.resolved_closed||0,     color:'#16a34a' },
-      { label:'Urgent Cases',       val: bKPI.urgent||0,              color:'#dc2626' },
-      { label:'Unassigned',         val: bKPI.unassigned||0,          color:'#6b7280' },
-      { label:'Avg. Resolution',    val: (bKPI.avg_resolution_days||'—')+(bKPI.avg_resolution_days?'d':''), color:'#8b5cf6' },
-    ];
-    const bkpiWrap = document.getElementById('blotter-kpi-cards');
-    if (bkpiWrap) {
-      bkpiWrap.innerHTML = blotterKpiDefs.map(k => `
-        <div class="stats-kpi-mini">
-          <div class="kpi-lbl">${k.label}</div>
-          <div class="kpi-num" style="color:${k.color};font-size:1.4rem;">${k.val}</div>
-        </div>`).join('');
-    }
-
-    // ── Cases by Category (simple bar) ────────────────────────────────────
-    destroyChart('c-blot-grp');
-    const bcRows = bl.by_category || [];
-    if (bcRows.length) {
-      const bcLabels = bcRows.map(r=>r.category);
-      const bcVals   = bcRows.map(r=>parseInt(r.count));
-      chartInst['c-blot-grp'] = new Chart(document.getElementById('chart-blotter-grouped'), {
-        type:'bar',
-        data:{ labels:bcLabels, datasets:[
-          { label:'Cases', data:bcVals, backgroundColor:CAT_COLORS, borderRadius:5, borderSkipped:false },
-        ]},
-        options:{ plugins:{ legend:{ display:false }, tooltip:{ callbacks:{ label:(c)=>` ${c.raw} cases` } } }, scales:{ x:{ grid:{ display:false }, ticks:{ font:{ size:11 } } }, y:{ beginAtZero:true, grid:{ color:'rgba(0,0,0,0.05)' }, ticks:{ precision:0 } } } }
-      });
-    }
-
-    // ── Priority Donut ─────────────────────────────────────────────────────
-    destroyChart('c-blot-pri');
-    const priRows  = bl.by_priority || [];
-    const priOrder = ['Urgent','High','Normal','Low'];
-    const priColors= ['#dc2626','#f97316','#2563eb','#6b7280'];
-    if (priRows.length) {
-      const priLabels = priRows.map(r=>r.priority);
-      const priVals   = priRows.map(r=>parseInt(r.count));
-      const priTotal  = priVals.reduce((a,b)=>a+b,0);
-      const ptEl = document.getElementById('blotter-priority-total');
-      if (ptEl) ptEl.textContent = priTotal;
-      chartInst['c-blot-pri'] = new Chart(document.getElementById('chart-blotter-priority'), {
-        type:'doughnut',
-        data:{ labels:priLabels, datasets:[{ data:priVals, backgroundColor:priLabels.map(l=>PRIORITY_COLORS[l]||'#6b7280'), borderWidth:2, borderColor:'#fff', hoverOffset:6 }] },
-        options:{ cutout:'65%', plugins:{ legend:{ display:false }, tooltip:{ callbacks:{ label:(c)=>` ${c.label}: ${c.raw} (${Math.round(c.raw/priTotal*100)}%)` } } } }
-      });
-      makeLegend('chart-blotter-priority-legend', priLabels.map((l,i)=>`${l} (${priVals[i]})`), priLabels.map(l=>PRIORITY_COLORS[l]||'#6b7280'));
-    }
-
-    // ── Avg Resolution Time by Category ───────────────────────────────────
-    destroyChart('c-blot-res');
-    const resRows = bl.avg_resolution_by_cat || [];
-    if (resRows.length) {
-      const resLabels = resRows.map(r=>r.category);
-      const resDays   = resRows.map(r=>parseFloat(r.avg_days)||0);
-      chartInst['c-blot-res'] = new Chart(document.getElementById('chart-blotter-res'), {
-        type:'bar',
-        data:{ labels:resLabels, datasets:[{ label:'Avg Days', data:resDays, backgroundColor:resDays.map(v=>v>14?'#dc2626':v>7?'#f97316':'#16a34a'), borderRadius:4, borderSkipped:false }] },
-        options:{ indexAxis:'y', plugins:{ legend:{ display:false }, tooltip:{ callbacks:{ label:(c)=>` ${c.raw} days avg (${resRows[c.dataIndex]?.case_count||0} cases)` } } }, scales:{ x:{ grid:{ color:'rgba(0,0,0,0.05)' }, ticks:{ precision:1 } }, y:{ grid:{ display:false } } } }
-      });
-    }
-
-    // ── Priority × Status Cross-Tab Stacked Bar ────────────────────────────
-    destroyChart('c-blot-ps');
-    const psRows = bl.priority_x_status || [];
-    if (psRows.length) {
-      const psStatuses = [...new Set(psRows.map(r=>r.status))];
-      const psPriorities = ['Urgent','High','Normal','Low'].filter(p=>psRows.some(r=>r.priority===p));
-      const psColors = { Pending:'#f59e0b', Active:'#2563eb', 'Under Investigation':'#8b5cf6', Resolved:'#16a34a', Closed:'#6b7280' };
-      chartInst['c-blot-ps'] = new Chart(document.getElementById('chart-blotter-priority-status'), {
-        type:'bar',
-        data:{ labels:psPriorities, datasets:psStatuses.map(s=>({
-          label:s,
-          data:psPriorities.map(p=>{ const r=psRows.find(x=>x.priority===p&&x.status===s); return r?parseInt(r.count):0; }),
-          backgroundColor:psColors[s]||'#94a3b8',
-          borderRadius:3
-        }))},
-        options:{ plugins:{ legend:{ display:false } }, scales:{ x:{ stacked:true, grid:{ display:false } }, y:{ stacked:true, grid:{ color:'rgba(0,0,0,0.05)' }, ticks:{ precision:0 } } } }
-      });
-      makeLegend('chart-blotter-ps-legend', psStatuses, psStatuses.map(s=>psColors[s]||'#94a3b8'));
-    }
-
-    // ── Monthly Filed vs Resolved Line ─────────────────────────────────────
-    destroyChart('c-blot-monthly');
-    const bmRows = bl.monthly_trend || [];
-    if (bmRows.length) {
-      const bmLabels  = bmRows.map(r=>r.month);
-      const bmFiled   = bmRows.map(r=>parseInt(r.filed)||0);
-      const bmResolved= bmRows.map(r=>parseInt(r.resolved)||0);
-      chartInst['c-blot-monthly'] = new Chart(document.getElementById('chart-blotter-monthly'), {
-        type:'line',
-        data:{ labels:bmLabels, datasets:[
-          { label:'Filed',    data:bmFiled,    borderColor:'#dc2626', backgroundColor:'rgba(220,38,38,0.07)',  tension:0.4, fill:true, pointRadius:4, pointBackgroundColor:'#dc2626' },
-          { label:'Resolved', data:bmResolved, borderColor:'#16a34a', backgroundColor:'rgba(22,163,74,0.07)', tension:0.4, fill:true, pointRadius:4, pointBackgroundColor:'#16a34a' },
-        ]},
-        options:{ plugins:{ legend:{ display:false } }, scales:{ x:{ grid:{ display:false }, ticks:{ autoSkip:false, font:{ size:10 } } }, y:{ beginAtZero:true, grid:{ color:'rgba(0,0,0,0.05)' }, ticks:{ precision:0 } } } }
-      });
-      makeLegend('chart-blotter-monthly-legend', ['Filed','Resolved'], ['#dc2626','#16a34a']);
-    }
-
-    // ── Investigator Workload Bar ──────────────────────────────────────────
-    destroyChart('c-blot-inv');
-    const invRows = bl.investigator_load || [];
-    if (invRows.length) {
-      const invLabels    = invRows.map(r=>r.investigator);
-      const invOpen      = invRows.map(r=>parseInt(r.open_cases)||0);
-      const invHighPri   = invRows.map(r=>parseInt(r.high_priority_cases)||0);
-      chartInst['c-blot-inv'] = new Chart(document.getElementById('chart-blotter-investigator'), {
-        type:'bar',
-        data:{ labels:invLabels, datasets:[
-          { label:'Open Cases',        data:invOpen,    backgroundColor:'#2563eb', borderRadius:3 },
-          { label:'High Priority',     data:invHighPri, backgroundColor:'#f97316', borderRadius:3 },
-        ]},
-        options:{ indexAxis:'y', plugins:{ legend:{ display:false }, tooltip:{ callbacks:{ label:(c)=>` ${c.dataset.label}: ${c.raw}` } } }, scales:{ x:{ grid:{ color:'rgba(0,0,0,0.05)' }, stacked:false, ticks:{ precision:0 } }, y:{ grid:{ display:false } } } }
-      });
-    }
-
-    // ── Incident Time Heatmap (real data from incident_time × incident_date) ─
-    const hmapWrap = document.getElementById('chart-blotter-heatmap');
-    if (hmapWrap) {
-      const heatRows = bl.time_heatmap || [];
-      // dayOfWeek: 1=Sun,2=Mon...7=Sat  → remap to Mon–Sun cols (0–6)
-      const days  = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
-      const hours = Array.from({length:24},(_,i)=>{ const h=i%12||12; return `${h}${i<12?'am':'pm'}`; });
-      // Build 24×7 matrix
-      const matrix = Array.from({length:24},()=>Array(7).fill(0));
-      heatRows.forEach(r => {
-        const h = parseInt(r.hour_of_day);
-        const dow = parseInt(r.day_of_week)-1; // 0=Sun
-        if (h>=0&&h<24&&dow>=0&&dow<7) matrix[h][dow] = parseInt(r.count)||0;
-      });
-      const maxVal = Math.max(...matrix.flat(), 1);
-      // Only show 6am–10pm rows to save space
-      const showHours = Array.from({length:17},(_,i)=>i+6);
-      let html = `<div class="hmap-grid" style="grid-template-columns:42px repeat(7,1fr);gap:3px;">`;
-      html += '<div></div>';
-      days.forEach(dy => { html += `<div style="font-size:0.68rem;color:#94a3b8;text-align:center;padding-bottom:3px;">${dy}</div>`; });
-      showHours.forEach(h => {
-        const label = `${h%12||12}${h<12?'am':'pm'}`;
-        html += `<div style="font-size:0.65rem;color:#94a3b8;display:flex;align-items:center;justify-content:flex-end;padding-right:4px;">${label}</div>`;
-        days.forEach((_,di) => {
-          const v = matrix[h][di];
-          const alpha = v===0 ? 0 : 0.15+(v/maxVal)*0.75;
-          const bg = v===0 ? '#f8fafc' : `rgba(220,38,38,${alpha.toFixed(2)})`;
-          html += `<div style="background:${bg};height:16px;border-radius:2px;" title="${label} ${days[di]}: ${v} incidents"></div>`;
-        });
-      });
-      html += '</div>';
-      const scaleSteps = [0.15,0.35,0.55,0.75,0.95];
-      html += `<div style="display:flex;gap:5px;align-items:center;margin-top:8px;font-size:0.7rem;color:#94a3b8;justify-content:flex-end;">
-        <span>Fewer</span>
-        ${scaleSteps.map(a=>`<span style="width:12px;height:12px;border-radius:2px;background:rgba(220,38,38,${a});display:inline-block;"></span>`).join('')}
-        <span>More</span>
-      </div>`;
-      hmapWrap.innerHTML = html;
-    }
-
-    // ── Location Hotspots Horizontal Bar ──────────────────────────────────
-    destroyChart('c-blot-loc');
-    const locRows = bl.location_hotspots || [];
-    if (locRows.length) {
-      const locLabels = locRows.map(r=>r.location);
-      const locTotal  = locRows.map(r=>parseInt(r.count)||0);
-      const locOpen   = locRows.map(r=>parseInt(r.open_count)||0);
-      chartInst['c-blot-loc'] = new Chart(document.getElementById('chart-blotter-locations'), {
-        type:'bar',
-        data:{ labels:locLabels, datasets:[
-          { label:'Total Cases', data:locTotal, backgroundColor:'rgba(37,99,235,0.25)', borderRadius:3 },
-          { label:'Still Open',  data:locOpen,  backgroundColor:'#dc2626', borderRadius:3 },
-        ]},
-        options:{ indexAxis:'y', plugins:{ legend:{ display:false }, tooltip:{ callbacks:{ label:(c)=>` ${c.dataset.label}: ${c.raw}` } } }, scales:{ x:{ grid:{ color:'rgba(0,0,0,0.05)' }, ticks:{ precision:0 } }, y:{ grid:{ display:false }, ticks:{ font:{ size:10 } } } } }
-      });
-    }
-
-    // ── Case Volume by Category Over Time (stacked bar) ────────────────────
-    destroyChart('c-blot-cat-monthly');
-    const catMonthlyRows = bl.monthly_by_category || [];
-    if (catMonthlyRows.length) {
-      const cmMonths = [...new Set(catMonthlyRows.map(r=>r.month))].sort();
-      const cmCats   = [...new Set(catMonthlyRows.map(r=>r.category))];
-      chartInst['c-blot-cat-monthly'] = new Chart(document.getElementById('chart-blotter-cat-monthly'), {
-        type:'bar',
-        data:{ labels:cmMonths, datasets:cmCats.map((cat,i)=>({
-          label:cat,
-          data:cmMonths.map(m=>{ const r=catMonthlyRows.find(x=>x.month===m&&x.category===cat); return r?parseInt(r.count):0; }),
-          backgroundColor:CAT_COLORS[i%CAT_COLORS.length],
-          borderRadius:2
-        }))},
-        options:{ plugins:{ legend:{ display:false } }, scales:{ x:{ stacked:true, grid:{ display:false }, ticks:{ autoSkip:false, font:{ size:10 } } }, y:{ stacked:true, grid:{ color:'rgba(0,0,0,0.05)' }, ticks:{ precision:0 } } } }
-      });
-      makeLegend('chart-blotter-cat-monthly-legend', cmCats, CAT_COLORS);
-    }
-
-    // ── Upcoming Hearings Table ────────────────────────────────────────────
-    const hearWrap = document.getElementById('blotter-hearings-table');
-    if (hearWrap) {
-      const hearRows = bl.upcoming_hearings || [];
-      if (!hearRows.length) {
-        hearWrap.innerHTML = `<p style="color:#94a3b8;font-size:0.82rem;padding:1rem 0;">No upcoming hearings in the next 30 days.</p>`;
-      } else {
-        hearWrap.innerHTML = `<table ${blotterTableStyles()}>
-          <thead><tr>${th('Case No.')}${th('Title')}${th('Date')}${th('Location')}${th('Priority')}${th('Investigator')}</tr></thead>
-          <tbody>${hearRows.map(r=>`<tr>
-            ${td(`<code style="font-size:0.72rem;background:#f1f5f9;padding:0.1rem 0.4rem;border-radius:4px;">${r.case_no}</code>`)}
-            ${td(`<span title="${r.case_title}" style="display:block;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${r.case_title}</span>`)}
-            ${td(`<strong style="color:#0b2250;">${fmtDate(r.next_hearing_date)}</strong>`)}
-            ${td(r.hearing_location,`font-size:0.75rem;color:#64748b;`)}
-            ${td(priorityBadge(r.priority))}
-            ${td(r.investigator,`font-size:0.75rem;`)}
-          </tr>`).join('')}</tbody>
-        </table>`;
-      }
-    }
-
-    // ── Repeat Reporters Table ────────────────────────────────────────────
-    const repWrap = document.getElementById('blotter-reporters-table');
-    if (repWrap) {
-      const repRows = bl.repeat_reporters || [];
-      if (!repRows.length) {
-        repWrap.innerHTML = `<p style="color:#94a3b8;font-size:0.82rem;padding:1rem 0;">No repeat reporters found.</p>`;
-      } else {
-        repWrap.innerHTML = `<table ${blotterTableStyles()}>
-          <thead><tr>${th('Reporter')}${th('Contact')}${th('Total')}${th('Open')}${th('Latest Case')}</tr></thead>
-          <tbody>${repRows.map(r=>`<tr>
-            ${td(`<strong>${r.reporter_name}</strong>`)}
-            ${td(r.reporter_contact,`font-size:0.75rem;color:#64748b;`)}
-            ${td(`<span style="font-weight:700;color:#0b2250;">${r.total_cases}</span>`)}
-            ${td(r.open_cases > 0 ? `<span style="color:#dc2626;font-weight:600;">${r.open_cases}</span>` : `<span style="color:#16a34a;">0</span>`)}
-            ${td(fmtDate(r.latest_case),`font-size:0.75rem;color:#64748b;`)}
-          </tr>`).join('')}</tbody>
-        </table>`;
-      }
-    }
-
-    // ── Case Age Report Table (10 rows, scrollable) ───────────────────────
-    const ageWrap = document.getElementById('blotter-age-table');
-    if (ageWrap) {
-      const ageRows = (bl.case_age_report || []).slice(0, 10);
-      if (!ageRows.length) {
-        ageWrap.innerHTML = `<p style="color:#94a3b8;font-size:0.82rem;padding:1rem 0;">No open cases found.</p>`;
-      } else {
-        ageWrap.innerHTML = `<table ${blotterTableStyles()}>
-          <thead style="position:sticky;top:0;z-index:1;"><tr>${th('Case No.')}${th('Title')}${th('Category')}${th('Priority')}${th('Status')}${th('Investigator')}${th('Filed')}${th('Days Open')}</tr></thead>
-          <tbody>${ageRows.map(r=>`<tr>
-            ${td(`<code style="font-size:0.72rem;background:#f1f5f9;padding:0.1rem 0.4rem;border-radius:4px;">${r.case_no}</code>`)}
-            ${td(`<span title="${r.case_title}" style="display:block;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${r.case_title}</span>`)}
-            ${td(r.category,`font-size:0.75rem;`)}
-            ${td(priorityBadge(r.priority))}
-            ${td(statusBadge(r.status))}
-            ${td(r.investigator,`font-size:0.75rem;color:#64748b;`)}
-            ${td(fmtDate(r.created_at),`font-size:0.75rem;color:#64748b;`)}
-            ${td(ageBadge(r.days_open))}
-          </tr>`).join('')}</tbody>
-        </table>`;
-      }
-    }
-
-    // ════════════════════════════════════════════════════════════════════════
-    // RESIDENT CHARTS
-    // ════════════════════════════════════════════════════════════════════════
-
-    // ── Population Pyramid ────────────────────────────────────────────────
-    const pyWrap = document.getElementById('chart-pyramid');
-    if (pyWrap) {
-      const genders     = d.residents.by_gender;
-      const maleTotal   = parseInt(genders.find(g=>(g.gender||'').toLowerCase()==='male')?.count||0);
-      const femaleTotal = parseInt(genders.find(g=>(g.gender||'').toLowerCase()==='female')?.count||0);
-      const totalPop    = maleTotal + femaleTotal || 1;
-      const ageGroups   = ['0–17','18–35','36–59','60+'];
-      const mDist = [0.28,0.35,0.25,0.12];
-      const fDist = [0.26,0.33,0.27,0.14];
-      const pyMax = Math.ceil(totalPop*0.4)||1;
-      pyWrap.innerHTML = ageGroups.map((g,i) => {
-        const m = Math.round(maleTotal*mDist[i]);
-        const f = Math.round(femaleTotal*fDist[i]);
-        const mPct = Math.round(m/pyMax*100);
-        const fPct = Math.round(f/pyMax*100);
-        return `<div class="pyramid-row-item">
-          <div style="flex:1;display:flex;justify-content:flex-end;">
-            <div class="py-m" style="width:${Math.max(mPct,3)}%;background:#1d4ed8;">
-              <span class="py-val" style="color:#dbeafe;">${m}</span>
-            </div>
-          </div>
-          <div class="py-label">${g}</div>
-          <div style="flex:1;">
-            <div class="py-f" style="width:${Math.max(fPct,3)}%;background:#db2777;">
-              <span class="py-val" style="color:#fce7f3;">${f}</span>
-            </div>
-          </div>
-        </div>`;
-      }).join('');
-    }
-
-    // ── Resident Profile Donut (Gender + Senior + PWD + Voter) ───────────
-    destroyChart('c-dual');
-    const gRows  = d.residents.by_gender;
-    const mCount = parseInt(gRows.find(g=>(g.gender||'').toLowerCase()==='male')?.count||0);
-    const fCount = parseInt(gRows.find(g=>(g.gender||'').toLowerCase()==='female')?.count||0);
-    const seniorC= parseInt(d.residents.seniors)||0;
-    const pwdC   = parseInt(d.residents.pwd)||0;
-    const voterC = parseInt(d.residents.voters)||0;
-    const resLabels = ['Male','Female','Senior Citizen','PWD','Registered Voter'];
-    const resVals   = [mCount, fCount, seniorC, pwdC, voterC];
-    const resColors = ['#1d4ed8','#db2777','#f59e0b','#8b5cf6','#16a34a'];
-    const resTotals = resVals.reduce((a,b)=>a+b,0)||1;
-    chartInst['c-dual'] = new Chart(document.getElementById('chart-dual-ring'), {
-      type:'doughnut',
-      data:{ labels:resLabels, datasets:[
-        { data:resVals, backgroundColor:resColors, borderWidth:2, borderColor:'#fff', hoverOffset:8 }
-      ]},
-      options:{ cutout:'60%', plugins:{ legend:{ display:false }, tooltip:{ callbacks:{ label:(c)=>` ${c.label}: ${c.raw}` } } } }
-    });
-    makeLegend('chart-dual-ring-legend', resLabels.map((l,i)=>`${l} (${resVals[i]})`), resColors);
-
-    // ── 6-Month Trends + Forecast ─────────────────────────────────────────
-    destroyChart('c3');
-    const tMonths = [...new Set(d.trends.map(t=>t.month).filter(m=>m))].sort();
-    const getT = (type) => tMonths.map(m=>{ const r=d.trends.find(t=>t.month===m&&t.type===type); return r?parseInt(r.count):0; });
-    const docT=getT('documents'), blotT=getT('blotters'), resT=getT('residents');
-    function linearForecast(arr,steps=2) {
-      const n=arr.length; if(n<2) return [...arr,...Array(steps).fill(null)];
-      const slope=arr[n-1]-arr[n-2];
-      const result=arr.map(()=>null); result[n-1]=arr[n-1];
-      for(let i=1;i<=steps;i++) result.push(Math.max(0,Math.round(arr[n-1]+slope*i)));
-      return result;
-    }
-    const lastMonth=tMonths[tMonths.length-1];
-    const forecastLabels=[...tMonths];
-    if(lastMonth){ const [yr,mo]=lastMonth.split('-').map(Number); for(let i=1;i<=2;i++){ const nm=mo+i>12?mo+i-12:mo+i; const ny=mo+i>12?yr+1:yr; forecastLabels.push(`${ny}-${String(nm).padStart(2,'0')}`); } }
-    chartInst['c3'] = new Chart(document.getElementById('chart-trends'), {
-      type:'line',
-      data:{ labels:forecastLabels, datasets:[
-        { label:'Documents', data:[...docT,null,null],  borderColor:'#2563eb', backgroundColor:'rgba(37,99,235,.07)',  tension:.4, fill:true, pointRadius:4, pointBackgroundColor:'#2563eb' },
-        { label:'Blotters',  data:[...blotT,null,null], borderColor:'#dc2626', backgroundColor:'rgba(220,38,38,.06)',  tension:.4, fill:true, pointRadius:4, pointBackgroundColor:'#dc2626' },
-        { label:'Residents', data:[...resT,null,null],  borderColor:'#16a34a', backgroundColor:'rgba(22,163,74,.06)', tension:.4, fill:true, pointRadius:4, pointBackgroundColor:'#16a34a' },
-        { label:'Doc Forecast', data:linearForecast(docT),  borderColor:'#93c5fd', borderDash:[5,4], backgroundColor:'transparent', fill:false, tension:.4, pointRadius:3, pointBackgroundColor:'#93c5fd' },
-        { label:'Res Forecast', data:linearForecast(resT),  borderColor:'#6ee7b7', borderDash:[5,4], backgroundColor:'transparent', fill:false, tension:.4, pointRadius:3, pointBackgroundColor:'#6ee7b7' },
-      ]},
-      options:{ plugins:{ legend:{ display:false } }, scales:{ x:{ grid:{ color:'rgba(0,0,0,0.05)' }, ticks:{ autoSkip:false, font:{ size:11 } } }, y:{ beginAtZero:true, grid:{ color:'rgba(0,0,0,0.05)' }, ticks:{ precision:0 } } } }
-    });
-    makeLegend('chart-trends-legend',['Documents','Blotters','Residents','Doc Forecast','Res Forecast'],['#2563eb','#dc2626','#16a34a','#93c5fd','#6ee7b7']);
-
-    // ── Document Request Activity Heatmap (kept on trends section) ────────
-    const docHmapWrap = document.getElementById('chart-heatmap');
-    if (docHmapWrap) {
-      const days2  = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
-      const base   = Math.max(1,Math.round(dsTotal/10));
-      const rawData= Array.from({length:10},(_,hi)=>days2.map((_,di)=>{
-        const workday=di<5; const peak=hi>=1&&hi<=3;
-        if(!workday) return Math.random()<0.1?1:0;
-        return Math.round((peak?base*1.5:base*0.6)*(0.5+Math.random()));
-      }));
-      const maxVal=Math.max(...rawData.flat(),1);
-      const hours2=['8am','9am','10am','11am','12pm','1pm','2pm','3pm','4pm','5pm'];
-      let html=`<div class="hmap-grid" style="grid-template-columns:40px repeat(7,1fr);gap:3px;">`;
-      html+='<div></div>';
-      days2.forEach(dy=>{html+=`<div style="font-size:0.68rem;color:#94a3b8;text-align:center;padding-bottom:3px;">${dy}</div>`;});
-      hours2.forEach((h,hi)=>{
-        html+=`<div style="font-size:0.68rem;color:#94a3b8;display:flex;align-items:center;justify-content:flex-end;padding-right:5px;">${h}</div>`;
-        days2.forEach((_,di)=>{ const v=rawData[hi][di]; const alpha=v===0?0.05:0.12+(v/maxVal)*0.78; html+=`<div class="hmap-cell" style="background:rgba(37,99,235,${alpha.toFixed(2)});height:18px;border-radius:3px;" title="${h} ${days2[di]}: ${v} requests"></div>`; });
-      });
-      html+='</div>';
-      html+=`<div style="display:flex;gap:6px;align-items:center;margin-top:8px;font-size:0.72rem;color:#94a3b8;justify-content:flex-end;"><span>Less</span>${[0.05,0.25,0.5,0.75,1].map(a=>`<span style="width:12px;height:12px;border-radius:2px;background:rgba(37,99,235,${a});display:inline-block;"></span>`).join('')}<span>More</span></div>`;
-      docHmapWrap.innerHTML=html;
-    }
+    // ── Render default chart (population) via dropdown ─────────────────────
+    const sel = document.getElementById('stats-category-select');
+    renderStatCategory(sel ? sel.value : 'population');
 
   } catch(e) { console.error('loadStatistics error:', e); }
+
+
 }
 
 // ── USERS ────────────────────────────────────────────────────────────────────
