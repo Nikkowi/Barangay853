@@ -338,7 +338,11 @@
       const res = await fetch(`${API}/auth/login.php`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password })
+        body: JSON.stringify({
+          email,
+          password,
+          trusted_token: localStorage.getItem('trusted_token') || ''
+        })
       });
 
       const data = await res.json();
@@ -348,13 +352,23 @@
         return;
       }
 
-      localStorage.setItem('auth_token', data.token);
-      localStorage.setItem('user', JSON.stringify(data.user));
-
-      if (data.user.role === 'resident') {
-        window.location.href = 'resident-dashboard.html';
+      if (data.requires_2fa) {
+        // Hold the pending session in sessionStorage — NOT localStorage yet
+        sessionStorage.setItem('2fa_user_id',       data.user_id);
+        sessionStorage.setItem('2fa_email',          data.email);
+        sessionStorage.setItem('2fa_expires',        data.expires_at);
+        sessionStorage.setItem('2fa_expiry_minutes', data.expiry_minutes);
+        sessionStorage.setItem('2fa_pending_login',  JSON.stringify({
+          pre_token: data.pre_token,
+          user:      data.user,
+        }));
+        window.location.href = '2fa.html';
       } else {
-        window.location.href = 'dashboard.html';
+        localStorage.setItem('auth_token', data.token);
+        localStorage.setItem('user', JSON.stringify(data.user));
+        window.location.href = data.user.role === 'resident'
+          ? 'resident-dashboard.html'
+          : 'dashboard.html';
       }
 
     } catch (err) {
@@ -367,60 +381,101 @@
 
   async function handleRegister() {
     hideError('reg-error');
-    const password = document.getElementById('reg-password').value;
-    const confirm = document.getElementById('reg-confirm').value;
-    const terms = document.getElementById('reg-terms').checked;
     const btn = document.getElementById('reg-btn');
 
-    if (password !== confirm) {
-      showError('reg-error', 'Passwords do not match');
-      return;
+    const firstName = document.getElementById('reg-firstname').value.trim();
+    const lastName  = document.getElementById('reg-lastname').value.trim();
+    const email     = document.getElementById('reg-email').value.trim();
+    const password  = document.getElementById('reg-password').value;
+    const confirm   = document.getElementById('reg-confirm').value;
+    const terms     = document.getElementById('reg-terms').checked;
+
+    // ── Name validation (client-side) ─────────────────────────────────────────
+    const BANNED_KEYWORDS = [
+        'admin','administrator','staff','user','test','demo',
+        'resident','system','root','superuser','moderator','manager',
+        'operator','support','service','bot','null','undefined',
+        'guest','anonymous','account','login','barangay','brgy',
+        'kagawad','kapitan','chairman','secretary','treasurer',
+    ];
+
+    function validatePersonName(name) {
+        if (!name) return { valid: false, error: 'Name is required.' };
+        const trimmed = name.trim();
+        if (trimmed.length < 2)   return { valid: false, error: 'Name must be at least 2 characters long.' };
+        if (trimmed.length > 100) return { valid: false, error: 'Name must be 100 characters or less.' };
+        if (/\d/.test(trimmed))   return { valid: false, error: 'Name cannot contain numbers. Please enter your real full name.' };
+        if (!/^[a-zA-ZÀ-ÖØ-öø-ÿÑñ\s'\-\.]+$/.test(trimmed)) return { valid: false, error: "Name can only contain letters, spaces, hyphens ( - ), apostrophes ( ' ), or periods ( . )." };
+        if (!/[a-zA-ZÀ-ÖØ-öø-ÿÑñ]/.test(trimmed)) return { valid: false, error: 'Name must contain at least one letter.' };
+        if (/[\-'\.]{2,}/.test(trimmed)) return { valid: false, error: 'Name contains invalid consecutive special characters.' };
+        const parts = trimmed.toLowerCase().split(/[\s\-]+/);
+        for (const kw of BANNED_KEYWORDS) {
+            if (parts.some(p => p === kw)) return { valid: false, error: `"${kw}" is not allowed as a name. Please enter your real full name (e.g. "Juan dela Cruz").` };
+        }
+        return { valid: true, error: null };
     }
-    if (password.length < 6) {
-      showError('reg-error', 'Password must be at least 6 characters');
-      return;
+
+    function validateEmailAddress(email) {
+        if (!email) return { valid: false, error: 'Email is required.' };
+        const trimmed = email.trim().toLowerCase();
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) return { valid: false, error: 'Please enter a valid email address.' };
+        const localPart  = trimmed.split('@')[0];
+        const localWords = localPart.replace(/[\d\._\-\+]+/g, ' ').trim().split(/\s+/);
+        for (const kw of BANNED_KEYWORDS) {
+            if (localWords.some(w => w === kw)) return { valid: false, error: `Email addresses containing "${kw}" are not allowed. Please use your personal email address.` };
+            if (localPart === kw) return { valid: false, error: `Email addresses containing "${kw}" are not allowed. Please use your personal email address.` };
+            if (new RegExp(`^${kw}\\d`).test(localPart)) return { valid: false, error: `Email addresses like "${kw}1@..." are not allowed. Please use your personal email address.` };
+        }
+        return { valid: true, error: null };
     }
-    if (!terms) {
-      showError('reg-error', 'You must agree to the terms and conditions');
-      return;
-    }
+
+    const firstNameCheck = validatePersonName(firstName);
+    if (!firstNameCheck.valid) { showError('reg-error', firstNameCheck.error); return; }
+
+    const lastNameCheck = validatePersonName(lastName);
+    if (!lastNameCheck.valid) { showError('reg-error', lastNameCheck.error); return; }
+
+    const emailCheck = validateEmailAddress(email);
+    if (!emailCheck.valid) { showError('reg-error', emailCheck.error); return; }
+
+    // ── Password checks ───────────────────────────────────────────────────────
+    if (password !== confirm) { showError('reg-error', 'Passwords do not match'); return; }
+    if (password.length < 6)  { showError('reg-error', 'Password must be at least 6 characters'); return; }
+    if (!terms)               { showError('reg-error', 'You must agree to the terms and conditions'); return; }
 
     btn.disabled = true;
     btn.textContent = 'Creating Account...';
 
     try {
-      const res = await fetch(`${API}/auth/register.php`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          first_name: document.getElementById('reg-firstname').value,
-          last_name: document.getElementById('reg-lastname').value,
-          email: document.getElementById('reg-email').value,
-          password: password,
-          contact_number: document.getElementById('reg-contact').value,
-          address: document.getElementById('reg-address').value,
-          date_of_birth: document.getElementById('reg-dob').value || null
-        })
-      });
+        const res = await fetch(`${API}/auth/register.php`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                first_name:     firstName,
+                last_name:      lastName,
+                email:          email,
+                password:       password,
+                contact_number: document.getElementById('reg-contact').value,
+                address:        document.getElementById('reg-address').value,
+                date_of_birth:  document.getElementById('reg-dob').value || null,
+            }),
+        });
 
-      const data = await res.json();
+        const data = await res.json();
 
-      if (!data.success) {
-        showError('reg-error', data.message || 'Registration failed');
-        return;
-      }
+        if (!data.success) { showError('reg-error', data.message || 'Registration failed'); return; }
 
-      document.getElementById('reg-success').textContent = 'Account created! Redirecting...';
-      document.getElementById('reg-success').style.display = 'block';
-      setTimeout(() => window.location.href = 'login.html', 1500);
+        document.getElementById('reg-success').textContent = 'Account created! Redirecting...';
+        document.getElementById('reg-success').style.display = 'block';
+        setTimeout(() => showLogin(), 1500);
 
     } catch (err) {
-      showError('reg-error', 'Cannot connect to server. Make sure XAMPP is running.');
+        showError('reg-error', 'Cannot connect to server. Make sure XAMPP is running.');
     } finally {
-      btn.disabled = false;
-      btn.textContent = 'Create Account';
+        btn.disabled = false;
+        btn.textContent = 'Create Account';
     }
-  }
+}
 
   // Allow pressing Enter to login
   document.addEventListener('keydown', function(e) {

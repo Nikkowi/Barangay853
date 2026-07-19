@@ -5,9 +5,247 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Announcements - Barangay 853</title>
   <link rel="stylesheet" href="public.css">
+  <style>
+    /* ── Page Header ── */
+    .ann-header {
+      background: linear-gradient(135deg, #1a237e 0%, #283593 60%, #3949ab 100%);
+      color: #fff;
+      padding: 3.5rem 0 2.5rem;
+      text-align: center;
+    }
+    .ann-header h1 {
+      font-size: 2.4rem;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      margin-bottom: 0.4rem;
+    }
+    .ann-header p {
+      font-size: 1rem;
+      opacity: 0.82;
+      max-width: 500px;
+      margin: 0 auto;
+    }
+
+    /* ── Filter Tabs ── */
+    .filter-section {
+      background: #f4f6fb;
+      padding: 1.5rem 0 0;
+    }
+    .filter-tabs {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+    .filter-tab {
+      padding: 0.45rem 1.2rem;
+      border-radius: 20px;
+      border: 1.5px solid #c5cae9;
+      background: #fff;
+      color: #3949ab;
+      font-size: 0.83rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.18s;
+    }
+    .filter-tab:hover,
+    .filter-tab.active {
+      background: #3949ab;
+      color: #fff;
+      border-color: #3949ab;
+    }
+
+    /* ── Timeline Wrapper ── */
+    .ann-timeline-section {
+      background: #f4f6fb;
+      padding: 2rem 0 4rem;
+    }
+    .timeline-feed {
+      position: relative;
+      padding-left: 2.6rem;
+    }
+    .timeline-feed::before {
+      content: '';
+      position: absolute;
+      left: 10px;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background: linear-gradient(to bottom, #3949ab 0%, #c5cae9 100%);
+      border-radius: 2px;
+    }
+
+    /* ── Month Label ── */
+    .tl-month {
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: #9fa8da;
+      margin: 1.8rem 0 0.8rem;
+      padding-left: 0.1rem;
+    }
+
+    /* ── Single Timeline Entry ── */
+    .tl-item {
+      position: relative;
+      margin-bottom: 1.2rem;
+      opacity: 0;
+      transform: translateY(14px);
+      animation: tlFadeUp 0.38s forwards;
+    }
+    @keyframes tlFadeUp {
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .tl-dot {
+      position: absolute;
+      left: -2.1rem;
+      top: 1.05rem;
+      width: 13px;
+      height: 13px;
+      border-radius: 50%;
+      background: #3949ab;
+      border: 2.5px solid #f4f6fb;
+      box-shadow: 0 0 0 2px #3949ab;
+      z-index: 1;
+    }
+    .tl-dot.services    { background: #0277bd; box-shadow: 0 0 0 2px #0277bd; }
+    .tl-dot.events      { background: #e65100; box-shadow: 0 0 0 2px #e65100; }
+    .tl-dot.announcements { background: #c62828; box-shadow: 0 0 0 2px #c62828; }
+
+    .tl-card {
+      background: #fff;
+      border-radius: 13px;
+      padding: 1.1rem 1.4rem;
+      box-shadow: 0 2px 10px rgba(26,35,126,0.07);
+      cursor: pointer;
+      transition: box-shadow 0.18s, transform 0.18s;
+      display: flex;
+      gap: 1rem;
+      align-items: flex-start;
+    }
+    .tl-card:hover {
+      box-shadow: 0 6px 22px rgba(26,35,126,0.13);
+      transform: translateY(-2px);
+    }
+
+    /* Image thumb (optional) */
+    .tl-thumb {
+      width: 72px;
+      height: 72px;
+      border-radius: 9px;
+      object-fit: cover;
+      flex-shrink: 0;
+      background: #e8eaf6;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.7rem;
+      color: #9fa8da;
+      overflow: hidden;
+    }
+    .tl-thumb img { width: 100%; height: 100%; object-fit: cover; }
+
+    .tl-body { flex: 1; min-width: 0; }
+
+    .tl-meta {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 0.3rem;
+      flex-wrap: wrap;
+    }
+    .tl-badge {
+      font-size: 0.68rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      padding: 0.16rem 0.6rem;
+      border-radius: 20px;
+      color: #fff;
+    }
+    .tl-badge.services      { background: #0277bd; }
+    .tl-badge.events        { background: #e65100; }
+    .tl-badge.announcements { background: #c62828; }
+
+    .tl-date {
+      font-size: 0.73rem;
+      color: #bbb;
+      font-weight: 500;
+    }
+
+    .tl-title {
+      font-size: 0.97rem;
+      font-weight: 700;
+      color: #1a237e;
+      margin-bottom: 0.25rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .tl-summary {
+      font-size: 0.82rem;
+      color: #666;
+      line-height: 1.5;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .tl-read-more {
+      font-size: 0.78rem;
+      color: #3949ab;
+      font-weight: 600;
+      margin-top: 0.35rem;
+      display: inline-block;
+    }
+
+    /* ── Empty / Loading ── */
+    .tl-empty {
+      text-align: center;
+      padding: 3rem 1rem;
+      color: #aaa;
+    }
+    .tl-empty .icon { font-size: 3rem; margin-bottom: 0.75rem; }
+    .tl-empty h3 { color: #888; }
+
+    /* ── Modal ── */
+    .modal-backdrop {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.45);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 9999; padding: 1rem;
+    }
+    .modal {
+      background: #fff;
+      border-radius: 16px;
+      width: 100%; max-width: 660px;
+      max-height: 88vh;
+      overflow-y: auto;
+      padding: 2rem 2rem 2.5rem;
+      position: relative;
+    }
+    .modal-close {
+      position: absolute; top: 1rem; right: 1rem;
+      background: #f1f5f9; border: none; border-radius: 50%;
+      width: 32px; height: 32px;
+      font-size: 1.1rem; cursor: pointer; color: #555;
+      display: flex; align-items: center; justify-content: center;
+      transition: background 0.15s;
+    }
+    .modal-close:hover { background: #e2e8f0; }
+
+    @media (max-width: 600px) {
+      .tl-card { flex-direction: column; }
+      .tl-thumb { width: 100%; height: 140px; }
+      .ann-header h1 { font-size: 1.75rem; }
+      .tl-title { white-space: normal; }
+    }
+  </style>
 </head>
 <body class="public-page">
 
+  <!-- Navigation -->
   <nav class="navbar">
     <div class="container">
       <div class="nav-brand">
@@ -18,6 +256,7 @@
         <li><a href="index.html">Home</a></li>
         <li><a href="documents.html">Documents</a></li>
         <li><a href="announcements.html" class="active">Announcements</a></li>
+        <li><a href="expenses.html">Transparency</a></li>
         <li><a href="report.html">Report</a></li>
         <li><a href="about.html">About</a></li>
         <li id="nav-auth"></li>
@@ -25,13 +264,15 @@
     </div>
   </nav>
 
-  <section class="page-header">
+  <!-- Page Header -->
+  <section class="ann-header">
     <div class="container">
-      <h1>Announcements & Services</h1>
-      <p>Stay updated with the latest news, events, and services</p>
+      <h1>📢 Announcements</h1>
+      <p>Stay updated with the latest news, events, and services from Barangay 853.</p>
     </div>
   </section>
 
+  <!-- Filter Tabs -->
   <section class="filter-section">
     <div class="container">
       <div class="filter-tabs">
@@ -43,30 +284,53 @@
     </div>
   </section>
 
-  <section class="announcements-section">
+  <!-- Timeline Feed -->
+  <section class="ann-timeline-section">
     <div class="container">
-      <div id="announcements-container">
-        <div class="empty-state"><div style="font-size:48px;margin-bottom:16px">⏳</div><h3>Loading announcements...</h3></div>
+      <div class="timeline-feed" id="timeline-feed">
+        <div class="tl-empty">
+          <div class="icon">⏳</div>
+          <h3>Loading announcements…</h3>
+        </div>
       </div>
     </div>
   </section>
 
-  <div id="modal-public-announcement" class="modal-backdrop" style="display:none; z-index:9999;">
-    <div class="modal" style="max-width: 650px; padding-bottom: 2.5rem;">
-      <button class="modal-close" onclick="closePublicAnnouncement()">&times;</button>
-      <div id="public-announcement-content" style="display:flex;flex-direction:column;">
-        </div>
+  <!-- Detail Modal -->
+  <div id="modal-public-announcement" class="modal-backdrop" style="display:none;">
+    <div class="modal">
+      <button class="modal-close" onclick="closePublicAnnouncement()">✕</button>
+      <div id="public-announcement-content"></div>
     </div>
   </div>
 
+  <!-- Footer -->
   <footer class="footer">
     <div class="container">
       <div class="footer-content">
-        <div class="footer-section"><h4>Barangay 853</h4><p>Serving the community with dedication and transparency</p></div>
-        <div class="footer-section"><h4>Quick Links</h4><ul><li><a href="index.html">Home</a></li><li><a href="documents.html">Documents</a></li><li><a href="announcements.html">Announcements</a></li><li><a href="about.html">About</a></li></ul></div>
-        <div class="footer-section"><h4>Contact Us</h4><p>Email: barangay853@example.com</p><p>Phone: (02) 1234-5678</p></div>
+        <div class="footer-section">
+          <h4>Barangay 853</h4>
+          <p>Serving the community with dedication and transparency</p>
+        </div>
+        <div class="footer-section">
+          <h4>Quick Links</h4>
+          <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="documents.html">Documents</a></li>
+            <li><a href="announcements.html">Announcements</a></li>
+            <li><a href="expenses.html">Transparency</a></li>
+            <li><a href="about.html">About</a></li>
+          </ul>
+        </div>
+        <div class="footer-section">
+          <h4>Contact Us</h4>
+          <p>Email: barangay853@example.com</p>
+          <p>Phone: (02) 1234-5678</p>
+        </div>
       </div>
-      <div class="footer-bottom"><p>&copy; 2025 Barangay 853. All rights reserved.</p></div>
+      <div class="footer-bottom">
+        <p>&copy; 2025 Barangay 853. All rights reserved.</p>
+      </div>
     </div>
   </footer>
 
@@ -75,112 +339,152 @@
     let allAnnouncements = [];
 
     const staticAnnouncements = [
-      { id:1, category:'services', title:'Document Processing Services', published_on:'Available Daily', summary:'Get your barangay documents processed quickly and efficiently.', items:['Barangay Clearance','Certificate of Residency','Certificate of Indigency','Barangay ID'], link:'documents.html' },
-      { id:2, category:'services', title:'Health & Wellness Programs', published_on:'Every Tuesday & Thursday', summary:'Free health check-ups, immunization programs, and wellness consultations for all residents.', items:['Blood pressure monitoring','Child immunization','Prenatal check-ups','Health consultations'], info:'Time: 9:00 AM - 3:00 PM\nLocation: Barangay Health Center' },
-      { id:3, category:'services', title:'Free Legal Assistance', published_on:'Every Monday & Wednesday', summary:'Consult with our legal advisors for free legal advice and assistance in resolving disputes.', items:['Legal consultations','Mediation services','Document preparation','Referral services'], info:'Time: 10:00 AM - 4:00 PM\nLocation: Barangay Hall, 2nd Floor' },
-      { id:4, category:'announcements', title:'Barangay Assembly Meeting', published_on:'Posted: November 25, 2025', summary:'All residents are invited to attend the quarterly barangay assembly.', info:'Date: December 15, 2025\nTime: 2:00 PM - 5:00 PM\nVenue: Barangay Covered Court', note:'Light snacks will be served. Please bring valid ID.' },
-      { id:5, category:'announcements', title:'Updated Garbage Collection Schedule', published_on:'Posted: November 20, 2025', summary:'Please take note of the new garbage collection schedule effective December 1, 2025.', schedule:[{label:'Biodegradable:',value:'Monday, Wednesday, Friday'},{label:'Non-biodegradable:',value:'Tuesday, Thursday, Saturday'},{label:'Collection Time:',value:'6:00 AM - 10:00 AM'}], note:'Segregate your waste properly. Penalties apply for violations.' },
-      { id:6, category:'events', title:'Barangay Christmas Celebration', published_on:'Event Date: December 20, 2025', summary:"Join us for a night of fun, games, and fellowship!", highlights:['Christmas Caroling Competition','Gift-giving for children and senior citizens','Raffle draws with exciting prizes','Free food and refreshments','Live entertainment'], info:'Time: 5:00 PM onwards\nVenue: Barangay Plaza' },
-      { id:7, category:'events', title:'Barangay Sports Festival', published_on:'Event Date: January 15-20, 2026', summary:'Show your barangay pride! Register now for our annual sports festival.', highlights:["Basketball (Men's & Women's)",'Volleyball (Mixed)','Chess Tournament','Table Tennis','Badminton Singles & Doubles'], info:'Registration Deadline: January 5, 2026\nVenue: Barangay Sports Complex' },
-      { id:8, category:'announcements', title:'Scheduled Water Interruption', published_on:'Posted: November 28, 2025', summary:'Manila Water will conduct maintenance work that will temporarily affect water supply.', info:'Date: December 5, 2025\nTime: 10:00 PM - 6:00 AM (next day)\nAffected Areas: Zones 94-96', note:'Please store adequate water supply. Water tankers will be available during interruption.' }
+      { id:1, category:'services', title:'Document Processing Services', published_on:'2025-04-20', summary:'Get your barangay documents processed quickly and efficiently.', items:['Barangay Clearance','Certificate of Residency','Certificate of Indigency','Barangay ID'], link:'documents.html' },
+      { id:2, category:'services', title:'Health & Wellness Programs', published_on:'2025-04-15', summary:'Free health check-ups, immunization programs, and wellness consultations for all residents.', items:['Blood pressure monitoring','Child immunization','Prenatal check-ups','Health consultations'], info:'Time: 9:00 AM - 3:00 PM\nLocation: Barangay Health Center' },
+      { id:3, category:'services', title:'Free Legal Assistance', published_on:'2025-04-10', summary:'Consult with our legal advisors for free legal advice and assistance in resolving disputes.', items:['Legal consultations','Mediation services','Document preparation','Referral services'], info:'Time: 10:00 AM - 4:00 PM\nLocation: Barangay Hall, 2nd Floor' },
+      { id:4, category:'announcements', title:'Barangay Assembly Meeting', published_on:'2025-11-25', summary:'All residents are invited to attend the quarterly barangay assembly.', info:'Date: December 15, 2025\nTime: 2:00 PM - 5:00 PM\nVenue: Barangay Covered Court', note:'Light snacks will be served. Please bring valid ID.' },
+      { id:5, category:'announcements', title:'Updated Garbage Collection Schedule', published_on:'2025-11-20', summary:'Please take note of the new garbage collection schedule effective December 1, 2025.', schedule:[{label:'Biodegradable:',value:'Mon, Wed, Fri'},{label:'Non-biodegradable:',value:'Tue, Thu, Sat'},{label:'Collection Time:',value:'6:00 AM – 10:00 AM'}], note:'Segregate your waste properly. Penalties apply for violations.' },
+      { id:6, category:'events', title:'Barangay Christmas Celebration', published_on:'2025-12-01', summary:"Join us for a night of fun, games, and fellowship at the Barangay Plaza!", highlights:['Christmas Caroling Competition','Gift-giving for children and senior citizens','Raffle draws with exciting prizes','Free food and refreshments','Live entertainment'], info:'Time: 5:00 PM onwards\nVenue: Barangay Plaza' },
+      { id:7, category:'events', title:'Barangay Sports Festival', published_on:'2025-12-05', summary:'Show your barangay pride! Register now for our annual sports festival.', highlights:["Basketball (Men's & Women's)",'Volleyball (Mixed)','Chess Tournament','Table Tennis','Badminton Singles & Doubles'], info:'Registration Deadline: January 5, 2026\nVenue: Barangay Sports Complex' },
+      { id:8, category:'announcements', title:'Scheduled Water Interruption', published_on:'2025-11-28', summary:'Manila Water will conduct maintenance work affecting water supply in Zones 94–96.', info:'Date: December 5, 2025\nTime: 10:00 PM – 6:00 AM\nAffected Areas: Zones 94–96', note:'Please store adequate water supply. Water tankers will be available.' }
     ];
 
+    const CATEGORY_CONFIG = {
+      services:      { label: 'Service',      icon: '🔧' },
+      events:        { label: 'Event',         icon: '🎉' },
+      announcements: { label: 'Announcement', icon: '📣' },
+    };
+
     function badgeLabel(cat) {
-      return cat === 'services' ? 'Service' : cat === 'events' ? 'Event' : 'Announcement';
+      return CATEGORY_CONFIG[cat]?.label || 'Notice';
     }
 
-    function renderCard(item) {
-      const items = item.items ? (typeof item.items === 'string' ? JSON.parse(item.items) : item.items) : null;
-      const highlights = item.highlights ? (typeof item.highlights === 'string' ? JSON.parse(item.highlights) : item.highlights) : null;
-      const schedule = item.schedule ? (typeof item.schedule === 'string' ? JSON.parse(item.schedule) : item.schedule) : null;
-      const info = item.info;
-      const note = item.note;
-      const link = item.link;
-
-      // Ensure API variable is defined for the image path
-      const BASE_URL = window.API || 'http://localhost/Barangay853';
-      const imageDisplay = item.image_url 
-        ? `<img src="${BASE_URL}/${item.image_url}" style="width:100%; height:100%; object-fit:cover;">` 
-        : `<div style="color:#7f8c8d">${badgeLabel(item.category)} Image</div>`;
-
-      return `
-        <div class="announcement-card" onclick="viewPublicAnnouncement(${item.id})" style="cursor:pointer;">
-          <span class="card-badge ${item.category}">${badgeLabel(item.category)}</span>
-          <div class="card-image" style="overflow:hidden;">${imageDisplay}</div>
-          <div class="card-content">
-            <h3>${item.title}</h3>
-            <p class="card-date">${item.published_on || ''}</p>
-            <p>${item.summary || item.body || ''}</p>
-            ${items ? `<ul class="service-list">${items.map(i => `<li>${i}</li>`).join('')}</ul>` : ''}
-            ${highlights ? `<div class="event-highlights"><h4>Highlights:</h4><ul>${highlights.map(h => `<li>${h}</li>`).join('')}</ul></div>` : ''}
-            ${schedule ? `<div class="schedule-table">${schedule.map(r => `<div class="schedule-row"><strong>${r.label}</strong> ${r.value}</div>`).join('')}</div>` : ''}
-            ${info ? `<div class="card-info">${info.split('\n').map(l => `<div>${l}</div>`).join('')}</div>` : ''}
-            ${note ? `<p class="card-note"><strong>Note:</strong> ${note}</p>` : ''}
-            ${link ? `<a href="${link}" class="btn primary" style="margin-top:1rem;display:inline-block">Learn More</a>` : ''}
-          </div>
-        </div>`;
+    function formatDate(dateStr) {
+      if (!dateStr || dateStr === 'N/A') return '';
+      const d = new Date(dateStr);
+      if (isNaN(d)) return dateStr;
+      return d.toLocaleDateString('en-PH', { year: 'numeric', month: 'long', day: 'numeric' });
     }
 
-    function renderAnnouncements(data) {
-      const container = document.getElementById('announcements-container');
+    function getMonthLabel(dateStr) {
+      const d = new Date(dateStr);
+      if (isNaN(d)) return 'General';
+      return d.toLocaleDateString('en-PH', { year: 'numeric', month: 'long' });
+    }
+
+    function thumbIcon(cat) {
+      return CATEGORY_CONFIG[cat]?.icon || '📌';
+    }
+
+    function renderTimeline(data) {
+      const feed = document.getElementById('timeline-feed');
+
       if (!data || data.length === 0) {
-        container.innerHTML = `<div class="empty-state"><div style="font-size:48px;margin-bottom:16px">📢</div><h3>No announcements found</h3><p>There are no announcements in this category at the moment.</p></div>`;
+        feed.innerHTML = `
+          <div class="tl-empty">
+            <div class="icon">📢</div>
+            <h3>No announcements found</h3>
+            <p>Nothing in this category right now. Check back soon!</p>
+          </div>`;
         return;
       }
-      container.innerHTML = `<div class="announcements-grid">${data.map(renderCard).join('')}</div>`;
+
+      // Sort newest first, then group by month
+      const sorted = [...data].sort((a, b) => new Date(b.published_on) - new Date(a.published_on));
+      const groups = {};
+      sorted.forEach(item => {
+        const m = getMonthLabel(item.published_on);
+        if (!groups[m]) groups[m] = [];
+        groups[m].push(item);
+      });
+
+      const BASE_URL = window.API || 'http://localhost/Barangay853';
+      let html = '';
+      let idx = 0;
+
+      Object.entries(groups).forEach(([month, entries]) => {
+        html += `<div class="tl-month">📅 ${month}</div>`;
+        entries.forEach(item => {
+          const cat = item.category || 'announcements';
+          const thumbHtml = item.image_url
+            ? `<div class="tl-thumb"><img src="${BASE_URL}/${item.image_url}" alt=""></div>`
+            : `<div class="tl-thumb">${thumbIcon(cat)}</div>`;
+
+          html += `
+            <div class="tl-item" style="animation-delay:${(idx * 0.07).toFixed(2)}s">
+              <div class="tl-dot ${cat}"></div>
+              <div class="tl-card" onclick="viewPublicAnnouncement(${item.id})">
+                ${thumbHtml}
+                <div class="tl-body">
+                  <div class="tl-meta">
+                    <span class="tl-badge ${cat}">${badgeLabel(cat)}</span>
+                    <span class="tl-date">${formatDate(item.published_on)}</span>
+                  </div>
+                  <div class="tl-title">${item.title}</div>
+                  <div class="tl-summary">${item.summary || item.body || ''}</div>
+                  <span class="tl-read-more">Read more →</span>
+                </div>
+              </div>
+            </div>`;
+          idx++;
+        });
+      });
+
+      feed.innerHTML = html;
     }
 
     function filterAnnouncements(cat, el) {
       document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
       el.classList.add('active');
       const filtered = cat === 'all' ? allAnnouncements : allAnnouncements.filter(a => a.category === cat);
-      renderAnnouncements(filtered);
+      renderTimeline(filtered);
     }
 
     async function viewPublicAnnouncement(id) {
       try {
         const BASE_URL = window.API || 'http://localhost/Barangay853';
-        
-        // Grab the item from the current list
-        let a = allAnnouncements.find(item => item.id === id);
+        let a = allAnnouncements.find(i => i.id === id);
         if (!a) return;
 
-        // Try to fetch the absolute latest data from DB (in case they have more text body)
         try {
-            const res = await fetch(`${BASE_URL}/announcements/index.php?public=1&id=${id}`);
-            const data = await res.json();
-            if (data.success && data.data) {
-                a = Array.isArray(data.data) ? data.data[0] : data.data;
-            }
-        } catch(err) { console.log("Using cached data"); }
+          const res = await fetch(`${BASE_URL}/announcements/index.php?public=1&id=${id}`);
+          const data = await res.json();
+          if (data.success && data.data) {
+            a = Array.isArray(data.data) ? data.data[0] : data.data;
+          }
+        } catch(e) { /* use cached */ }
+
+        const cat = a.category || 'announcements';
+        const badgeColors = { services: '#0277bd', events: '#e65100', announcements: '#c62828' };
+        const badgeColor = badgeColors[cat] || '#3949ab';
+
+        const items     = a.items     ? (typeof a.items === 'string'     ? JSON.parse(a.items)     : a.items)     : null;
+        const highlights= a.highlights? (typeof a.highlights==='string'  ? JSON.parse(a.highlights): a.highlights): null;
+        const schedule  = a.schedule  ? (typeof a.schedule === 'string'  ? JSON.parse(a.schedule)  : a.schedule)  : null;
 
         const imgHtml = a.image_url
-          ? `<img src="${BASE_URL}/${a.image_url}" style="width:100%; max-height:350px; object-fit:cover; border-radius:8px; margin-bottom:1.5rem; border:1px solid #e2e8f0;">`
-          : ``;
-
-        // Default badge color mapping based on your CSS
-        let badgeColor = '#e74c3c'; // red (announcements)
-        if (a.category === 'services') badgeColor = '#3498db'; // blue
-        if (a.category === 'events') badgeColor = '#f39c12'; // orange
-
-        const pubDate = a.published_on && a.published_on !== 'N/A' 
-          ? new Date(a.published_on).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) 
-          : 'N/A';
+          ? `<img src="${BASE_URL}/${a.image_url}" style="width:100%;max-height:320px;object-fit:cover;border-radius:10px;margin-bottom:1.25rem;">`
+          : '';
 
         document.getElementById('public-announcement-content').innerHTML = `
           ${imgHtml}
-          <span style="display:inline-block; padding: 0.25rem 0.75rem; border-radius: 4px; font-size: 0.875rem; font-weight: 500; background: ${badgeColor}; color: #fff; margin-bottom: 1rem;">${badgeLabel(a.category)}</span>
-          <h2 style="color:#2c3e50; margin-bottom: 0.5rem; font-size: 1.6rem; font-weight:700;">${a.title}</h2>
-          <p style="color:#7f8c8d; font-size:0.9rem; margin-bottom: 1.5rem;">Published on ${pubDate}</p>
-          
-          <div style="color:#374151; line-height:1.7; white-space:pre-wrap; font-size:1rem; border-top: 1px solid #f1f5f9; padding-top: 1.5rem;">${a.body || a.summary || 'No additional details provided.'}</div>
-          
-          ${a.link ? `<div style="margin-top:2rem;"><a href="${a.link}" target="_blank" class="btn primary">View External Link</a></div>` : ''}
+          <span style="display:inline-block;padding:0.22rem 0.75rem;border-radius:20px;font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;background:${badgeColor};color:#fff;margin-bottom:0.9rem;">${badgeLabel(cat)}</span>
+          <h2 style="color:#1a237e;font-size:1.5rem;font-weight:800;margin-bottom:0.4rem;">${a.title}</h2>
+          <p style="color:#bbb;font-size:0.82rem;margin-bottom:1.4rem;">📅 ${formatDate(a.published_on)}</p>
+          <div style="color:#374151;line-height:1.75;font-size:0.95rem;border-top:1px solid #f1f5f9;padding-top:1.2rem;">
+            ${a.body || a.summary || 'No additional details provided.'}
+          </div>
+          ${items ? `<div style="margin-top:1rem;"><ul style="list-style:disc;padding-left:1.4rem;color:#444;font-size:0.9rem;line-height:1.9;">${items.map(i=>`<li>${i}</li>`).join('')}</ul></div>` : ''}
+          ${highlights ? `<div style="margin-top:1rem;"><strong style="font-size:0.85rem;color:#555;">Highlights:</strong><ul style="list-style:disc;padding-left:1.4rem;color:#444;font-size:0.9rem;line-height:1.9;">${highlights.map(h=>`<li>${h}</li>`).join('')}</ul></div>` : ''}
+          ${schedule ? `<div style="margin-top:1rem;background:#f8f9ff;border-radius:8px;padding:0.9rem 1.1rem;">${schedule.map(r=>`<div style="font-size:0.88rem;padding:0.25rem 0;border-bottom:1px solid #eee;"><strong>${r.label}</strong> ${r.value}</div>`).join('')}</div>` : ''}
+          ${a.info ? `<div style="margin-top:1rem;background:#e8eaf6;border-radius:8px;padding:0.9rem 1.1rem;font-size:0.88rem;color:#3949ab;line-height:1.8;">${a.info.split('\n').map(l=>`<div>📍 ${l}</div>`).join('')}</div>` : ''}
+          ${a.note ? `<div style="margin-top:1rem;padding:0.8rem 1rem;background:#fff8e1;border-left:4px solid #f59e0b;border-radius:6px;font-size:0.85rem;color:#78350f;"><strong>Note:</strong> ${a.note}</div>` : ''}
+          ${a.link ? `<div style="margin-top:1.5rem;"><a href="${a.link}" class="btn primary">View Details →</a></div>` : ''}
         `;
-        
+
         document.getElementById('modal-public-announcement').style.display = 'flex';
       } catch(e) {
-        console.error("Error loading announcement:", e);
+        console.error('Error loading announcement:', e);
       }
     }
 
@@ -188,9 +492,15 @@
       document.getElementById('modal-public-announcement').style.display = 'none';
     }
 
+    // Close modal on backdrop click
+    document.getElementById('modal-public-announcement').addEventListener('click', function(e) {
+      if (e.target === this) closePublicAnnouncement();
+    });
+
     async function loadAnnouncements() {
       try {
-        const res = await fetch(`${API}/announcements/index.php?public=1`);
+        const BASE_URL = window.API || 'http://localhost/Barangay853';
+        const res = await fetch(`${BASE_URL}/announcements/index.php?public=1`);
         const data = await res.json();
         if (data.success && data.data.length > 0) {
           allAnnouncements = data.data;
@@ -200,7 +510,7 @@
       } catch (err) {
         allAnnouncements = staticAnnouncements;
       }
-      renderAnnouncements(allAnnouncements);
+      renderTimeline(allAnnouncements);
     }
 
     loadAnnouncements();

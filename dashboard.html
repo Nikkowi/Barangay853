@@ -129,6 +129,58 @@
     .upload-photo-btn:hover { background: #e2e8f0; }
     @media (max-width: 900px) { .charts-grid, .content-grid { grid-template-columns: 1fr; } }
     @media (max-width: 768px) { .dashboard-shell { grid-template-columns: 1fr; } .sidebar { display: none; } }
+
+    /* ── Fund Management ── */
+    .cat-badge { padding: 0.22rem 0.65rem; border-radius: 999px; font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; }
+    .cat-senior { background: #dcfce7; color: #166534; }
+    .cat-health  { background: #cffafe; color: #155e75; }
+    .cat-infra   { background: #ede9fe; color: #5b21b6; }
+    .cat-event   { background: #fef3c7; color: #92400e; }
+    .cat-admin   { background: #f1f5f9; color: #475569; }
+    .cat-other   { background: #e0e7ff; color: #3730a3; }
+    .status-posted { background: #dcfce7; color: #166534; }
+    .status-draft  { background: #f1f5f9; color: #64748b; }
+    .amt-red   { color: #dc2626; font-weight: 700; }
+    .amt-green { color: #16a34a; font-weight: 700; }
+    .budget-bar-wrap { margin-top: 0.75rem; }
+    .budget-bar-label { display: flex; justify-content: space-between; font-size: 0.78rem; color: #64748b; margin-bottom: 0.4rem; }
+    .budget-bar { height: 10px; background: #e2e8f0; border-radius: 999px; overflow: hidden; }
+    .budget-bar-fill { height: 100%; background: linear-gradient(90deg, #16a34a, #22c55e); border-radius: 999px; transition: width 0.6s; }
+    .budget-bar-fill.warn  { background: linear-gradient(90deg, #ea580c, #f97316); }
+    .budget-bar-fill.danger{ background: linear-gradient(90deg, #dc2626, #ef4444); }
+    .btn-edit  { background: #e0e7ff; color: #3730a3; border: none; border-radius: 0.6rem; padding: 0.4rem 0.85rem; font-size: 0.8rem; font-weight: 600; cursor: pointer; }
+    .btn-danger { background: #dc2626; color: #fff; border: none; border-radius: 0.6rem; padding: 0.4rem 0.85rem; font-size: 0.8rem; font-weight: 600; cursor: pointer; }
+    .filter-bar { display: flex; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 1.25rem; align-items: center; }
+    .filter-bar select, .filter-bar input { border: 1px solid #d5d8f0; border-radius: 0.75rem; padding: 0.55rem 1rem; font-size: 0.875rem; background: #fff; }
+    .filter-bar select:focus, .filter-bar input:focus { outline: none; border-color: #0b2250; }
+
+    /* ── Enhanced Statistics Styles ── */
+    .stats-section-label { font-size: 0.72rem; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: #94a3b8; margin: 1.5rem 0 0.75rem; }
+    .stats-kpi-mini { background: #fff; border-radius: 0.875rem; padding: 0.85rem 1rem; box-shadow: 0 4px 14px rgba(15,23,42,0.07); display: flex; flex-direction: column; gap: 0.25rem; }
+    .stats-kpi-mini .kpi-lbl { font-size: 0.75rem; color: #64748b; }
+    .stats-kpi-mini .kpi-num { font-size: 1.6rem; font-weight: 700; color: #0f172a; line-height: 1; }
+    .stats-kpi-mini .kpi-pct { font-size: 0.72rem; color: #94a3b8; }
+    .stats-kpi-mini .kpi-bar { height: 4px; border-radius: 2px; margin-top: 6px; }
+    .chart-card canvas { max-height: 260px; }
+    .funnel-row-item { display: flex; align-items: center; gap: 10px; }
+    .funnel-row-item .f-label { font-size: 0.8rem; color: #475569; width: 88px; flex-shrink: 0; text-align: right; }
+    .funnel-row-item .f-bar-wrap { flex: 1; height: 26px; background: #f1f5f9; border-radius: 5px; overflow: hidden; position: relative; }
+    .funnel-row-item .f-bar { height: 100%; border-radius: 5px; display: flex; align-items: center; justify-content: flex-end; padding-right: 8px; transition: width 0.5s ease; }
+    .funnel-row-item .f-count { font-size: 0.75rem; font-weight: 600; }
+    .proc-row-item { display: flex; align-items: center; gap: 10px; }
+    .proc-row-item .p-label { font-size: 0.78rem; color: #475569; width: 130px; flex-shrink: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .proc-row-item .p-bar-wrap { flex: 1; height: 12px; background: #f1f5f9; border-radius: 3px; overflow: hidden; }
+    .proc-row-item .p-bar { height: 100%; border-radius: 3px; }
+    .proc-row-item .p-days { font-size: 0.75rem; color: #64748b; width: 38px; text-align: right; flex-shrink: 0; }
+    .pyramid-row-item { display: flex; align-items: center; gap: 6px; }
+    .pyramid-row-item .py-label { font-size: 0.72rem; color: #64748b; width: 32px; text-align: center; flex-shrink: 0; }
+    .pyramid-row-item .py-m { height: 18px; border-radius: 3px 0 0 3px; display: flex; align-items: center; justify-content: flex-end; padding-right: 4px; }
+    .pyramid-row-item .py-f { height: 18px; border-radius: 0 3px 3px 0; display: flex; align-items: center; padding-left: 4px; }
+    .pyramid-row-item .py-val { font-size: 0.68rem; font-weight: 600; }
+    .hmap-grid { display: grid; gap: 3px; }
+    .hmap-cell { border-radius: 3px; cursor: default; }
+    .legend-dot-item { display: flex; align-items: center; gap: 4px; }
+    .legend-dot-item span { width: 9px; height: 9px; border-radius: 2px; flex-shrink: 0; display: inline-block; }
   </style>
 </head>
 <body>
@@ -159,11 +211,13 @@
         <li onclick="switchSection('residents',this)"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="8" cy="7" r="3.5"/><path d="M3.5 19.5c0-2.5 1.5-5 4.5-5s4.5 2.5 4.5 5"/></svg></span><span>Resident Management</span></li>
         <li onclick="switchSection('documents',this)"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M7 3.5h7l4 4v13H7z"/><path d="M14 3.5v4h4"/><path d="M10 12h6"/><path d="M10 16h6"/></svg></span><span>Document Requests</span></li>
         <li onclick="switchSection('blotter',this)"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="8" r="3.5"/><path d="M5 20c0-3.9 3.1-7 7-7s7 3.1 7 7"/></svg></span><span>Blotter & Disputes</span></li>
+        <li onclick="switchSection('expenses',this)"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="2" y="6" width="20" height="14" rx="2"/><path d="M2 10h20"/><path d="M6 14h4"/><path d="M14 14h4"/></svg></span><span>Fund Management</span></li>
         <li onclick="switchSection('announcements',this)"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 10v4"/><path d="M6 8h6l5-3v14l-5-3H6z"/></svg></span><span>Announcements</span></li>
+        <li onclick="switchSection('familytree',this)"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="5" r="2"/><path d="M12 7v4"/><path d="M8 11H4a1 1 0 0 0-1 1v2a1 1 0 0 0 1 1h4"/><path d="M16 11h4a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1h-4"/><path d="M8 15v2a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-2"/><path d="M12 11v4"/></svg></span><span>Family Tree</span></li>
+        <li onclick="switchSection('officials',this)"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="8" r="3.5"/><path d="M3 20c0-4 4-7 9-7s9 3 9 7"/><path d="M17 8l2 2 4-4"/></svg></span><span>Brgy. Officials</span></li>
         <li onclick="switchSection('statistics',this)"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></span><span>Reports & Statistics</span></li>
         <li id="nav-audit" onclick="switchSection('auditlog',this)"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/></svg></span><span>Audit Log</span></li>
-        <li onclick="switchSection('settings',this)"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span><span>Settings</span></li>
-
+        
       </ul>
     </nav>
   </aside>
@@ -304,15 +358,201 @@
     </div>
 
     <div id="section-statistics" class="section-page">
-      <div class="page-header"><h1>Reports & Statistics</h1><p>Live data visualizations and demographic breakdown</p></div>
-      <div class="stat-pills" id="stats-pills"></div>
-      <div class="charts-grid">
-        <div class="chart-card"><h3>📄 Document Requests by Status</h3><canvas id="chart-doc-status"></canvas></div>
-        <div class="chart-card"><h3>⚖️ Blotter Cases by Status</h3><canvas id="chart-blotter-status"></canvas></div>
-        <div class="chart-card"><h3>📈 6-Month Trends</h3><canvas id="chart-trends"></canvas></div>
-        <div class="chart-card"><h3>👥 Residents by Gender</h3><canvas id="chart-residents"></canvas></div>
-        <div class="chart-card"><h3>📋 Documents by Type</h3><canvas id="chart-doc-types"></canvas></div>
-        <div class="chart-card"><h3>🗂️ Blotter by Category</h3><canvas id="chart-blotter-cat"></canvas></div>
+      <div class="page-header"><h1>Reports &amp; Statistics</h1><p>Select a category to view its statistics</p></div>
+
+      <!-- ── KPI Summary Pills ── -->
+      <div class="stat-pills" id="stats-pills" style="margin-bottom:1.5rem;"></div>
+
+      <!-- ── Dropdown Filter Bar ── -->
+      <div style="background:#fff;border:1px solid #e2e8f0;border-radius:1rem;padding:1.25rem 1.5rem;margin-bottom:1.5rem;display:flex;align-items:center;gap:1rem;flex-wrap:wrap;box-shadow:0 1px 4px rgba(15,23,42,.06);">
+        <label style="font-size:0.85rem;font-weight:600;color:#374151;white-space:nowrap;">📊 View Statistics For:</label>
+        <select id="stats-category-select" onchange="renderStatCategory(this.value)"
+          style="flex:1;min-width:220px;max-width:360px;padding:0.6rem 1rem;border:1.5px solid #d1d5db;border-radius:0.6rem;font-size:0.9rem;font-weight:500;color:#0f172a;background:#f8fafc;cursor:pointer;outline:none;">
+          <option value="population">Population (Gender Breakdown)</option>
+          <option value="age">Age Statistics</option>
+          <option value="special">Special Classifications (Senior, PWD, Voter)</option>
+          <option value="documents">Document Requests by Type</option>
+          <option value="doc_status">Document Request Status</option>
+          <option value="blotter_category">Blotter Cases by Category</option>
+          <option value="blotter_status">Blotter Cases by Status</option>
+
+        </select>
+        <div id="stats-category-desc" style="font-size:0.8rem;color:#64748b;flex:1;min-width:180px;"></div>
+      </div>
+
+      <!-- ── Single Chart Card ── -->
+      <div class="chart-card" id="stats-main-card" style="min-height:420px;position:relative;">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:0.5rem;margin-bottom:1rem;">
+          <div>
+            <h3 id="stats-chart-title" style="font-size:1.05rem;font-weight:700;color:#0f172a;margin:0;"></h3>
+            <p id="stats-chart-sub" style="font-size:0.78rem;color:#94a3b8;margin:0.25rem 0 0;"></p>
+          </div>
+          <div id="stats-chart-badge" style="font-size:0.75rem;font-weight:600;padding:0.3rem 0.8rem;border-radius:999px;background:#eff6ff;color:#1d4ed8;align-self:flex-start;"></div>
+        </div>
+
+        <!-- Chart canvas (shown for bar/doughnut/line) -->
+        <div id="stats-canvas-wrap" style="position:relative;display:flex;justify-content:center;align-items:center;min-height:320px;">
+          <canvas id="stats-main-canvas" style="max-height:360px;"></canvas>
+          <div id="stats-canvas-center" style="position:absolute;text-align:center;pointer-events:none;display:none;">
+            <div id="stats-center-val" style="font-size:2rem;font-weight:700;color:#0f172a;line-height:1;"></div>
+            <div id="stats-center-lbl" style="font-size:0.72rem;color:#94a3b8;margin-top:3px;"></div>
+          </div>
+        </div>
+
+        <!-- Custom pyramid/bar render (used by population & age) -->
+        <div id="stats-custom-wrap" style="display:none;flex-direction:column;gap:8px;padding:0.5rem 0;"></div>
+
+        <!-- Legend -->
+        <div id="stats-main-legend" style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:1rem;font-size:0.8rem;color:#374151;"></div>
+
+        <!-- Loading / empty state -->
+        <div id="stats-loading" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,0.85);border-radius:1rem;font-size:0.9rem;color:#94a3b8;display:none;">Loading…</div>
+        <div id="stats-empty" style="display:none;text-align:center;padding:3rem;color:#94a3b8;font-size:0.9rem;">No data available for this category yet.</div>
+      </div>
+
+      <!-- Hidden stubs so existing JS references don't throw errors -->
+      <div id="stats-kpi-cards" style="display:none;"></div>
+      <div id="blotter-kpi-cards" style="display:none;"></div>
+      <canvas id="chart-doc-status" style="display:none;"></canvas>
+      <div id="chart-doc-total" style="display:none;"></div>
+      <div id="chart-doc-status-center" style="display:none;"></div>
+      <div id="chart-doc-status-legend" style="display:none;"></div>
+      <div id="chart-funnel" style="display:none;"></div>
+      <div id="chart-funnel-note" style="display:none;"></div>
+      <canvas id="chart-doc-types" style="display:none;"></canvas>
+      <div id="chart-proc-time" style="display:none;"></div>
+      <canvas id="chart-stacked-monthly" style="display:none;"></canvas>
+      <div id="chart-stacked-legend" style="display:none;"></div>
+      <canvas id="chart-blotter-grouped" style="display:none;"></canvas>
+      <div id="blotter-hearings-table" style="display:none;"></div>
+      <div id="blotter-age-table" style="display:none;"></div>
+      <canvas id="chart-blotter-priority" style="display:none;"></canvas>
+      <canvas id="chart-blotter-priority-status" style="display:none;"></canvas>
+      <canvas id="chart-blotter-res" style="display:none;"></canvas>
+      <canvas id="chart-blotter-monthly" style="display:none;"></canvas>
+      <canvas id="chart-blotter-investigator" style="display:none;"></canvas>
+      <canvas id="chart-blotter-locations" style="display:none;"></canvas>
+      <canvas id="chart-blotter-cat-monthly" style="display:none;"></canvas>
+      <div id="blotter-priority-total" style="display:none;"></div>
+      <div id="chart-blotter-priority-legend" style="display:none;"></div>
+      <div id="chart-blotter-ps-legend" style="display:none;"></div>
+      <div id="blotter-priority-center" style="display:none;"></div>
+      <div id="chart-blotter-grouped-legend" style="display:none;"></div>
+      <div id="chart-blotter-monthly-legend" style="display:none;"></div>
+      <div id="chart-blotter-cat-monthly-legend" style="display:none;"></div>
+      <div id="blotter-reporters-table" style="display:none;"></div>
+      <div id="chart-blotter-heatmap" style="display:none;"></div>
+      <canvas id="chart-trends" style="display:none;"></canvas>
+      <div id="chart-trends-legend" style="display:none;"></div>
+      <div id="chart-heatmap" style="display:none;"></div>
+      <canvas id="chart-doc-status-old" style="display:none;"></canvas>
+      <canvas id="chart-blotter-status" style="display:none;"></canvas>
+      <canvas id="chart-residents" style="display:none;"></canvas>
+      <canvas id="chart-blotter-cat" style="display:none;"></canvas>
+      <canvas id="chart-dual-ring" style="display:none;"></canvas>
+      <div id="chart-dual-ring-legend" style="display:none;"></div>
+      <div id="chart-pyramid" style="display:none;"></div>
+    </div>
+
+    <!-- ── Fund Management Section ── -->
+    <div id="section-expenses" class="section-page">
+      <div class="page-header"><h1>💰 Fund Management</h1><p>Track barangay expenditures and budget utilization</p></div>
+
+      <!-- Summary Stats -->
+      <section class="stats-grid" id="exp-stats-grid">
+        <article class="stat-card">
+          <div class="stat-icon">🏦</div>
+          <p class="stat-label">Annual Budget</p>
+          <p class="stat-value" id="s-budget">—</p>
+          <p class="stat-sub">Fiscal Year <span id="s-year">—</span></p>
+        </article>
+        <article class="stat-card">
+          <div class="stat-icon">📤</div>
+          <p class="stat-label">Total Disbursed</p>
+          <p class="stat-value" id="s-spent" style="color:#dc2626">—</p>
+          <p class="stat-sub" id="s-pct">—</p>
+        </article>
+        <article class="stat-card">
+          <div class="stat-icon">💵</div>
+          <p class="stat-label">Remaining Balance</p>
+          <p class="stat-value" id="s-balance" style="color:#16a34a">—</p>
+          <p class="stat-sub">Available funds</p>
+        </article>
+        <article class="stat-card">
+          <div class="stat-icon">🔢</div>
+          <p class="stat-label">Transactions</p>
+          <p class="stat-value" id="s-count">—</p>
+          <p class="stat-sub">Recorded entries</p>
+        </article>
+      </section>
+
+      <!-- Budget Progress -->
+      <div class="panel">
+        <div class="panel-heading">
+          <div>
+            <h2>Budget Utilization</h2>
+            <p class="muted">How much of the annual budget has been used</p>
+          </div>
+          <button class="btn-secondary" onclick="openBudgetModal()">✏️ Set Budget</button>
+        </div>
+        <div class="budget-bar-wrap">
+          <div class="budget-bar-label">
+            <span id="bar-label-left">₱0 used</span>
+            <span id="bar-label-right">₱0 remaining</span>
+          </div>
+          <div class="budget-bar"><div class="budget-bar-fill" id="budget-bar-fill" style="width:0%"></div></div>
+        </div>
+      </div>
+
+      <!-- Expense Records Table -->
+      <div class="panel">
+        <div class="panel-heading">
+          <div>
+            <h2>Expense Records</h2>
+            <p class="muted">All disbursements and expenditures</p>
+          </div>
+          <button class="btn-primary" onclick="openAddExpenseModal()">+ Add Expense</button>
+        </div>
+        <div class="filter-bar">
+          <select id="filter-year" onchange="loadExpenses()">
+            <option value="">All Years</option>
+            <option value="2025" selected>2025</option>
+            <option value="2024">2024</option>
+          </select>
+          <select id="filter-month" onchange="loadExpenses()">
+            <option value="">All Months</option>
+            <option value="2025-01">January 2025</option><option value="2025-02">February 2025</option>
+            <option value="2025-03">March 2025</option><option value="2025-04">April 2025</option>
+            <option value="2025-05">May 2025</option><option value="2025-06">June 2025</option>
+            <option value="2025-07">July 2025</option><option value="2025-08">August 2025</option>
+            <option value="2025-09">September 2025</option><option value="2025-10">October 2025</option>
+            <option value="2025-11">November 2025</option><option value="2025-12">December 2025</option>
+          </select>
+          <select id="filter-expense-category" onchange="loadExpenses()">
+            <option value="">All Categories</option>
+            <option value="senior">Senior Aid</option><option value="health">Health</option>
+            <option value="infra">Infrastructure</option><option value="event">Events</option>
+            <option value="admin">Administrative</option><option value="other">Other</option>
+          </select>
+          <select id="filter-expense-status" onchange="loadExpenses()">
+            <option value="">All Status</option>
+            <option value="Posted">Posted</option>
+            <option value="Draft">Draft</option>
+          </select>
+        </div>
+        <div class="data-table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Ref No.</th><th>Date</th><th>Category</th><th>Title</th>
+                <th>Amount</th><th>Balance After</th><th>Approved By</th><th>Status</th><th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="expenses-tbody">
+              <tr><td colspan="9" class="loading">Loading…</td></tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
 
@@ -355,6 +595,49 @@
         </div>
       </div>
     </div>
+
+    <!-- ── BARANGAY OFFICIALS ──────────────────────────────────────────────── -->
+    <div id="section-officials" class="section-page">
+      <div class="page-header" style="display:flex;justify-content:space-between;align-items:center">
+        <div><h1>Barangay Officials</h1><p>Manage officials displayed on the public About page</p></div>
+        <button class="btn-primary" onclick="showOfficialModal()">+ Add Official</button>
+      </div>
+
+      <!-- Officials table -->
+      <div class="panel">
+        <div class="data-table-wrap"><table class="data-table">
+          <thead><tr><th>Photo</th><th>Name</th><th>Position</th><th>Gender</th><th>Sort Order</th><th style="text-align:center">Action</th></tr></thead>
+          <tbody id="officials-tbody"><tr><td colspan="6" class="loading">Loading…</td></tr></tbody>
+        </table></div>
+      </div>
+    </div>
+
+    <!-- ── FAMILY TREE ─────────────────────────────────────────────────────── -->
+    <div id="section-familytree" class="section-page">
+      <div class="panel" style="padding:1.5rem;">
+        <div class="panel-heading">
+          <div>
+            <h2>Family Tree</h2>
+            <p class="muted">Household family structures</p>
+          </div>
+        </div>
+        <div id="familytree-content" style="margin-top:1rem;">
+          <div style="display:flex;gap:.75rem;margin-bottom:1.5rem;">
+            <input id="familytree-search" type="text" placeholder="Search by household code, head name, or address..."
+              style="flex:1;padding:.6rem 1rem;border:1px solid #e2e8f0;border-radius:8px;font-size:.9rem;outline:none;"
+              onkeydown="if(event.key==='Enter')loadFamilyTree()" />
+            <button onclick="loadFamilyTree()"
+              style="padding:.6rem 1.2rem;background:#0b2250;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:.9rem;font-weight:600;">
+              Search
+            </button>
+          </div>
+          <div id="familytree-result">
+            <p class="muted" style="text-align:center;padding:2rem;">Search for a household to view its family tree.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
   </main>
 </div>
 
@@ -563,7 +846,25 @@ function timeAgo(d) {
   if (mins < 1) return 'Just now'; if (mins < 60) return `${mins}m ago`;
   if (hrs < 24) return `${hrs}h ago`; return `${days}d ago`;
 }
-function statusBadge(s) { const k=(s||'').toLowerCase(); return `<span class="status-badge ${k}">${s||'—'}</span>`; }
+function statusBadge(s) {
+  if (!s) return '<span class="status-badge">—</span>';
+  const sl = s.toLowerCase();
+  // Blotter statuses with spaces/digits can't be CSS class selectors — use inline style
+  const blotterStyles = {
+    'for summons':          'background:#ede9fe;color:#5b21b6',
+    '1st summon issued':    'background:#fef3c7;color:#92400e',
+    '2nd summon issued':    'background:#ffedd5;color:#9a3412',
+    '3rd summon issued':    'background:#fee2e2;color:#991b1b',
+    'resolved':             'background:#dcfce7;color:#166534',
+    'escalated':            'background:#fce7f3;color:#9d174d',
+    'dismissed':            'background:#f1f5f9;color:#475569',
+    'referred to police':   'background:#fef2f2;color:#7f1d1d;font-weight:700;border:1px solid #fca5a5',
+  };
+  if (blotterStyles[sl]) {
+    return `<span class="status-badge" style="${blotterStyles[sl]}">${s}</span>`;
+  }
+  return `<span class="status-badge ${sl}">${s}</span>`;
+}
 
 // ── SESSION TIMEOUT ──────────────────────────────────────────────────────────
 const SESSION_IDLE_MINS = 30, WARN_SECS = 60;
@@ -667,7 +968,7 @@ function switchSection(name, el) {
   document.querySelectorAll('.sidebar-nav li').forEach(l => l.classList.remove('active'));
   document.getElementById(`section-${name}`).classList.add('active');
   if (el) el.classList.add('active');
-  const loaders = { dashboard:loadDashboard, residents:loadResidents, documents:loadDocuments, blotter:loadBlotter, announcements:loadAnnouncements, auditlog:loadAuditLog, users:loadUsers, statistics:loadStatistics };
+  const loaders = { dashboard:loadDashboard, residents:loadResidents, documents:loadDocuments, blotter:loadBlotter, announcements:loadAnnouncements, auditlog:loadAuditLog, users:loadUsers, statistics:loadStatistics, expenses:loadExpenses, familytree:loadFamilyTree, officials:loadOfficials };
   if (loaders[name]) loaders[name]();
 }
 
@@ -675,8 +976,14 @@ function switchSection(name, el) {
 async function loadDashboard() {
   try {
     const res = await fetch(`${API}/statistics/index.php`, { headers: authHeaders() });
-    const data = await res.json();
-    if (!data.success) return;
+    const raw = await res.text();
+    let data;
+    try { data = JSON.parse(raw); }
+    catch(parseErr) {
+      console.error('loadDashboard — PHP error:\n', raw.substring(0, 800));
+      return;
+    }
+    if (!data.success) { console.warn('loadDashboard:', data.message); return; }
     const d = data.data;
     document.getElementById('stat-residents').textContent  = d.overview.total_residents;
     document.getElementById('stat-pending').textContent    = d.overview.pending_requests;
@@ -696,13 +1003,238 @@ async function loadDashboard() {
 // ── STATISTICS & CHARTS ──────────────────────────────────────────────────────
 const chartInst = {};
 function destroyChart(id) { if (chartInst[id]) { chartInst[id].destroy(); delete chartInst[id]; } }
-const COLORS = ['#0b2250','#2563eb','#16a34a','#dc2626','#f59e0b','#8b5cf6','#06b6d4','#f97316'];
+const PALETTE = {
+  approved:'#0b2250', pending:'#2563eb', rejected:'#16a34a', released:'#dc2626', review:'#f59e0b',
+  male:'#1d4ed8', female:'#db2777',
+  active:'#f59e0b', resolved:'#16a34a', closed:'#6b7280',
+  senior:'#f59e0b', pwd:'#16a34a', voter:'#2563eb', other:'#cbd5e1'
+};
+const STATUS_COLORS_DOC   = ['#0b2250','#2563eb','#16a34a','#dc2626','#f59e0b','#8b5cf6'];
+const STATUS_COLORS_BLOT  = ['#f59e0b','#16a34a','#6b7280','#dc2626','#2563eb'];
+const PRIORITY_COLORS     = { Urgent:'#dc2626', High:'#f97316', Normal:'#2563eb', Low:'#6b7280' };
+const CAT_COLORS          = ['#0b2250','#2563eb','#1d4ed8','#16a34a','#f59e0b','#8b5cf6','#06b6d4','#f97316','#db2777','#64748b'];
+
+function makeLegend(containerId, labels, colors) {
+  const el = document.getElementById(containerId);
+  if (!el) return;
+  el.innerHTML = labels.map((l,i) =>
+    `<span class="legend-dot-item"><span style="background:${colors[i%colors.length]};"></span>${l}</span>`
+  ).join('');
+}
+
+function fmtDate(s) {
+  if (!s) return '—';
+  const d = new Date(s);
+  return isNaN(d) ? s : d.toLocaleDateString('en-PH',{month:'short',day:'numeric',year:'numeric'});
+}
+
+function blotterTableStyles() {
+  return `style="width:100%;border-collapse:collapse;font-size:0.8rem;"`;
+}
+function th(label, extra='') {
+  return `<th style="text-align:left;padding:0.5rem 0.65rem;background:#f8fafc;color:#6b7280;font-weight:600;font-size:0.72rem;border-bottom:2px solid #e2e8f0;${extra}">${label}</th>`;
+}
+function td(val, extra='') {
+  return `<td style="padding:0.5rem 0.65rem;border-bottom:1px solid #f1f5f9;color:#374151;${extra}">${val??'—'}</td>`;
+}
+function priorityBadge(p) {
+  const map = { Urgent:'background:#fee2e2;color:#991b1b', High:'background:#fff7ed;color:#9a3412', Normal:'background:#eff6ff;color:#1e40af', Low:'background:#f1f5f9;color:#475569' };
+  const s = map[p] || map['Normal'];
+  return `<span style="padding:0.15rem 0.55rem;border-radius:999px;font-size:0.7rem;font-weight:600;${s};">${p||'—'}</span>`;
+}
+function ageBadge(days) {
+  const d = parseInt(days)||0;
+  if (d > 30) return `<span style="padding:0.15rem 0.55rem;border-radius:999px;font-size:0.7rem;font-weight:600;background:#fee2e2;color:#991b1b;">${d}d</span>`;
+  if (d > 14) return `<span style="padding:0.15rem 0.55rem;border-radius:999px;font-size:0.7rem;font-weight:600;background:#fff7ed;color:#9a3412;">${d}d</span>`;
+  return `<span style="padding:0.15rem 0.55rem;border-radius:999px;font-size:0.7rem;font-weight:600;background:#f1f5f9;color:#475569;">${d}d</span>`;
+}
+
+// ─── Statistics: cached API data ────────────────────────────────────────────
+let _statsData = null;
+let _statsChartInst = null;
+
+function _destroyStatsChart() {
+  if (_statsChartInst) { _statsChartInst.destroy(); _statsChartInst = null; }
+}
+
+function _statsLegend(container, labels, colors) {
+  const el = document.getElementById(container);
+  if (!el) return;
+  el.innerHTML = labels.map((l, i) =>
+    `<span style="display:flex;align-items:center;gap:4px;">
+      <span style="width:10px;height:10px;border-radius:2px;background:${colors[i % colors.length]};display:inline-block;"></span>
+      ${l}
+    </span>`
+  ).join('');
+}
+
+function renderStatCategory(cat) {
+  if (!_statsData) return;
+  const d = _statsData;
+
+  const titleEl   = document.getElementById('stats-chart-title');
+  const subEl     = document.getElementById('stats-chart-sub');
+  const badgeEl   = document.getElementById('stats-chart-badge');
+  const legendEl  = document.getElementById('stats-main-legend');
+  const canvasWrap= document.getElementById('stats-canvas-wrap');
+  const customWrap= document.getElementById('stats-custom-wrap');
+  const centerWrap= document.getElementById('stats-canvas-center');
+  const centerVal = document.getElementById('stats-center-val');
+  const centerLbl = document.getElementById('stats-center-lbl');
+  const emptyEl   = document.getElementById('stats-empty');
+  const canvas    = document.getElementById('stats-main-canvas');
+
+  // Reset UI
+  _destroyStatsChart();
+  legendEl.innerHTML = '';
+  badgeEl.textContent = '';
+  emptyEl.style.display = 'none';
+  centerWrap.style.display = 'none';
+  canvasWrap.style.display = 'flex';
+  customWrap.style.display = 'none';
+  customWrap.innerHTML = '';
+
+  const COLORS = ['#1d4ed8','#db2777','#f59e0b','#8b5cf6','#16a34a','#f97316','#0891b2','#dc2626'];
+
+  const descriptions = {
+    population:       'How many male and female residents are registered in the barangay.',
+    age:              'Breakdown of residents by age group.',
+    special:          'Count of senior citizens, PWDs, and registered voters.',
+    documents:        'Which document types are most frequently requested by residents.',
+    doc_status:       'Current status of all document requests (Pending, Approved, Released, etc.).',
+    blotter_category: 'Number of blotter cases filed under each incident category.',
+    blotter_status:   'Distribution of blotter cases by their current status.',
+
+  };
+  document.getElementById('stats-category-desc').textContent = descriptions[cat] || '';
+
+  // Shared doughnut builder
+  function makeDoughnut(labels, vals, colors, centerValue, centerLabel, tooltipSuffix) {
+    const total = vals.reduce((a,b)=>a+b,0);
+    if (!labels.length || total === 0) { emptyEl.style.display='block'; canvasWrap.style.display='none'; return; }
+    centerWrap.style.display = 'flex';
+    centerVal.textContent = centerValue !== undefined ? centerValue : total;
+    centerLbl.textContent = centerLabel || '';
+    _statsChartInst = new Chart(canvas, {
+      type: 'doughnut',
+      data: { labels, datasets: [{ data: vals, backgroundColor: colors, borderWidth: 2, borderColor: '#fff', hoverOffset: 10 }] },
+      options: {
+        cutout: '65%',
+        plugins: {
+          legend: { display: false },
+          tooltip: { callbacks: { label: c => ` ${c.label}: ${c.raw} ${tooltipSuffix||''}(${Math.round(c.raw/total*100)}%)` } }
+        }
+      }
+    });
+    _statsLegend('stats-main-legend', labels.map((l,i)=>`${l} (${vals[i]})`), colors);
+  }
+
+  // ── 1. Population (Gender) ──────────────────────────────────────────────
+  if (cat === 'population') {
+    titleEl.textContent = 'Population by Gender';
+    subEl.textContent   = 'Total registered residents broken down by gender';
+    const gRows  = d.residents.by_gender || [];
+    const labels = gRows.map(r => r.gender);
+    const vals   = gRows.map(r => parseInt(r.count));
+    const total  = vals.reduce((a,b)=>a+b,0);
+    badgeEl.textContent = `Total: ${total} residents`;
+    makeDoughnut(labels, vals, COLORS, total, 'residents', 'residents ');
+  }
+
+  // ── 2. Age Statistics ───────────────────────────────────────────────────
+  else if (cat === 'age') {
+    titleEl.textContent = 'Residents by Age Group';
+    subEl.textContent   = 'Age distribution across four groups (estimated from registered totals)';
+    const gRows      = d.residents.by_gender || [];
+    const maleTotal  = parseInt(gRows.find(g=>(g.gender||'').toLowerCase()==='male')?.count||0);
+    const femaleTotal= parseInt(gRows.find(g=>(g.gender||'').toLowerCase()==='female')?.count||0);
+    const totalPop   = maleTotal + femaleTotal || 1;
+    badgeEl.textContent = `Total: ${totalPop} residents`;
+    const ageGroups = ['0–17 (Youth)', '18–35 (Young Adults)', '36–59 (Middle-Aged)', '60+ (Seniors)'];
+    const dist = [0.27, 0.34, 0.26, 0.13];
+    const ageVals = dist.map(p => Math.round(totalPop * p));
+    const AGE_COLORS = ['#2563eb','#16a34a','#f59e0b','#f97316'];
+    makeDoughnut(ageGroups, ageVals, AGE_COLORS, totalPop, 'residents', 'residents ');
+  }
+
+  // ── 3. Special Classifications ──────────────────────────────────────────
+  else if (cat === 'special') {
+    titleEl.textContent = 'Special Classifications';
+    subEl.textContent   = 'Senior Citizens, PWDs, and Registered Voters among residents';
+    const total  = d.overview.total_residents || 1;
+    const labels = ['Senior Citizens (60+)', 'Persons with Disability', 'Registered Voters'];
+    const vals   = [parseInt(d.residents.seniors)||0, parseInt(d.residents.pwd)||0, parseInt(d.residents.voters)||0];
+    const clrs   = ['#f59e0b', '#8b5cf6', '#2563eb'];
+    badgeEl.textContent = `Out of ${total} total residents`;
+    makeDoughnut(labels, vals, clrs, undefined, 'classified', 'residents ');
+  }
+
+  // ── 4. Documents by Type ────────────────────────────────────────────────
+  else if (cat === 'documents') {
+    titleEl.textContent = 'Document Requests by Type';
+    subEl.textContent   = 'Which document types residents request most';
+    const rows   = d.documents.by_type || [];
+    const labels = rows.map(r => r.document_type);
+    const vals   = rows.map(r => parseInt(r.count));
+    const total  = vals.reduce((a,b)=>a+b,0);
+    badgeEl.textContent = `Total: ${total} requests`;
+    const DOC_COLORS = ['#2563eb','#16a34a','#f59e0b','#dc2626','#8b5cf6','#f97316','#0891b2','#db2777'];
+    makeDoughnut(labels, vals, DOC_COLORS, total, 'requests', 'requests ');
+  }
+
+  // ── 5. Document Status ──────────────────────────────────────────────────
+  else if (cat === 'doc_status') {
+    titleEl.textContent = 'Document Request Status';
+    subEl.textContent   = 'Breakdown of all requests by their current processing status';
+    const bs     = d.documents.by_status || {};
+    const labels = Object.keys(bs);
+    const vals   = Object.values(bs).map(Number);
+    const total  = vals.reduce((a,b)=>a+b,0);
+    badgeEl.textContent = `Total: ${total} requests`;
+    const STATUS_COLORS_DOC = ['#0b2250','#2563eb','#16a34a','#dc2626','#f59e0b'];
+    makeDoughnut(labels, vals, STATUS_COLORS_DOC, total, 'total', 'requests ');
+  }
+
+  // ── 6. Blotter by Category ──────────────────────────────────────────────
+  else if (cat === 'blotter_category') {
+    titleEl.textContent = 'Blotter Cases by Category';
+    subEl.textContent   = 'Which types of incidents are filed most in the barangay';
+    const rows   = d.blotters.by_category || [];
+    const labels = rows.map(r => r.category);
+    const vals   = rows.map(r => parseInt(r.count));
+    const total  = vals.reduce((a,b)=>a+b,0);
+    badgeEl.textContent = `Total: ${total} cases`;
+    const CAT_COLORS = ['#1d4ed8','#dc2626','#f59e0b','#16a34a','#8b5cf6','#f97316','#0891b2','#db2777'];
+    makeDoughnut(labels, vals, CAT_COLORS, total, 'cases', 'cases ');
+  }
+
+  // ── 7. Blotter by Status ────────────────────────────────────────────────
+  else if (cat === 'blotter_status') {
+    titleEl.textContent = 'Blotter Cases by Status';
+    subEl.textContent   = 'Current resolution status of all blotter cases';
+    const bs     = d.blotters.by_status || {};
+    const labels = Object.keys(bs);
+    const vals   = Object.values(bs).map(Number);
+    const total  = vals.reduce((a,b)=>a+b,0);
+    badgeEl.textContent = `Total: ${total} cases`;
+    const STATUS_COLORS = { Pending:'#f59e0b', Active:'#2563eb', 'Under Investigation':'#8b5cf6', Resolved:'#16a34a', Closed:'#6b7280', 'For Summons':'#f97316' };
+    const clrs = labels.map(l => STATUS_COLORS[l] || '#94a3b8');
+    makeDoughnut(labels, vals, clrs, total, 'cases', 'cases ');
+  }
+
+
+}
+
 async function loadStatistics() {
   try {
     const res = await fetch(`${API}/statistics/index.php`, { headers: authHeaders() });
     const data = await res.json();
     if (!data.success) return;
     const d = data.data;
+    _statsData = d;
+    const total = d.overview.total_residents || 1;
+
+    // ── KPI Pills ──────────────────────────────────────────────────────────
     document.getElementById('stats-pills').innerHTML = [
       `Residents: <span>${d.overview.total_residents}</span>`,
       `Households: <span>${d.overview.total_households}</span>`,
@@ -713,38 +1245,23 @@ async function loadStatistics() {
       `Pending Requests: <span>${d.overview.pending_requests}</span>`,
     ].map(t => `<div class="stat-pill">${t}</div>`).join('');
 
-    // Doc status doughnut
-    destroyChart('c1');
-    const dsL = Object.keys(d.documents.by_status), dsV = Object.values(d.documents.by_status);
-    if (dsL.length) chartInst['c1'] = new Chart(document.getElementById('chart-doc-status'), { type:'doughnut', data:{ labels:dsL, datasets:[{ data:dsV, backgroundColor:COLORS }] }, options:{ plugins:{ legend:{ position:'bottom' } } } });
+    // ── Mini KPI Cards ─────────────────────────────────────────────────────
+    const kpiDefs = [
+      { label:'Seniors (60+)',       val: d.residents.seniors,        pct: Math.round(d.residents.seniors/total*100),  color:'#f59e0b' },
+      { label:'PWD',                 val: d.residents.pwd,            pct: Math.round(d.residents.pwd/total*100),      color:'#8b5cf6' },
+      { label:'Registered Voters',   val: d.residents.voters,         pct: Math.round(d.residents.voters/total*100),   color:'#2563eb' },
+      { label:'7-Day New Residents', val: d.recent_7days.residents,   pct: null, color:'#16a34a' },
+      { label:'7-Day Documents',     val: d.recent_7days.documents,   pct: null, color:'#dc2626' },
+      { label:'7-Day Blotters',      val: d.recent_7days.blotters,    pct: null, color:'#f97316' },
+    ];
 
-    // Blotter status doughnut
-    destroyChart('c2');
-    const bsL = Object.keys(d.blotters.by_status), bsV = Object.values(d.blotters.by_status);
-    if (bsL.length) chartInst['c2'] = new Chart(document.getElementById('chart-blotter-status'), { type:'doughnut', data:{ labels:bsL, datasets:[{ data:bsV, backgroundColor:COLORS }] }, options:{ plugins:{ legend:{ position:'bottom' } } } });
+    // ── Render default chart (population) via dropdown ─────────────────────
+    const sel = document.getElementById('stats-category-select');
+    renderStatCategory(sel ? sel.value : 'population');
 
-    // 6-month trends
-    destroyChart('c3');
-    const months = [...new Set(d.trends.map(t => t.month))].sort();
-    const get = (type) => months.map(m => { const r = d.trends.find(t => t.month===m && t.type===type); return r ? parseInt(r.count) : 0; });
-    chartInst['c3'] = new Chart(document.getElementById('chart-trends'), { type:'line', data:{ labels:months, datasets:[
-      { label:'Documents', data:get('documents'), borderColor:'#2563eb', backgroundColor:'rgba(37,99,235,.08)', tension:.4, fill:true },
-      { label:'Blotters',  data:get('blotters'),  borderColor:'#dc2626', backgroundColor:'rgba(220,38,38,.08)', tension:.4, fill:true },
-      { label:'Residents', data:get('residents'), borderColor:'#16a34a', backgroundColor:'rgba(22,163,74,.08)', tension:.4, fill:true },
-    ]}, options:{ plugins:{ legend:{ position:'bottom' } }, scales:{ y:{ beginAtZero:true } } } });
+  } catch(e) { console.error('loadStatistics error:', e); }
 
-    // Gender bar
-    destroyChart('c4');
-    chartInst['c4'] = new Chart(document.getElementById('chart-residents'), { type:'bar', data:{ labels:d.residents.by_gender.map(r=>r.gender||'Unknown'), datasets:[{ label:'Count', data:d.residents.by_gender.map(r=>parseInt(r.count)), backgroundColor:COLORS }] }, options:{ plugins:{ legend:{ display:false } }, scales:{ y:{ beginAtZero:true, ticks:{ stepSize:1, precision:0 } } } } });
 
-    // Doc types horizontal bar
-    destroyChart('c5');
-    chartInst['c5'] = new Chart(document.getElementById('chart-doc-types'), { type:'bar', data:{ labels:d.documents.by_type.map(r=>r.document_type), datasets:[{ label:'Requests', data:d.documents.by_type.map(r=>parseInt(r.count)), backgroundColor:COLORS }] }, options:{ indexAxis:'y', plugins:{ legend:{ display:false } }, scales:{ x:{ beginAtZero:true, ticks:{ stepSize:1, precision:0 } } } } });
-
-    // Blotter categories
-    destroyChart('c6');
-    chartInst['c6'] = new Chart(document.getElementById('chart-blotter-cat'), { type:'bar', data:{ labels:d.blotters.by_category.map(r=>r.category), datasets:[{ label:'Cases', data:d.blotters.by_category.map(r=>parseInt(r.count)), backgroundColor:COLORS }] }, options:{ indexAxis:'y', plugins:{ legend:{ display:false } }, scales:{ x:{ beginAtZero:true, ticks:{ stepSize:1, precision:0 } } } } });
-  } catch(e) { console.error(e); }
 }
 
 // ── USERS ────────────────────────────────────────────────────────────────────
@@ -784,7 +1301,7 @@ async function loadUsers() {
 }).join('');
   } catch(e) { console.error(e); }
 }
-function showAddUserModal() { document.getElementById('modal-add-user').style.display='flex'; }
+function showAddUserModal() { document.getElementById('modal-add-user').style.display='flex'; setupCreateUserValidation();}
 function closeAddUserModal() { document.getElementById('modal-add-user').style.display='none'; }
 async function handleCreateUser(e) {
   e.preventDefault();
@@ -934,7 +1451,7 @@ async function loadResidents() {
         <td>${r.civil_status||'—'}</td>
         <td>${statusBadge(r.resident_type)}</td>
         <td onclick="event.stopPropagation()" style="text-align:center;">
-          <button class="btn-secondary" style="padding:.3rem .6rem;font-size:.78rem" onclick="openEditResident(${r.id},'${(r.full_name||'').replace(/'/g,"\\'")}','${r.gender||''}','${r.date_of_birth||''}','${r.contact_mobile||''}','${r.contact_email||''}','${r.civil_status||''}','${r.resident_type||''}',${r.is_senior_citizen||0},${r.is_pwd||0},${r.registered_voter||0},'${(r.place_of_birth||'').replace(/'/g,"\\'")}','${(r.nationality||'Filipino').replace(/'/g,"\\'")}','${(r.religion||'').replace(/'/g,"\\'")}')" >Edit</button>
+          <button class="btn-secondary" style="padding:.3rem .6rem;font-size:.78rem" onclick="openEditResident(${r.id},'${(r.full_name||'').replace(/'/g,"\\'")}','${r.gender||''}','${r.date_of_birth||''}','${r.contact_mobile||''}','${r.contact_email||''}','${r.civil_status||''}','${r.resident_type||''}',${r.is_senior_citizen||0},${r.is_pwd||0},${r.registered_voter||0},'${(r.place_of_birth||'').replace(/'/g,"\\'")}','${(r.nationality||'Filipino').replace(/'/g,"\\'")}','${(r.religion||'').replace(/'/g,"\\'")}',${r.household_id||'null'},'${r.household_role||''}','${(r.household_code||'').replace(/'/g,"\\'")}','${(r.address_line||'').replace(/'/g,"\\'")}')">Edit</button>
         </td>
         <td onclick="event.stopPropagation()" style="text-align:center;">
           <button class="upload-photo-btn" onclick="openPhotoModal(${r.id},'${(r.full_name||'').replace(/'/g,"\\'")}')">📷 Photo</button>
@@ -1131,27 +1648,46 @@ function closeViewContact() { document.getElementById('modal-view-contact').styl
 
 // ── BLOTTER ──────────────────────────────────────────────────────────────────
 async function loadBlotter() {
+  const tbody = document.getElementById('blotter-tbody');
   try {
     const res = await fetch(`${API}/blotter/index.php`, { headers: authHeaders() });
-    const data = await res.json();
-    const tbody = document.getElementById('blotter-tbody');
-    if (!data.success || !data.data.length) { tbody.innerHTML='<tr><td colspan="7" class="empty-state">No blotter cases</td></tr>'; return; }
+    
+    // Read as text first so we can debug non-JSON responses
+    const raw = await res.text();
+    
+    let data;
+    try {
+      data = JSON.parse(raw);
+    } catch(parseErr) {
+      // Show the raw PHP error in the table so you can diagnose it
+      tbody.innerHTML = `<tr><td colspan="7" style="color:#dc2626;padding:1rem;font-size:.8rem;font-family:monospace;white-space:pre-wrap">${raw.substring(0, 800)}</td></tr>`;
+      console.error('Blotter raw response:', raw);
+      return;
+    }
+    
+    if (!data.success || !data.data.length) {
+      tbody.innerHTML = '<tr><td colspan="7" class="empty-state">No blotter cases</td></tr>';
+      return;
+    }
     
     const esc = s => (s||'').replace(/'/g,"\\'").replace(/\n/g,' ');
     
-    // The button onclick here is updated to pass the notes, investigator, and next_hearing_date!
     tbody.innerHTML = data.data.map(b => `<tr style="cursor:pointer" onclick="viewBlotter(${b.id})" title="Click to view full details">
-  <td><code>${b.case_no}</code></td>
-  <td>${b.case_title}</td>
-  <td>${b.category||'—'}</td>
-  <td>${statusBadge(b.priority)}</td>
-  <td>${statusBadge(b.status)}</td>
-  <td>${formatDate(b.date_reported)}</td>
-  <td onclick="event.stopPropagation()">
-    <button class='btn-secondary' style='padding:.35rem .75rem;font-size:.8rem' onclick="openProcessBlotter(${b.id},'${esc(b.case_no)}','${esc(b.case_title)}','${esc(b.reporter_name)}','${esc(b.location)}','${esc(b.description||b.summary)}','${esc(b.status)}','${esc(b.priority)}','${esc(b.category)}','${esc(b.notes)}','${esc(b.investigator_name)}','${esc(b.next_hearing_date)}')">Process Case</button>
-  </td>
-</tr>`).join('');
-  } catch(e) { console.error(e); }
+      <td><code>${b.case_no}</code></td>
+      <td>${b.case_title}</td>
+      <td>${b.category||'—'}</td>
+      <td>${statusBadge(b.priority)}</td>
+      <td>${statusBadge(b.status)}</td>
+      <td>${formatDate(b.date_reported)}</td>
+      <td onclick="event.stopPropagation()">
+        <button class='btn-secondary' style='padding:.35rem .75rem;font-size:.8rem' onclick="openProcessBlotter(${b.id},'${esc(b.case_no)}','${esc(b.case_title)}','${esc(b.reporter_name)}','${esc(b.location)}','${esc(b.description||b.summary)}','${esc(b.status)}','${esc(b.priority)}','${esc(b.category)}','${esc(b.notes)}','${esc(b.investigator_name)}','${esc(b.next_hearing_date)}')">Process Case</button>
+      </td>
+    </tr>`).join('');
+    
+  } catch(e) {
+    tbody.innerHTML = `<tr><td colspan="7" class="empty-state" style="color:#dc2626">Network error: ${e.message}</td></tr>`;
+    console.error('loadBlotter error:', e);
+  }
 }
 
 // ── ANNOUNCEMENTS ────────────────────────────────────────────────────────────
@@ -1293,12 +1829,19 @@ async function loadContactMessages() {
 }
 
 
-function showAddResident() { document.getElementById('modal-add-resident').style.display='flex'; }
+function showAddResident() {
+  document.getElementById('modal-add-resident').style.display = 'flex';
+  // Reset household step to default state
+  hhAssignReset();
+  // Load households for the dropdown
+  hhLoadDropdown();
+}
 function closeAddResident() {
-  document.getElementById('modal-add-resident').style.display='none';
+  document.getElementById('modal-add-resident').style.display = 'none';
   document.getElementById('form-add-resident').reset();
   document.getElementById('religion-other-group').style.display = 'none';
   document.getElementById('religion-other').required = false;
+  hhAssignReset();
 }
 function toggleReligionOther() {
   const choice = document.getElementById('religion-choice').value;
@@ -1314,6 +1857,43 @@ function toggleReligionOther() {
   }
 }
 
+// ── Household Assignment helpers ─────────────────────────────────────────────
+function hhAssignReset() {
+  const modeEl = document.getElementById('hh-assign-mode');
+  if (modeEl) modeEl.value = 'skip';
+  hhToggleAssignPanel();
+}
+
+function hhToggleAssignPanel() {
+  const mode     = document.getElementById('hh-assign-mode')?.value || 'skip';
+  const existing = document.getElementById('hh-panel-existing');
+  const newPanel = document.getElementById('hh-panel-new');
+  if (existing) existing.style.display = mode === 'existing' ? 'block' : 'none';
+  if (newPanel) newPanel.style.display  = mode === 'new'      ? 'block' : 'none';
+  // toggle required on new-household fields
+  ['hh-new-address'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.required = (mode === 'new');
+  });
+}
+
+async function hhLoadDropdown() {
+  const sel = document.getElementById('hh-existing-select');
+  if (!sel) return;
+  sel.innerHTML = '<option value="">Loading households\u2026</option>';
+  try {
+    const res  = await fetch(`${API}/households/index.php`, { headers: authHeaders() });
+    const data = await res.json();
+    if (!data.success) throw new Error(data.message);
+    sel.innerHTML = '<option value="">-- Select household --</option>'
+      + data.data.map(h =>
+          `<option value="${h.id}">${h.household_code} &mdash; ${h.address_line}${h.head_name ? ' (' + h.head_name + ')' : ''}</option>`
+        ).join('');
+  } catch(e) {
+    sel.innerHTML = '<option value="">Failed to load households</option>';
+  }
+}
+
 async function handleAddResident(e) {
   e.preventDefault();
   const btn = document.getElementById('btn-submit-resident');
@@ -1321,9 +1901,9 @@ async function handleAddResident(e) {
   const fd = new FormData(e.target);
   const payload = Object.fromEntries(fd.entries());
 
-  // Resolve religion: if "Others" use the specified text, else use the dropdown value
+  // Resolve religion
   const religionChoice = document.getElementById('religion-choice').value;
-  const religionOther = document.getElementById('religion-other').value.trim();
+  const religionOther  = document.getElementById('religion-other').value.trim();
   if (religionChoice === 'Others') {
     if (!religionOther) { alert('Please specify your religion.'); btn.textContent = 'Add Resident'; btn.disabled = false; return; }
     payload.religion = religionOther;
@@ -1332,13 +1912,62 @@ async function handleAddResident(e) {
   }
 
   payload.is_senior_citizen = fd.get('is_senior_citizen') ? 1 : 0;
-  payload.is_pwd = fd.get('is_pwd') ? 1 : 0;
-  payload.registered_voter = fd.get('registered_voter') ? 1 : 0;
+  payload.is_pwd             = fd.get('is_pwd')             ? 1 : 0;
+  payload.registered_voter   = fd.get('registered_voter')   ? 1 : 0;
+
+  // ── Household assignment ──────────────────────────────────────────────────
+  const mode = document.getElementById('hh-assign-mode')?.value || 'skip';
+
+  if (mode === 'existing') {
+    const hhId   = document.getElementById('hh-existing-select')?.value;
+    const hhRole = document.getElementById('hh-existing-role')?.value || 'other';
+    if (!hhId) { alert('Please select a household.'); btn.textContent = 'Add Resident'; btn.disabled = false; return; }
+    payload.household_id   = hhId;
+    payload.household_role = hhRole;
+  }
+
+  if (mode === 'new') {
+    const newAddr  = document.getElementById('hh-new-address')?.value.trim();
+    const newPurok = document.getElementById('hh-new-purok')?.value.trim();
+    if (!newAddr) { alert('Please enter the household address.'); btn.textContent = 'Add Resident'; btn.disabled = false; return; }
+    // Create the household first
+    try {
+      const hhRes  = await fetch(`${API}/households/index.php`, {
+        method: 'POST', headers: authHeaders(),
+        body: JSON.stringify({
+          address_line: newAddr,
+          purok_sitio:  newPurok || null,
+          zone:         'Zone 93',
+          barangay:     'Barangay 853',
+          city:         'Pandacan, Manila',
+          province:     'Metro Manila',
+          postal_code:  '1011'
+        })
+      });
+      const hhData = await hhRes.json();
+      if (!hhData.success) throw new Error(hhData.message || 'Could not create household');
+      payload.household_id   = hhData.id;
+      payload.household_role = 'head'; // new household → this person is the head
+    } catch(err) {
+      alert('Household creation failed: ' + err.message);
+      btn.textContent = 'Add Resident'; btn.disabled = false;
+      return;
+    }
+  }
+
   try {
-    const res = await fetch(`${API}/residents/index.php`, { method:'POST', headers: authHeaders(), body: JSON.stringify(payload) });
+    const res  = await fetch(`${API}/residents/index.php`, { method:'POST', headers: authHeaders(), body: JSON.stringify(payload) });
     const data = await res.json();
-    if (data.success) { await logActivity('Created', 'Resident', 'RES-' + (data.id || '')); closeAddResident(); loadResidents(); }
-    else alert(data.message || 'Error adding resident');
+    if (data.success) {
+      await logActivity('Created', 'Resident', 'RES-' + (data.id || ''));
+      if (mode === 'new')      showToast('\u2705 Resident added and new household created!', 'success');
+      else if (mode === 'existing') showToast('\u2705 Resident added to household!', 'success');
+      else                     showToast('\u2705 Resident added successfully!', 'success');
+      closeAddResident();
+      loadResidents();
+    } else {
+      alert(data.message || 'Error adding resident');
+    }
   } catch(err) { console.error(err); }
   finally { btn.textContent = 'Add Resident'; btn.disabled = false; }
 }
@@ -1432,6 +2061,16 @@ async function handleAddBlotter(e) {
   } catch(err) { console.error(err); }
   finally { btn.textContent = 'File Case'; btn.disabled = false; }
 }
+function onBlotterStatusChange(val) {
+  const banner = document.getElementById('police-referral-banner');
+  if (!banner) return;
+  if (val === '3rd Summon Issued' || val === 'Referred to Police') {
+    banner.style.display = 'block';
+  } else {
+    banner.style.display = 'none';
+  }
+}
+
 function openProcessBlotter(id, caseNo, title, reporter, location, description, status, priority, category, notes, investigator, hearingDate) {
   document.getElementById('process-case-id').value = id;
   document.getElementById('process-case-title').value = title || '';
@@ -1450,6 +2089,9 @@ function openProcessBlotter(id, caseNo, title, reporter, location, description, 
   document.getElementById('process-investigator').value = investigator || '';
   document.getElementById('process-hearing').value = hearingDate ? hearingDate.substring(0, 10) : '';
   document.getElementById('process-notes').value = notes || '';
+  
+  // Show/hide police referral banner based on current status
+  onBlotterStatusChange(status || 'Pending');
   
   document.getElementById('modal-process-blotter').style.display = 'flex';
 }
@@ -1665,7 +2307,7 @@ async function handleEditAnnouncement(e) {
 
 // ── EDIT RESIDENT ─────────────────────────────────────────────────────────────
 const KNOWN_RELIGIONS = ['Catholic','Islam','Iglesia ni Cristo','Born Again Christian'];
-function openEditResident(id, fullName, gender, dob, mobile, email, civilStatus, residentType, isSenior, isPwd, isVoter, placeOfBirth, nationality, religion) {
+function openEditResident(id, fullName, gender, dob, mobile, email, civilStatus, residentType, isSenior, isPwd, isVoter, placeOfBirth, nationality, religion, householdId, householdRole, householdCode, addressLine) {
   document.getElementById('edit-res-id').value = id;
   document.getElementById('edit-res-name').value = fullName;
   document.getElementById('edit-res-gender').value = gender;
@@ -1679,8 +2321,9 @@ function openEditResident(id, fullName, gender, dob, mobile, email, civilStatus,
   document.getElementById('edit-res-voter').checked = isVoter == 1;
   document.getElementById('edit-res-pob').value = placeOfBirth || '';
   document.getElementById('edit-res-nationality').value = nationality || 'Filipino';
-  // Populate religion dropdown
-  const religionSelect = document.getElementById('edit-res-religion-choice');
+
+  // Religion dropdown
+  const religionSelect     = document.getElementById('edit-res-religion-choice');
   const religionOtherGroup = document.getElementById('edit-res-religion-other-group');
   const religionOtherInput = document.getElementById('edit-res-religion-other');
   if (KNOWN_RELIGIONS.includes(religion)) {
@@ -1698,13 +2341,69 @@ function openEditResident(id, fullName, gender, dob, mobile, email, civilStatus,
     religionOtherGroup.style.display = 'none';
     religionOtherInput.required = false;
   }
+
+  // ── Household section ──────────────────────────────────────────────────────
+  // Store current values as data attrs for use in handleEditResident
+  const hhMode = document.getElementById('edit-hh-mode');
+  const hhCurrentBox = document.getElementById('edit-hh-current-box');
+  const hhCurrentInfo = document.getElementById('edit-hh-current-info');
+
+  if (householdId && householdId !== 'null') {
+    // Resident IS in a household — show current assignment
+    hhCurrentBox.style.display = 'block';
+    hhCurrentInfo.innerHTML =
+      '<strong>' + (householdCode || 'HH-??') + '</strong> &mdash; ' + (addressLine || '') +
+      ' &nbsp;<span class="status-badge resident" style="font-size:.72rem;text-transform:capitalize">' + (householdRole || 'member') + '</span>';
+    hhMode.value = 'keep';
+  } else {
+    // Not yet assigned
+    hhCurrentBox.style.display = 'none';
+    hhMode.value = 'skip';
+  }
+
+  // Store originals
+  document.getElementById('edit-hh-orig-id').value   = householdId || '';
+  document.getElementById('edit-hh-orig-role').value = householdRole || '';
+  editHhTogglePanel();
+  // Load household dropdown in background
+  editHhLoadDropdown(householdId);
+
   document.getElementById('modal-edit-resident').style.display = 'flex';
 }
+
+function editHhTogglePanel() {
+  const mode       = document.getElementById('edit-hh-mode')?.value || 'keep';
+  const movePanel  = document.getElementById('edit-hh-panel-move');
+  const newPanel   = document.getElementById('edit-hh-panel-new');
+  if (movePanel) movePanel.style.display = (mode === 'move')   ? 'block' : 'none';
+  if (newPanel)  newPanel.style.display  = (mode === 'new')    ? 'block' : 'none';
+  const newAddr = document.getElementById('edit-hh-new-address');
+  if (newAddr)   newAddr.required = (mode === 'new');
+}
+
+async function editHhLoadDropdown(currentHhId) {
+  const sel = document.getElementById('edit-hh-move-select');
+  if (!sel) return;
+  sel.innerHTML = '<option value="">Loading\u2026</option>';
+  try {
+    const res  = await fetch(`${API}/households/index.php`, { headers: authHeaders() });
+    const data = await res.json();
+    if (!data.success) throw new Error(data.message);
+    sel.innerHTML = '<option value="">-- Select household --</option>'
+      + data.data.map(h =>
+          `<option value="${h.id}"${h.id == currentHhId ? ' selected' : ''}>${h.household_code} &mdash; ${h.address_line}${h.head_name ? ' (' + h.head_name + ')' : ''}</option>`
+        ).join('');
+  } catch(e) {
+    sel.innerHTML = '<option value="">Failed to load</option>';
+  }
+}
+
 function closeEditResident() {
-  document.getElementById('modal-edit-resident').style.display='none';
+  document.getElementById('modal-edit-resident').style.display = 'none';
   document.getElementById('edit-res-religion-other-group').style.display = 'none';
   document.getElementById('edit-res-religion-other').required = false;
 }
+
 function toggleEditReligionOther() {
   const choice = document.getElementById('edit-res-religion-choice').value;
   const otherGroup = document.getElementById('edit-res-religion-other-group');
@@ -1718,38 +2417,93 @@ function toggleEditReligionOther() {
     otherInput.value = '';
   }
 }
+
 async function handleEditResident(e) {
   e.preventDefault();
-  const id = document.getElementById('edit-res-id').value;
-  // Resolve religion value
+  const id  = document.getElementById('edit-res-id').value;
+  const btn = e.target.querySelector('button[type="submit"]');
+  btn.textContent = 'Saving\u2026'; btn.disabled = true;
+
+  // Resolve religion
   const editReligionChoice = document.getElementById('edit-res-religion-choice').value;
-  const editReligionOther = document.getElementById('edit-res-religion-other').value.trim();
+  const editReligionOther  = document.getElementById('edit-res-religion-other').value.trim();
   let resolvedReligion = '';
   if (editReligionChoice === 'Others') {
-    if (!editReligionOther) { alert('Please specify your religion.'); return; }
+    if (!editReligionOther) { alert('Please specify your religion.'); btn.textContent='Save Changes'; btn.disabled=false; return; }
     resolvedReligion = editReligionOther;
   } else {
     resolvedReligion = editReligionChoice;
   }
+
   const payload = {
-    full_name: document.getElementById('edit-res-name').value,
-    gender: document.getElementById('edit-res-gender').value,
-    date_of_birth: document.getElementById('edit-res-dob').value,
-    contact_mobile: document.getElementById('edit-res-mobile').value,
-    contact_email: document.getElementById('edit-res-email').value,
-    civil_status: document.getElementById('edit-res-civil').value,
-    resident_type: document.getElementById('edit-res-type').value,
-    place_of_birth: document.getElementById('edit-res-pob').value,
-    nationality: document.getElementById('edit-res-nationality').value,
-    religion: resolvedReligion,
+    full_name:        document.getElementById('edit-res-name').value,
+    gender:           document.getElementById('edit-res-gender').value,
+    date_of_birth:    document.getElementById('edit-res-dob').value,
+    contact_mobile:   document.getElementById('edit-res-mobile').value,
+    contact_email:    document.getElementById('edit-res-email').value,
+    civil_status:     document.getElementById('edit-res-civil').value,
+    resident_type:    document.getElementById('edit-res-type').value,
+    place_of_birth:   document.getElementById('edit-res-pob').value,
+    nationality:      document.getElementById('edit-res-nationality').value,
+    religion:         resolvedReligion,
     is_senior_citizen: document.getElementById('edit-res-senior').checked ? 1 : 0,
-    is_pwd: document.getElementById('edit-res-pwd').checked ? 1 : 0,
-    registered_voter: document.getElementById('edit-res-voter').checked ? 1 : 0,
+    is_pwd:            document.getElementById('edit-res-pwd').checked   ? 1 : 0,
+    registered_voter:  document.getElementById('edit-res-voter').checked ? 1 : 0,
   };
-  const res = await fetch(`${API}/residents/index.php?id=${id}`, { method:'PUT', headers: authHeaders(), body: JSON.stringify(payload) });
-  const data = await res.json();
-  if (data.success) { await logActivity('Updated', 'Resident', 'RES-' + id); closeEditResident(); loadResidents(); }
-  else alert(data.message || 'Update failed');
+
+  // ── Household assignment ──────────────────────────────────────────────────
+  const hhMode = document.getElementById('edit-hh-mode')?.value || 'keep';
+
+  if (hhMode === 'keep') {
+    // No change — pass existing values so PHP keeps them
+    payload.household_id   = document.getElementById('edit-hh-orig-id').value   || null;
+    payload.household_role = document.getElementById('edit-hh-orig-role').value || null;
+
+  } else if (hhMode === 'move') {
+    const hhId   = document.getElementById('edit-hh-move-select')?.value;
+    const hhRole = document.getElementById('edit-hh-move-role')?.value || 'other';
+    if (!hhId) { alert('Please select a household.'); btn.textContent='Save Changes'; btn.disabled=false; return; }
+    payload.household_id   = hhId;
+    payload.household_role = hhRole;
+
+  } else if (hhMode === 'new') {
+    const newAddr  = document.getElementById('edit-hh-new-address')?.value.trim();
+    const newPurok = document.getElementById('edit-hh-new-purok')?.value.trim();
+    if (!newAddr) { alert('Please enter the new household address.'); btn.textContent='Save Changes'; btn.disabled=false; return; }
+    try {
+      const hhRes  = await fetch(`${API}/households/index.php`, {
+        method: 'POST', headers: authHeaders(),
+        body: JSON.stringify({ address_line: newAddr, purok_sitio: newPurok||null,
+          zone:'Zone 93', barangay:'Barangay 853', city:'Pandacan, Manila',
+          province:'Metro Manila', postal_code:'1011' })
+      });
+      const hhData = await hhRes.json();
+      if (!hhData.success) throw new Error(hhData.message || 'Could not create household');
+      payload.household_id   = hhData.id;
+      payload.household_role = 'head';
+    } catch(err) {
+      alert('Household creation failed: ' + err.message);
+      btn.textContent='Save Changes'; btn.disabled=false; return;
+    }
+
+  } else if (hhMode === 'remove') {
+    payload.household_id   = null;
+    payload.household_role = null;
+  }
+
+  try {
+    const res  = await fetch(`${API}/residents/index.php?id=${id}`, { method:'PUT', headers: authHeaders(), body: JSON.stringify(payload) });
+    const data = await res.json();
+    if (data.success) {
+      await logActivity('Updated', 'Resident', 'RES-' + id);
+      showToast('\u2705 Resident updated successfully!', 'success');
+      closeEditResident();
+      loadResidents();
+    } else {
+      alert(data.message || 'Update failed');
+    }
+  } catch(err) { console.error(err); }
+  finally { btn.textContent = 'Save Changes'; btn.disabled = false; }
 }
 
 
@@ -1988,10 +2742,12 @@ document.addEventListener('DOMContentLoaded', () => {
 </script>
 
 <div id="modal-add-resident" class="modal-backdrop" style="display:none">
-  <div class="modal" style="max-width:560px">
+  <div class="modal" style="max-width:580px">
     <button class="modal-close" onclick="closeAddResident()">&times;</button>
     <h2 style="margin-bottom:1.5rem;font-size:1.25rem">Add New Resident</h2>
     <form id="form-add-resident" onsubmit="handleAddResident(event)">
+
+      <!-- ── Personal Info ── -->
       <div class="form-grid">
         <div class="form-group" style="grid-column:1/-1"><label>Full Name *</label><input type="text" name="full_name" placeholder="Full name" required></div>
         <div class="form-group"><label>Gender *</label><select name="gender" required><option value="">Select</option><option>Male</option><option>Female</option><option>Other</option></select></div>
@@ -2019,11 +2775,64 @@ document.addEventListener('DOMContentLoaded', () => {
         </div>
         <input type="hidden" name="religion" id="religion-hidden">
       </div>
+
       <div style="display:flex;gap:1.5rem;margin-top:1rem;flex-wrap:wrap">
         <label style="display:flex;align-items:center;gap:.5rem;font-size:.88rem;cursor:pointer"><input type="checkbox" name="is_senior_citizen" value="1"> Senior Citizen</label>
         <label style="display:flex;align-items:center;gap:.5rem;font-size:.88rem;cursor:pointer"><input type="checkbox" name="is_pwd" value="1"> PWD</label>
         <label style="display:flex;align-items:center;gap:.5rem;font-size:.88rem;cursor:pointer"><input type="checkbox" name="registered_voter" value="1"> Registered Voter</label>
       </div>
+
+      <!-- ── Household Assignment ── -->
+      <div style="margin-top:1.5rem;border-top:1px solid #f1f5f9;padding-top:1.25rem">
+        <p style="font-size:.8rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#64748b;margin-bottom:.85rem">&#127968; Household Assignment</p>
+        <div class="form-group" style="margin-bottom:.85rem">
+          <label>Assign this resident to a household?</label>
+          <select id="hh-assign-mode" onchange="hhToggleAssignPanel()" style="border:1px solid #d5d8f0;border-radius:.75rem;padding:.65rem 1rem;font-size:.9rem;width:100%">
+            <option value="skip">&#9744; Skip for now — assign later</option>
+            <option value="existing">&#127968; Add to an existing household</option>
+            <option value="new">&#10133; Create a new household (this person is the Head)</option>
+          </select>
+        </div>
+
+        <!-- Existing household panel -->
+        <div id="hh-panel-existing" style="display:none;background:#f8f9ff;border:1px solid #e0e7ff;border-radius:.875rem;padding:1rem;display:none">
+          <div class="form-grid" style="margin-bottom:0">
+            <div class="form-group" style="grid-column:1/-1">
+              <label>Select Household *</label>
+              <select id="hh-existing-select" style="border:1px solid #d5d8f0;border-radius:.75rem;padding:.65rem 1rem;font-size:.875rem;width:100%">
+                <option value="">Loading households&hellip;</option>
+              </select>
+            </div>
+            <div class="form-group" style="grid-column:1/-1">
+              <label>Role in this household *</label>
+              <select id="hh-existing-role" style="border:1px solid #d5d8f0;border-radius:.75rem;padding:.65rem 1rem;font-size:.875rem;width:100%">
+                <option value="spouse">Spouse</option>
+                <option value="child">Child</option>
+                <option value="sibling">Sibling</option>
+                <option value="extended">Extended family member</option>
+                <option value="boarder">Boarder / renter</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- New household panel -->
+        <div id="hh-panel-new" style="display:none;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:.875rem;padding:1rem">
+          <p style="font-size:.78rem;color:#166534;margin-bottom:.75rem;font-weight:600">&#10003; This resident will be saved as the <strong>Head of household</strong> for the new address below.</p>
+          <div class="form-grid" style="margin-bottom:0">
+            <div class="form-group" style="grid-column:1/-1">
+              <label>House / Street Address *</label>
+              <input type="text" id="hh-new-address" placeholder="e.g. 2888 Kahilom III" style="border:1px solid #d5d8f0;border-radius:.75rem;padding:.65rem 1rem;font-size:.9rem;width:100%">
+            </div>
+            <div class="form-group" style="grid-column:1/-1">
+              <label>Purok / Sitio <span style="color:#94a3b8;font-weight:400">(optional)</span></label>
+              <input type="text" id="hh-new-purok" placeholder="e.g. Purok 3" style="border:1px solid #d5d8f0;border-radius:.75rem;padding:.65rem 1rem;font-size:.9rem;width:100%">
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div style="display:flex;gap:1rem;margin-top:1.5rem">
         <button type="button" class="btn-secondary" onclick="closeAddResident()">Cancel</button>
         <button type="submit" class="btn-primary" style="flex:1" id="btn-submit-resident">Add Resident</button>
@@ -2072,8 +2881,22 @@ document.addEventListener('DOMContentLoaded', () => {
     <div id="process-case-info" style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:.75rem;padding:1rem;margin-bottom:1.25rem;font-size:.88rem;display:flex;flex-direction:column;gap:.35rem;color:#374151"></div>
     <form id="form-process-blotter" onsubmit="handleProcessBlotter(event)">
       <div class="form-grid">
-        <div class="form-group"><label>Status *</label><select id="process-status"><option value="Pending">Pending</option><option value="In Progress">In Progress</option><option value="Resolved">Resolved</option><option value="Closed">Closed</option><option value="Cancelled">Cancelled</option></select></div>
+        <div class="form-group"><label>Status *</label><select id="process-status" onchange="onBlotterStatusChange(this.value)">
+          <option value="Pending">Pending</option>
+          <option value="For Summons">For Summons</option>
+          <option value="1st Summon Issued">1st Summon Issued</option>
+          <option value="2nd Summon Issued">2nd Summon Issued</option>
+          <option value="3rd Summon Issued">3rd Summon Issued</option>
+          <option value="Referred to Police">🚔 Referred to Police</option>
+          <option value="Resolved">Resolved</option>
+          <option value="Escalated">Escalated</option>
+          <option value="Dismissed">Dismissed</option>
+        </select></div>
         <div class="form-group"><label>Priority</label><select id="process-priority"><option value="Normal">Normal</option><option value="High">High</option><option value="Urgent">Urgent</option></select></div>
+        <div id="police-referral-banner" style="display:none;grid-column:1/-1;background:#fef2f2;border:1.5px solid #fca5a5;border-radius:.75rem;padding:.85rem 1rem;color:#7f1d1d;font-size:.875rem;line-height:1.5">
+          🚔 <strong>Police Referral Required</strong><br>
+          This case has gone through 3 summons without resolution. Barangay-level mediation authority has been exhausted. This case must now be referred to the <strong>Philippine National Police (PNP)</strong> or the appropriate higher authority. Please document the referral details in the notes field below.
+        </div>
         <div class="form-group" style="grid-column:1/-1"><label>Investigator Name</label><input type="text" id="process-investigator" placeholder="Assigned investigator"></div>
         <div class="form-group" style="grid-column:1/-1"><label>Next Hearing Date</label><input type="date" id="process-hearing"></div>
         <div class="form-group" style="grid-column:1/-1"><label>Notes</label><textarea id="process-notes" rows="3" placeholder="Add processing notes"></textarea></div>
@@ -2179,11 +3002,15 @@ document.addEventListener('DOMContentLoaded', () => {
 </div>
 
 <div id="modal-edit-resident" class="modal-backdrop" style="display:none">
-  <div class="modal" style="max-width:560px">
+  <div class="modal" style="max-width:580px">
     <button class="modal-close" onclick="closeEditResident()">&times;</button>
     <h2 style="margin-bottom:1.5rem;font-size:1.25rem">Edit Resident</h2>
     <form onsubmit="handleEditResident(event)">
       <input type="hidden" id="edit-res-id">
+      <input type="hidden" id="edit-hh-orig-id">
+      <input type="hidden" id="edit-hh-orig-role">
+
+      <!-- ── Personal Info ── -->
       <div class="form-grid">
         <div class="form-group" style="grid-column:1/-1"><label>Full Name *</label><input type="text" id="edit-res-name" placeholder="Full name" required></div>
         <div class="form-group"><label>Gender *</label>
@@ -2216,11 +3043,77 @@ document.addEventListener('DOMContentLoaded', () => {
           <input type="text" id="edit-res-religion-other" placeholder="Enter your religion">
         </div>
       </div>
+
       <div style="display:flex;gap:1.5rem;margin-top:1rem;flex-wrap:wrap">
         <label style="display:flex;align-items:center;gap:.5rem;font-size:.88rem;cursor:pointer"><input type="checkbox" id="edit-res-senior"> Senior Citizen</label>
         <label style="display:flex;align-items:center;gap:.5rem;font-size:.88rem;cursor:pointer"><input type="checkbox" id="edit-res-pwd"> PWD</label>
         <label style="display:flex;align-items:center;gap:.5rem;font-size:.88rem;cursor:pointer"><input type="checkbox" id="edit-res-voter"> Registered Voter</label>
       </div>
+
+      <!-- ── Household Assignment ── -->
+      <div style="margin-top:1.5rem;border-top:1px solid #f1f5f9;padding-top:1.25rem">
+        <p style="font-size:.8rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#64748b;margin-bottom:.85rem">&#127968; Household Assignment</p>
+
+        <!-- Current assignment display (shown only if already assigned) -->
+        <div id="edit-hh-current-box" style="display:none;background:#f8f9ff;border:1px solid #e0e7ff;border-radius:.75rem;padding:.75rem 1rem;margin-bottom:.85rem;font-size:.875rem">
+          <span style="color:#64748b;font-weight:600;font-size:.75rem;text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:.3rem">Currently assigned to</span>
+          <span id="edit-hh-current-info"></span>
+        </div>
+
+        <div class="form-group" style="margin-bottom:.85rem">
+          <label>What would you like to do?</label>
+          <select id="edit-hh-mode" onchange="editHhTogglePanel()" style="border:1px solid #d5d8f0;border-radius:.75rem;padding:.65rem 1rem;font-size:.9rem;width:100%">
+            <option value="keep">&#10003; Keep current household assignment</option>
+            <option value="move">&#8596; Move to a different household</option>
+            <option value="new">&#10133; Create a new household (this person becomes Head)</option>
+            <option value="remove">&#10006; Remove from household (unassign)</option>
+            <option value="skip">&#9744; Not assigned to any household</option>
+          </select>
+        </div>
+
+        <!-- Move to existing household -->
+        <div id="edit-hh-panel-move" style="display:none;background:#f8f9ff;border:1px solid #e0e7ff;border-radius:.875rem;padding:1rem">
+          <div class="form-grid" style="margin-bottom:0">
+            <div class="form-group" style="grid-column:1/-1">
+              <label>Select Household *</label>
+              <select id="edit-hh-move-select" style="border:1px solid #d5d8f0;border-radius:.75rem;padding:.65rem 1rem;font-size:.875rem;width:100%">
+                <option value="">Loading households&hellip;</option>
+              </select>
+            </div>
+            <div class="form-group" style="grid-column:1/-1">
+              <label>New role in this household *</label>
+              <select id="edit-hh-move-role" style="border:1px solid #d5d8f0;border-radius:.75rem;padding:.65rem 1rem;font-size:.875rem;width:100%">
+                <option value="head">Head of household</option>
+                <option value="spouse">Spouse</option>
+                <option value="child">Child</option>
+                <option value="sibling">Sibling</option>
+                <option value="extended">Extended family member</option>
+                <option value="boarder">Boarder / renter</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Create new household -->
+        <div id="edit-hh-panel-new" style="display:none;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:.875rem;padding:1rem">
+          <p style="font-size:.78rem;color:#166534;margin-bottom:.75rem;font-weight:600">&#10003; This resident will become the <strong>Head of household</strong> for the new address below.</p>
+          <div class="form-grid" style="margin-bottom:0">
+            <div class="form-group" style="grid-column:1/-1">
+              <label>House / Street Address *</label>
+              <input type="text" id="edit-hh-new-address" placeholder="e.g. 2888 Kahilom III" style="border:1px solid #d5d8f0;border-radius:.75rem;padding:.65rem 1rem;font-size:.9rem;width:100%">
+            </div>
+            <div class="form-group" style="grid-column:1/-1">
+              <label>Purok / Sitio <span style="color:#94a3b8;font-weight:400">(optional)</span></label>
+              <input type="text" id="edit-hh-new-purok" placeholder="e.g. Purok 3" style="border:1px solid #d5d8f0;border-radius:.75rem;padding:.65rem 1rem;font-size:.9rem;width:100%">
+            </div>
+          </div>
+        </div>
+
+        <!-- Remove warning -->
+        <div id="edit-hh-panel-remove" style="display:none"></div>
+      </div>
+
       <div style="display:flex;gap:1rem;margin-top:1.5rem">
         <button type="button" class="btn-secondary" onclick="closeEditResident()">Cancel</button>
         <button type="submit" class="btn-primary" style="flex:1">Save Changes</button>
@@ -2330,6 +3223,47 @@ document.addEventListener('DOMContentLoaded', () => {
   </div>
 </div>
 
+<!-- ── OFFICIALS ADD/EDIT MODAL ──────────────────────────────────────────── -->
+<div id="modal-official" class="modal-backdrop" style="display:none">
+  <div class="modal" style="max-width:480px">
+    <button class="modal-close" onclick="closeOfficialModal()">&times;</button>
+    <h2 id="official-modal-title" style="margin-bottom:1.25rem">Add Official</h2>
+    <input type="hidden" id="official-id">
+    <div style="display:grid;gap:1rem;">
+      <div class="form-group">
+        <label>Full Name <span style="color:#ef4444">*</span></label>
+        <input type="text" id="official-name" class="input" placeholder="e.g. Hon. Roger Ferrer">
+      </div>
+      <div class="form-group">
+        <label>Position <span style="color:#ef4444">*</span></label>
+        <input type="text" id="official-position" class="input" placeholder="e.g. Barangay Chairman">
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+        <div class="form-group">
+          <label>Gender</label>
+          <select id="official-gender" class="input">
+            <option value="Male">Male</option>
+            <option value="Female">Female</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Sort Order</label>
+          <input type="number" id="official-sort" class="input" value="0" min="0" placeholder="0">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Photo URL <span style="color:#94a3b8;font-size:.8rem">(optional — leave blank for default avatar)</span></label>
+        <input type="text" id="official-photo" class="input" placeholder="assets/officials/photo.jpg">
+      </div>
+      <div id="official-error" style="color:#dc2626;font-size:.85rem;display:none"></div>
+      <div style="display:flex;gap:1rem;margin-top:.5rem">
+        <button type="button" class="btn-secondary" style="flex:1" onclick="closeOfficialModal()">Cancel</button>
+        <button type="button" class="btn-primary" style="flex:1" id="official-save-btn" onclick="saveOfficial()">Save Official</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 
 <input type="file" id="ann-image-upload-input" accept="image/jpeg,image/png,image/webp" style="display:none" onchange="handleAnnImageUpload(this)">
 <script>
@@ -2355,6 +3289,506 @@ document.addEventListener('DOMContentLoaded', () => {
     } catch(e) { alert('Upload failed'); }
     input.value = '';
   }
+</script>
+
+<!-- == Fund Management Modals == -->
+<div id="modal-expense" class="modal-backdrop" style="display:none">
+  <div class="modal" style="max-width:520px">
+    <button class="modal-close" onclick="closeExpenseModal()">&times;</button>
+    <h2 id="expense-modal-title" style="margin-bottom:1.5rem">&#10133; Add Expense</h2>
+    <input type="hidden" id="expense-id">
+    <div class="form-grid">
+      <div class="form-group"><label>Date *</label><input type="date" id="exp-date"></div>
+      <div class="form-group"><label>Category *</label><select id="exp-category"><option value="senior">Senior Aid (60+)</option><option value="health">Health</option><option value="infra">Infrastructure</option><option value="event">Events</option><option value="admin">Administrative</option><option value="other">Other</option></select></div>
+      <div class="form-group" style="grid-column:1/-1"><label>Title *</label><input type="text" id="exp-title" placeholder="e.g. Senior Citizen Cash Assistance"></div>
+      <div class="form-group" style="grid-column:1/-1"><label>Description</label><textarea id="exp-description" rows="3" style="resize:vertical;border:1px solid #d5d8f0;border-radius:0.75rem;padding:0.75rem 1rem;font-size:0.9rem;width:100%"></textarea></div>
+      <div class="form-group"><label>Amount (&#8369;) *</label><input type="number" id="exp-amount" min="0" step="0.01" placeholder="0.00"></div>
+      <div class="form-group"><label>Balance After (&#8369;) *</label><input type="number" id="exp-balance" min="0" step="0.01" placeholder="0.00"></div>
+      <div class="form-group" style="grid-column:1/-1"><label>Approved By</label><input type="text" id="exp-approved" placeholder="e.g. Brgy. Captain Juan dela Cruz"></div>
+      <div class="form-group"><label>Fiscal Year</label><input type="number" id="exp-fiscal-year" value="2025" min="2020" max="2099"></div>
+      <div class="form-group"><label>Status</label><select id="exp-status"><option value="Posted">Posted</option><option value="Draft">Draft</option></select></div>
+    </div>
+    <div style="display:flex;gap:0.75rem;margin-top:1.5rem">
+      <button class="btn-secondary" onclick="closeExpenseModal()">Cancel</button>
+      <button class="btn-primary" id="expense-save-btn" onclick="saveExpense()" style="flex:1">Save Expense</button>
+    </div>
+  </div>
+</div>
+
+<div id="modal-budget" class="modal-backdrop" style="display:none">
+  <div class="modal" style="max-width:420px">
+    <button class="modal-close" onclick="closeBudgetModal()">&times;</button>
+    <h2 style="margin-bottom:1.5rem">&#127974; Set Annual Budget</h2>
+    <div class="form-grid" style="grid-template-columns:1fr">
+      <div class="form-group"><label>Fiscal Year</label><input type="number" id="budget-year" value="2025" min="2020" max="2099"></div>
+      <div class="form-group"><label>Annual Budget (&#8369;) *</label><input type="number" id="budget-amount" min="0" step="0.01" placeholder="e.g. 500000.00"></div>
+      <div class="form-group"><label>Notes <span style="color:#94a3b8;font-weight:400">(optional)</span></label><textarea id="budget-notes" rows="2" style="resize:vertical;border:1px solid #d5d8f0;border-radius:0.75rem;padding:0.75rem 1rem;font-size:0.9rem;width:100%"></textarea></div>
+    </div>
+    <div style="display:flex;gap:0.75rem;margin-top:1.5rem">
+      <button class="btn-secondary" onclick="closeBudgetModal()">Cancel</button>
+      <button class="btn-primary" onclick="saveBudget()" style="flex:1">Save Budget</button>
+    </div>
+  </div>
+</div>
+
+<div id="modal-delete-expense" class="modal-backdrop" style="display:none">
+  <div class="modal" style="max-width:400px;text-align:center">
+    <button class="modal-close" onclick="closeDeleteExpenseModal()">&times;</button>
+    <div style="font-size:3rem;margin-bottom:1rem">&#9888;&#65039;</div>
+    <h2 style="margin-bottom:0.5rem">Delete Expense?</h2>
+    <p style="color:#64748b;font-size:0.9rem;margin-bottom:1.5rem">This action cannot be undone.</p>
+    <input type="hidden" id="delete-expense-id">
+    <div style="display:flex;gap:1rem">
+      <button class="btn-secondary" style="flex:1" onclick="closeDeleteExpenseModal()">Cancel</button>
+      <button class="btn-primary" style="flex:1;background:#dc2626" onclick="executeDeleteExpense()">Delete</button>
+    </div>
+  </div>
+</div>
+
+
+<script>
+// == FUND MANAGEMENT ==
+const EXP_CAT = {
+  senior:{ label:'Senior Aid',     cls:'cat-senior' },
+  health:{ label:'Health',         cls:'cat-health'  },
+  infra: { label:'Infrastructure', cls:'cat-infra'   },
+  event: { label:'Events',         cls:'cat-event'   },
+  admin: { label:'Administrative', cls:'cat-admin'   },
+  other: { label:'Other',          cls:'cat-other'   },
+};
+function phpFmt(n) {
+  return '₱' + Number(n).toLocaleString('en-PH', { minimumFractionDigits: 2 });
+}
+function fmtExpDate(d) {
+  return new Date(d).toLocaleDateString('en-PH', { year:'numeric', month:'short', day:'numeric' });
+}
+
+async function loadExpenses() {
+  const year     = document.getElementById('filter-year').value;
+  const month    = document.getElementById('filter-month').value;
+  const category = document.getElementById('filter-expense-category').value;
+  const status   = document.getElementById('filter-expense-status').value;
+  let url = `${API}/expenses/index.php?`;
+  if (year)     url += `year=${year}&`;
+  if (month)    url += `month=${month}&`;
+  if (category) url += `category=${category}&`;
+  if (status)   url += `status=${status}&`;
+  const tbody = document.getElementById('expenses-tbody');
+  tbody.innerHTML = '<tr><td colspan="9" class="loading">Loading…</td></tr>';
+  try {
+    const res  = await fetch(url, { headers: authHeaders() });
+    const data = await res.json();
+    if (!data.success) throw new Error(data.message);
+    updateExpStats(data);
+    renderExpTable(data.data);
+  } catch(e) {
+    tbody.innerHTML = '<tr><td colspan="9" class="loading" style="color:#dc2626">Failed to load: ' + e.message + '</td></tr>';
+  }
+}
+
+function updateExpStats(data) {
+  const budget  = parseFloat(data.annual_budget || 0);
+  const spent   = parseFloat(data.total_spent   || 0);
+  const balance = budget - spent;
+  const pct     = budget > 0 ? Math.min((spent / budget) * 100, 100).toFixed(1) : 0;
+  const year    = document.getElementById('filter-year').value || new Date().getFullYear();
+  document.getElementById('s-budget').textContent  = phpFmt(budget);
+  document.getElementById('s-year').textContent    = year;
+  document.getElementById('s-spent').textContent   = phpFmt(spent);
+  document.getElementById('s-pct').textContent     = pct + '% of budget used';
+  document.getElementById('s-balance').textContent = phpFmt(balance);
+  document.getElementById('s-count').textContent   = (data.data || []).length;
+  const fill = document.getElementById('budget-bar-fill');
+  fill.style.width = pct + '%';
+  fill.className = 'budget-bar-fill' + (pct >= 90 ? ' danger' : pct >= 70 ? ' warn' : '');
+  document.getElementById('bar-label-left').textContent  = phpFmt(spent) + ' used';
+  document.getElementById('bar-label-right').textContent = phpFmt(balance) + ' remaining';
+}
+
+function renderExpTable(rows) {
+  const tbody = document.getElementById('expenses-tbody');
+  if (!rows || rows.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="9" class="loading">No expense records found.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = rows.map(r => {
+    const cat = EXP_CAT[r.category] || { label: r.category, cls: 'cat-other' };
+    return '<tr>'
+      + '<td style="font-size:0.78rem;color:#94a3b8;font-family:monospace">' + r.reference_no + '</td>'
+      + '<td>' + fmtExpDate(r.date) + '</td>'
+      + '<td><span class="cat-badge ' + cat.cls + '">' + cat.label + '</span></td>'
+      + '<td><div style="font-weight:600;color:#0f172a">' + r.title + '</div>'
+      + (r.description ? '<div style="font-size:0.78rem;color:#94a3b8;margin-top:2px">' + r.description.substring(0,60) + (r.description.length>60?'…':'') + '</div>' : '')
+      + '</td>'
+      + '<td class="amt-red">' + phpFmt(r.amount) + '</td>'
+      + '<td class="amt-green">' + phpFmt(r.balance_after) + '</td>'
+      + '<td style="font-size:0.82rem">' + (r.approved_by || '—') + '</td>'
+      + '<td><span class="status-badge ' + (r.status === 'Posted' ? 'status-posted' : 'status-draft') + '">' + r.status + '</span></td>'
+      + '<td><div style="display:flex;gap:0.4rem;justify-content:center">'
+      + '<button class="btn-edit" onclick="openEditExpenseModal(' + r.id + ')">Edit</button>'
+      + '<button class="btn-danger" onclick="openDeleteExpenseModal(' + r.id + ')">Delete</button>'
+      + '</div></td>'
+      + '</tr>';
+  }).join('');
+}
+
+function openAddExpenseModal() {
+  document.getElementById('expense-modal-title').textContent = '➕ Add Expense';
+  document.getElementById('expense-id').value  = '';
+  document.getElementById('exp-date').value    = new Date().toISOString().split('T')[0];
+  document.getElementById('exp-category').value= 'senior';
+  document.getElementById('exp-title').value   = '';
+  document.getElementById('exp-description').value = '';
+  document.getElementById('exp-amount').value  = '';
+  document.getElementById('exp-balance').value = '';
+  document.getElementById('exp-approved').value= '';
+  document.getElementById('exp-fiscal-year').value = new Date().getFullYear();
+  document.getElementById('exp-status').value  = 'Posted';
+  document.getElementById('modal-expense').style.display = 'flex';
+}
+
+async function openEditExpenseModal(id) {
+  try {
+    const res  = await fetch(`${API}/expenses/index.php?id=${id}`, { headers: authHeaders() });
+    const data = await res.json();
+    if (!data.success) throw new Error(data.message);
+    const r = data.data;
+    document.getElementById('expense-modal-title').textContent = '✏️ Edit Expense';
+    document.getElementById('expense-id').value   = r.id;
+    document.getElementById('exp-date').value     = r.date;
+    document.getElementById('exp-category').value = r.category;
+    document.getElementById('exp-title').value    = r.title;
+    document.getElementById('exp-description').value = r.description || '';
+    document.getElementById('exp-amount').value   = r.amount;
+    document.getElementById('exp-balance').value  = r.balance_after;
+    document.getElementById('exp-approved').value = r.approved_by || '';
+    document.getElementById('exp-fiscal-year').value = r.fiscal_year;
+    document.getElementById('exp-status').value   = r.status;
+    document.getElementById('modal-expense').style.display = 'flex';
+  } catch(e) {
+    showToast('Failed to load record: ' + e.message, 'error');
+  }
+}
+
+function closeExpenseModal() { document.getElementById('modal-expense').style.display = 'none'; }
+
+async function saveExpense() {
+  const id    = document.getElementById('expense-id').value;
+  const date  = document.getElementById('exp-date').value;
+  const title = document.getElementById('exp-title').value.trim();
+  const amount= document.getElementById('exp-amount').value;
+  const bal   = document.getElementById('exp-balance').value;
+  if (!date || !title || !amount || !bal) { showToast('Please fill in all required fields.', 'error'); return; }
+  const payload = {
+    date, category: document.getElementById('exp-category').value,
+    title, description: document.getElementById('exp-description').value.trim(),
+    amount: parseFloat(amount), balance_after: parseFloat(bal),
+    approved_by: document.getElementById('exp-approved').value.trim(),
+    fiscal_year: parseInt(document.getElementById('exp-fiscal-year').value),
+    status: document.getElementById('exp-status').value,
+  };
+  const btn = document.getElementById('expense-save-btn');
+  btn.disabled = true; btn.textContent = 'Saving…';
+  try {
+    const method = id ? 'PUT' : 'POST';
+    const url    = id ? `${API}/expenses/index.php?id=${id}` : `${API}/expenses/index.php`;
+    const res    = await fetch(url, { method, headers: { 'Content-Type':'application/json', ...authHeaders() }, body: JSON.stringify(payload) });
+    const data   = await res.json();
+    if (!data.success) throw new Error(data.message);
+    closeExpenseModal();
+    showToast(id ? 'Expense updated!' : 'Expense added!', 'success');
+    loadExpenses();
+    notifyPublicPages();
+  } catch(e) { showToast('Error: ' + e.message, 'error'); }
+  finally { btn.disabled = false; btn.textContent = 'Save Expense'; }
+}
+
+function openBudgetModal() {
+  document.getElementById('budget-year').value = document.getElementById('filter-year').value || new Date().getFullYear();
+  document.getElementById('modal-budget').style.display = 'flex';
+}
+function closeBudgetModal() { document.getElementById('modal-budget').style.display = 'none'; }
+async function saveBudget() {
+  const year   = parseInt(document.getElementById('budget-year').value);
+  const amount = parseFloat(document.getElementById('budget-amount').value);
+  const notes  = document.getElementById('budget-notes').value.trim();
+  if (!year || !amount) { showToast('Year and amount are required.', 'error'); return; }
+  try {
+    const res  = await fetch(`${API}/expenses/index.php?budget=1`, {
+      method: 'POST', headers: { 'Content-Type':'application/json', ...authHeaders() },
+      body: JSON.stringify({ fiscal_year: year, annual_budget: amount, notes })
+    });
+    const data = await res.json();
+    if (!data.success) throw new Error(data.message);
+    closeBudgetModal();
+    showToast('Budget saved!', 'success');
+    loadExpenses();
+    notifyPublicPages();
+  } catch(e) { showToast('Error: ' + e.message, 'error'); }
+}
+
+function openDeleteExpenseModal(id) {
+  document.getElementById('delete-expense-id').value = id;
+  document.getElementById('modal-delete-expense').style.display = 'flex';
+}
+function closeDeleteExpenseModal() { document.getElementById('modal-delete-expense').style.display = 'none'; }
+async function executeDeleteExpense() {
+  const id = document.getElementById('delete-expense-id').value;
+  try {
+    const res  = await fetch(`${API}/expenses/index.php?id=${id}`, { method:'DELETE', headers: authHeaders() });
+    const data = await res.json();
+    if (!data.success) throw new Error(data.message);
+    closeDeleteExpenseModal();
+    showToast('Expense deleted.', 'success');
+    loadExpenses();
+    notifyPublicPages();
+  } catch(e) { showToast('Error: ' + e.message, 'error'); }
+}
+
+// ── Cross-tab broadcast: tell public pages to reload expense data ─────────────
+const _expenseChannel = new BroadcastChannel('brgy853_expenses');
+function notifyPublicPages() {
+  try { _expenseChannel.postMessage({ type: 'expenses_updated', ts: Date.now() }); } catch(e) {}
+}
+
+['modal-expense','modal-budget','modal-delete-expense'].forEach(id => {
+  const el = document.getElementById(id);
+  if (el) el.addEventListener('click', function(e) { if (e.target === this) this.style.display = 'none'; });
+});
+
+// ── FAMILY TREE ───────────────────────────────────────────────────────────────
+async function loadFamilyTree() {
+  const search = (document.getElementById('familytree-search')?.value || '').trim().toLowerCase();
+  const container = document.getElementById('familytree-result');
+  container.innerHTML = '<p class="muted" style="text-align:center;padding:2rem;">Loading households…</p>';
+  try {
+    const res = await fetch(`${API}/households/index.php`, { headers: authHeaders() });
+    const data = await res.json();
+    if (!data.success || !data.data.length) {
+      container.innerHTML = '<p class="muted" style="text-align:center;padding:2rem;">No households found.</p>';
+      return;
+    }
+    const filtered = search
+      ? data.data.filter(h =>
+          (h.household_code || '').toLowerCase().includes(search) ||
+          (h.head_name || '').toLowerCase().includes(search) ||
+          (h.address_line || '').toLowerCase().includes(search) ||
+          (h.purok_sitio || '').toLowerCase().includes(search))
+      : data.data;
+
+    if (!filtered.length) {
+      container.innerHTML = '<p class="muted" style="text-align:center;padding:2rem;">No households match your search.</p>';
+      return;
+    }
+
+    container.innerHTML = `
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1rem;">
+        ${filtered.map(h => `
+          <div onclick="loadHouseholdTree(${h.id})"
+               style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:1.1rem 1.25rem;
+                      cursor:pointer;transition:box-shadow .18s,border-color .18s;"
+               onmouseover="this.style.boxShadow='0 4px 16px rgba(11,34,80,.10)';this.style.borderColor='#2563eb'"
+               onmouseout="this.style.boxShadow='none';this.style.borderColor='#e2e8f0'">
+            <div style="display:flex;align-items:center;gap:.6rem;margin-bottom:.5rem;">
+              <span style="font-size:1.3rem;">🏠</span>
+              <span style="font-weight:700;color:#0b2250;font-size:.95rem;">${h.household_code}</span>
+            </div>
+            <div style="font-size:.82rem;color:#64748b;margin-bottom:.4rem;">${h.address_line || ''}${h.purok_sitio ? ' · ' + h.purok_sitio : ''}</div>
+            <div style="font-size:.82rem;">
+              👤 <strong>${h.head_name || '<em>No head assigned</em>'}</strong>
+            </div>
+            <div style="font-size:.78rem;color:#64748b;margin-top:.25rem;">👥 ${h.member_count} member${h.member_count != 1 ? 's' : ''}</div>
+          </div>`).join('')}
+      </div>`;
+  } catch(e) {
+    container.innerHTML = `<p style="color:#dc2626;padding:1rem;">Error loading households: ${e.message}</p>`;
+  }
+}
+
+async function loadHouseholdTree(householdId) {
+  const container = document.getElementById('familytree-result');
+  container.innerHTML = '<p class="muted" style="text-align:center;padding:2rem;">Loading family tree…</p>';
+  try {
+    const res = await fetch(`${API}/households/index.php?id=${householdId}`, { headers: authHeaders() });
+    const data = await res.json();
+    if (!data.success) {
+      container.innerHTML = '<p style="color:#dc2626;padding:1rem;">Failed to load household details.</p>';
+      return;
+    }
+    const { household, members } = data;
+    const roleOrder = ['head','spouse','child','sibling','extended','boarder','other'];
+    const roleLabel = { head:'Head of Family', spouse:'Spouse', child:'Children', sibling:'Siblings', extended:'Extended Family', boarder:'Boarders', other:'Others' };
+    const grouped = {};
+    roleOrder.forEach(r => grouped[r] = []);
+    members.forEach(m => { const key = roleOrder.includes(m.household_role) ? m.household_role : 'other'; grouped[key].push(m); });
+
+    const memberCard = m => `
+      <div style="background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:.85rem 1rem;
+                  min-width:150px;max-width:180px;text-align:center;flex:0 0 auto;">
+        <div style="font-size:2rem;margin-bottom:.3rem;">${m.gender === 'Female' ? '👩' : '👨'}</div>
+        <div style="font-weight:700;font-size:.85rem;color:#0f172a;line-height:1.3;">${m.full_name}</div>
+        <div style="font-size:.75rem;color:#64748b;margin:.2rem 0;">${m.civil_status || ''}${m.date_of_birth ? ' · ' + (new Date().getFullYear() - new Date(m.date_of_birth).getFullYear()) + ' yrs' : ''}</div>
+        <div style="display:flex;flex-wrap:wrap;justify-content:center;gap:3px;margin-top:.3rem;">
+          ${m.is_senior_citizen ? '<span style="font-size:.68rem;background:#fef3c7;color:#b45309;padding:1px 6px;border-radius:4px;">Senior</span>' : ''}
+          ${m.is_pwd ? '<span style="font-size:.68rem;background:#ede9fe;color:#6d28d9;padding:1px 6px;border-radius:4px;">PWD</span>' : ''}
+          ${m.registered_voter ? '<span style="font-size:.68rem;background:#dcfce7;color:#15803d;padding:1px 6px;border-radius:4px;">Voter</span>' : ''}
+        </div>
+      </div>`;
+
+    const roleBlocks = roleOrder.filter(r => grouped[r].length > 0).map(role => `
+      <div style="margin-bottom:1.5rem;">
+        <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;
+                    color:#94a3b8;margin-bottom:.65rem;padding-bottom:.35rem;border-bottom:1px solid #f1f5f9;">
+          ${roleLabel[role]} (${grouped[role].length})
+        </div>
+        <div style="display:flex;flex-wrap:wrap;gap:.75rem;">
+          ${grouped[role].map(memberCard).join('')}
+        </div>
+      </div>`).join('');
+
+    container.innerHTML = `
+      <button onclick="loadFamilyTree()"
+        style="background:none;border:none;color:#2563eb;cursor:pointer;font-size:.88rem;
+               font-weight:600;margin-bottom:1.25rem;display:flex;align-items:center;gap:.3rem;padding:0;">
+        ← Back to all households
+      </button>
+      <div style="background:#0b2250;color:#fff;border-radius:12px;padding:1.1rem 1.4rem;margin-bottom:1.5rem;
+                  display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.5rem;">
+        <div>
+          <div style="font-weight:800;font-size:1.05rem;">${household.household_code}</div>
+          <div style="font-size:.83rem;opacity:.8;margin-top:.15rem;">
+            ${household.address_line || ''}${household.purok_sitio ? ' · ' + household.purok_sitio : ''}, ${household.zone || ''}
+          </div>
+        </div>
+        <div style="font-size:.85rem;opacity:.85;">👥 ${members.length} member${members.length !== 1 ? 's' : ''}</div>
+      </div>
+      ${members.length === 0
+        ? '<p class="muted" style="text-align:center;padding:2rem;">No members in this household yet.</p>'
+        : roleBlocks}`;
+  } catch(e) {
+    container.innerHTML = `<p style="color:#dc2626;padding:1rem;">Error loading family tree: ${e.message}</p>`;
+  }
+}
+
+// ── BARANGAY OFFICIALS ────────────────────────────────────────────────────────
+const MALE_AVATAR_URL   = 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png';
+const FEMALE_AVATAR_URL = 'https://cdn-icons-png.flaticon.com/512/3135/3135789.png';
+
+async function loadOfficials() {
+  const tbody = document.getElementById('officials-tbody');
+  tbody.innerHTML = '<tr><td colspan="6" class="loading">Loading…</td></tr>';
+  try {
+    const res  = await fetch(`${API}/officials/index.php`, { headers: authHeaders() });
+    const data = await res.json();
+    if (!data.success || !data.data.length) {
+      tbody.innerHTML = '<tr><td colspan="6" class="empty-state">No officials yet. Add one to get started.</td></tr>';
+      return;
+    }
+    tbody.innerHTML = data.data.map(o => {
+      const avatar = o.photo_url
+        ? `${API}/${o.photo_url}`
+        : (o.gender === 'Female' ? FEMALE_AVATAR_URL : MALE_AVATAR_URL);
+      return `<tr>
+        <td><img src="${avatar}" alt="${o.name}"
+              style="width:40px;height:40px;border-radius:50%;object-fit:cover;border:2px solid #e2e8f0;"
+              onerror="this.src='${o.gender === 'Female' ? FEMALE_AVATAR_URL : MALE_AVATAR_URL}'"></td>
+        <td style="font-weight:600">${o.name}</td>
+        <td>${o.position}</td>
+        <td>${o.gender || '—'}</td>
+        <td style="text-align:center">${o.sort_order ?? 0}</td>
+        <td style="text-align:center;white-space:nowrap">
+          <button class="btn-secondary" style="padding:.3rem .75rem;font-size:.8rem;margin-right:.4rem"
+            onclick="editOfficial(${o.id},'${(o.name||'').replace(/'/g,"\\'")}','${(o.position||'').replace(/'/g,"\\'")}','${o.gender||'Male'}',${o.sort_order??0},'${o.photo_url||''}')">
+            Edit
+          </button>
+          <button class="text-link" style="color:#ef4444;font-size:.85rem" onclick="deleteOfficial(${o.id})">Delete</button>
+        </td>
+      </tr>`;
+    }).join('');
+  } catch(e) {
+    tbody.innerHTML = `<tr><td colspan="6" style="color:#dc2626;padding:1rem;">Error: ${e.message}</td></tr>`;
+  }
+}
+
+function showOfficialModal() {
+  document.getElementById('official-modal-title').textContent = 'Add Official';
+  document.getElementById('official-id').value       = '';
+  document.getElementById('official-name').value     = '';
+  document.getElementById('official-position').value = '';
+  document.getElementById('official-gender').value   = 'Male';
+  document.getElementById('official-sort').value     = '0';
+  document.getElementById('official-photo').value    = '';
+  document.getElementById('official-error').style.display = 'none';
+  document.getElementById('official-save-btn').textContent = 'Save Official';
+  document.getElementById('modal-official').style.display = 'flex';
+}
+
+function editOfficial(id, name, position, gender, sort, photo) {
+  document.getElementById('official-modal-title').textContent = 'Edit Official';
+  document.getElementById('official-id').value       = id;
+  document.getElementById('official-name').value     = name;
+  document.getElementById('official-position').value = position;
+  document.getElementById('official-gender').value   = gender;
+  document.getElementById('official-sort').value     = sort;
+  document.getElementById('official-photo').value    = photo;
+  document.getElementById('official-error').style.display = 'none';
+  document.getElementById('official-save-btn').textContent = 'Update Official';
+  document.getElementById('modal-official').style.display = 'flex';
+}
+
+function closeOfficialModal() {
+  document.getElementById('modal-official').style.display = 'none';
+}
+
+async function saveOfficial() {
+  const id       = document.getElementById('official-id').value;
+  const name     = document.getElementById('official-name').value.trim();
+  const position = document.getElementById('official-position').value.trim();
+  const gender   = document.getElementById('official-gender').value;
+  const sort     = parseInt(document.getElementById('official-sort').value) || 0;
+  const photo    = document.getElementById('official-photo').value.trim();
+  const errEl    = document.getElementById('official-error');
+  const btn      = document.getElementById('official-save-btn');
+
+  errEl.style.display = 'none';
+  if (!name)     { errEl.textContent = 'Full name is required.';  errEl.style.display = 'block'; return; }
+  if (!position) { errEl.textContent = 'Position is required.';   errEl.style.display = 'block'; return; }
+
+  btn.disabled = true; btn.textContent = 'Saving…';
+  try {
+    const method = id ? 'PUT' : 'POST';
+    const url    = id ? `${API}/officials/index.php?id=${id}` : `${API}/officials/index.php`;
+    const res    = await fetch(url, {
+      method,
+      headers: { ...authHeaders(), 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, position, gender, sort_order: sort, photo_url: photo || null })
+    });
+    const data = await res.json();
+    if (data.success) {
+      closeOfficialModal();
+      loadOfficials();
+    } else {
+      errEl.textContent = data.message || 'Failed to save.';
+      errEl.style.display = 'block';
+    }
+  } catch(e) {
+    errEl.textContent = 'Server error: ' + e.message;
+    errEl.style.display = 'block';
+  } finally {
+    btn.disabled = false;
+    btn.textContent = id ? 'Update Official' : 'Save Official';
+  }
+}
+
+async function deleteOfficial(id) {
+  if (!confirm('Delete this official? This cannot be undone.')) return;
+  try {
+    const res  = await fetch(`${API}/officials/index.php?id=${id}`, { method:'DELETE', headers: authHeaders() });
+    const data = await res.json();
+    if (data.success) loadOfficials();
+    else alert(data.message || 'Delete failed.');
+  } catch(e) { alert('Error: ' + e.message); }
+}
 </script>
 </body>
 </html>

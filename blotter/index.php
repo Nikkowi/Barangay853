@@ -1,232 +1,313 @@
 <?php
 require_once '../config/database.php';
 
-$method = $_SERVER['REQUEST_METHOD'];
+header('Content-Type: application/json');
 
 $headers = getallheaders();
 $authHeader = isset($headers['Authorization']) ? $headers['Authorization'] : '';
-$isPublic = isset($_GET['public']);
 
-// Always require auth for all requests
+if (!$authHeader || !str_starts_with($authHeader, 'Bearer ')) {
+    http_response_code(401);
+    echo json_encode(['success' => false, 'message' => 'Unauthorized']);
+    exit();
+}
+
+$token = substr($authHeader, 7);
 $conn = getConnection();
-$token = '';
-if ($authHeader && str_starts_with($authHeader, 'Bearer ')) {
-    $token = substr($authHeader, 7);
+
+$stmt = $conn->prepare('SELECT u.id, u.name, u.role FROM users u 
+    INNER JOIN personal_access_tokens t ON t.tokenable_id = u.id 
+    WHERE t.token = ?');
+$stmt->bind_param('s', $token);
+$stmt->execute();
+$authUser = $stmt->get_result()->fetch_assoc();
+if (!$authUser) {
+    http_response_code(401);
+    echo json_encode(['success' => false, 'message' => 'Invalid token']);
+    exit();
 }
 
-// Only validate token for non-public GET requests
-$isPublicGet = ($method === 'GET' && $isPublic);
-if (!$isPublicGet) {
-    if (!$token) {
-        http_response_code(401);
-        echo json_encode(['success' => false, 'message' => 'Unauthorized']);
-        exit();
-    }
-    $stmt = $conn->prepare('SELECT u.id FROM users u 
-        INNER JOIN personal_access_tokens t ON t.tokenable_id = u.id 
-        WHERE t.token = ?');
-    $stmt->bind_param('s', $token);
-    $stmt->execute();
-    if (!$stmt->get_result()->fetch_assoc()) {
-        http_response_code(401);
-        echo json_encode(['success' => false, 'message' => 'Invalid token']);
-        exit();
-    }
-}
+$method = $_SERVER['REQUEST_METHOD'];
+$id     = isset($_GET['id'])     ? intval($_GET['id'])     : null;
+$status = isset($_GET['status']) ? $_GET['status']         : null;
 
-// Get actor name from token for logging (if token is present)
-$actorName = 'Public';
-if (!empty($token)) {
-    $actorStmt = $conn->prepare('SELECT u.name FROM users u 
-        INNER JOIN personal_access_tokens t ON t.tokenable_id = u.id WHERE t.token = ?');
-    $actorStmt->bind_param('s', $token);
-    $actorStmt->execute();
-    $actorRow = $actorStmt->get_result()->fetch_assoc();
-    if ($actorRow) $actorName = $actorRow['name'];
-}
+// ============================================================
+// GET — fetch list or single record
+// ============================================================
+if ($method === 'GET') {
 
-// Helper: write to activity_logs
-function logActivity($conn, $actorName, $action, $module, $referenceId) {
-    $stmt = $conn->prepare('INSERT INTO activity_logs 
-        (actor_name, action, module, reference_id, logged_at, created_at, updated_at) 
-        VALUES (?, ?, ?, ?, NOW(), NOW(), NOW())');
-    $stmt->bind_param('ssss', $actorName, $action, $module, $referenceId);
-    $stmt->execute();
-}
-
-$id = isset($_GET['id']) ? intval($_GET['id']) : null;
-
-switch ($method) {
-    case 'GET':
-        if ($id) {
-            $stmt = $conn->prepare('SELECT bc.*,
-                GROUP_CONCAT(DISTINCT CONCAT(bp.role, ":", bp.name, ":", COALESCE(bp.contact, "")) SEPARATOR "|") as parties,
-                GROUP_CONCAT(DISTINCT CONCAT(ba.action_label, ":", COALESCE(ba.action_details, "")) SEPARATOR "|") as actions
-                FROM blotter_cases bc
-                LEFT JOIN blotter_parties bp ON bp.blotter_case_id = bc.id
-                LEFT JOIN blotter_actions ba ON ba.blotter_case_id = bc.id
-                WHERE bc.id = ?
-                GROUP BY bc.id');
-            $stmt->bind_param('i', $id);
-            $stmt->execute();
-            $case = $stmt->get_result()->fetch_assoc();
-            if (!$case) {
-                http_response_code(404);
-                echo json_encode(['success' => false, 'message' => 'Case not found']);
-            } else {
-                echo json_encode(['success' => true, 'data' => $case]);
-            }
-        // ── NEW: ?my=1 → return only the logged-in resident's own cases ──
-        } elseif (isset($_GET['my'])) {
-            // Look up the email that belongs to this token
-            $stmt = $conn->prepare('SELECT u.email FROM users u 
-                INNER JOIN personal_access_tokens t ON t.tokenable_id = u.id 
-                WHERE t.token = ?');
-            $stmt->bind_param('s', $token);
-            $stmt->execute();
-            $userEmail = $stmt->get_result()->fetch_assoc()['email'] ?? '';
-
-            if (empty($userEmail)) {
-                echo json_encode(['success' => true, 'data' => [], 'total' => 0]);
-                break;
-            }
-
-            $stmt = $conn->prepare('SELECT * FROM blotter_cases WHERE reporter_email = ? ORDER BY created_at DESC');
-            $stmt->bind_param('s', $userEmail);
-            $stmt->execute();
-            $rows = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
-            echo json_encode(['success' => true, 'data' => $rows, 'total' => count($rows)]);
-        // ──────────────────────────────────────────────────────────────────
-        } else {
-            $status = isset($_GET['status']) ? $_GET['status'] : null;
-            if ($status) {
-                $stmt = $conn->prepare('SELECT * FROM blotter_cases WHERE status = ? ORDER BY created_at DESC');
-                $stmt->bind_param('s', $status);
-            } else {
-                $stmt = $conn->prepare('SELECT * FROM blotter_cases ORDER BY created_at DESC');
-            }
-            $stmt->execute();
-            $rows = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
-            echo json_encode(['success' => true, 'data' => $rows, 'total' => count($rows)]);
-        }
-        break;
-
-    case 'POST':
-        $data = json_decode(file_get_contents('php://input'), true);
-        $requiredFields = [
-            'case_title'       => 'Case title',
-            'category'         => 'Category',
-            'priority'         => 'Priority',
-            'incident_date'    => 'Incident date',
-            'incident_time'    => 'Incident time',
-            'location'         => 'Location',
-            'summary'          => 'Summary',
-            'description'      => 'Full description',
-            'reporter_name'    => 'Reporter name',
-            'reporter_contact' => 'Reporter contact',
-            'reporter_email'   => 'Reporter email',
-            'reporter_address' => 'Reporter address',
-            'persons_involved' => 'Persons involved',
-            'witnesses'        => 'Witnesses',
-        ];
-        foreach ($requiredFields as $field => $label) {
-            if (empty($data[$field])) {
-                http_response_code(400);
-                echo json_encode(['success' => false, 'message' => "$label is required"]);
-                exit();
-            }
-        }
-        if (!preg_match('/^09\\d{9}$/', $data['reporter_contact'])) {
-            http_response_code(400);
-            echo json_encode(['success' => false, 'message' => 'Reporter contact must be 11 digits and start with 09.']);
-            exit();
-        }
-        $caseNo = 'BLT-' . date('Y') . '-' . str_pad(rand(1, 999), 3, '0', STR_PAD_LEFT);
-        $stmt = $conn->prepare('INSERT INTO blotter_cases 
-            (case_no, case_title, category, status, priority, location, summary, description,
-            reporter_name, reporter_contact, reporter_email, reporter_address,
-            persons_involved, witnesses, incident_date, incident_time, date_reported,
-            created_at, updated_at) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW(), NOW())');
-        $status   = $data['status']   ?? 'Pending';
-        $priority = $data['priority'] ?? 'Normal';
-        $stmt->bind_param('ssssssssssssssss',
-            $caseNo, $data['case_title'], $data['category'],
-            $status, $priority,
-            $data['location'], $data['summary'], $data['description'],
-            $data['reporter_name'], $data['reporter_contact'],
-            $data['reporter_email'], $data['reporter_address'],
-            $data['persons_involved'], $data['witnesses'],
-            $data['incident_date'], $data['incident_time']
-        );
-        $stmt->execute();
-        $newId = $conn->insert_id;
-        logActivity($conn, $actorName, 'Filed', 'Blotter', $caseNo . ' — ' . $data['case_title']);
-        echo json_encode(['success' => true, 'message' => 'Blotter case filed successfully',
-            'id' => $newId, 'case_no' => $caseNo]);
-        break;
-
-    case 'PUT':
-        if (!$id) {
-            http_response_code(400);
-            echo json_encode(['success' => false, 'message' => 'ID is required']);
-            exit();
-        }
-        $data = json_decode(file_get_contents('php://input'), true);
-        
-        // FIX 1: Convert empty date strings to proper NULL so MySQL doesn't crash
-        $nextHearingDate = !empty($data['next_hearing_date']) ? $data['next_hearing_date'] : null;
-        $notes = isset($data['notes']) ? $data['notes'] : null;
-
-        $stmt = $conn->prepare('UPDATE blotter_cases SET 
-            case_title=?, category=?, status=?, priority=?, location=?,
-            notes=?, investigator_name=?, next_hearing_date=?,
-            schedule_location=?, updated_at=NOW() WHERE id=?');
-            
-        // FIX 2: If the SQL fails (e.g., missing column), catch it cleanly
-        if (!$stmt) {
-            echo json_encode(['success' => false, 'message' => 'SQL Error: ' . $conn->error]);
-            exit();
-        }
-
-        $stmt->bind_param('sssssssssi',
-            $data['case_title'], 
-            $data['category'], 
-            $data['status'],
-            $data['priority'], 
-            $data['location'], 
-            $notes, 
-            $data['investigator_name'], 
-            $nextHearingDate,
-            $data['schedule_location'], 
-            $id
-        );
-        
-        if ($stmt->execute()) {
-            logActivity($conn, $actorName, 'Updated to ' . $data['status'], 'Blotter', 'BLT-' . $id);
-            echo json_encode(['success' => true, 'message' => 'Case updated successfully']);
-        } else {
-            echo json_encode(['success' => false, 'message' => 'Update failed: ' . $stmt->error]);
-        }
-        break;
-
-    case 'DELETE':
-        if (!$id) {
-            http_response_code(400);
-            echo json_encode(['success' => false, 'message' => 'ID is required']);
-            exit();
-        }
-        $stmt = $conn->prepare('DELETE FROM blotter_cases WHERE id = ?');
+    if ($id) {
+        // Single record
+        $stmt = $conn->prepare("
+            SELECT * FROM blotter_cases WHERE id = ?
+        ");
         $stmt->bind_param('i', $id);
         $stmt->execute();
-        logActivity($conn, $actorName, 'Deleted', 'Blotter', 'BLT-' . $id);
-        echo json_encode(['success' => true, 'message' => 'Case deleted successfully']);
-        break;
+        $row = $stmt->get_result()->fetch_assoc();
+        if (!$row) {
+            echo json_encode(['success' => false, 'message' => 'Case not found']);
+        } else {
+            echo json_encode(['success' => true, 'data' => $row]);
+        }
+        exit();
+    }
 
-    default:
-        http_response_code(405);
-        echo json_encode(['success' => false, 'message' => 'Method not allowed']);
+    // List — optional status filter
+    if ($status) {
+        $stmt = $conn->prepare("
+            SELECT id, case_no, case_title, category, status, priority,
+                   date_reported, reporter_name, reporter_contact,
+                   location, investigator_name, next_hearing_date, notes
+            FROM blotter_cases
+            WHERE status = ?
+            ORDER BY created_at DESC
+        ");
+        $stmt->bind_param('s', $status);
+    } else {
+        $stmt = $conn->prepare("
+            SELECT id, case_no, case_title, category, status, priority,
+                   date_reported, reporter_name, reporter_contact,
+                   location, investigator_name, next_hearing_date, notes,
+                   description, summary
+            FROM blotter_cases
+            ORDER BY created_at DESC
+        ");
+    }
+
+    $stmt->execute();
+    $rows = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+    echo json_encode(['success' => true, 'data' => $rows]);
+    exit();
 }
 
-$conn->close();
-?>
+// ============================================================
+// POST — create new blotter case
+// ============================================================
+if ($method === 'POST') {
+    $body = json_decode(file_get_contents('php://input'), true);
+
+    // ── Case number: BLT-YYYYMMDD-XXXX ──────────────────────────────────────
+    $datePart = date('Ymd');
+    $countRow = $conn->query("SELECT COUNT(*) as c FROM blotter_cases WHERE DATE(created_at) = CURDATE()")->fetch_assoc();
+    $seq      = str_pad(intval($countRow['c']) + 1, 4, '0', STR_PAD_LEFT);
+    $caseNo   = "BLT-{$datePart}-{$seq}";
+
+    // ── Evidence fields ──────────────────────────────────────────────────────
+    $hasEvidence     = (!empty($body['has_evidence']) && $body['has_evidence']) ? 1 : 0;
+    $evidenceCCTV    = (!empty($body['evidence_cctv']) && $body['evidence_cctv'])  ? 1 : 0;
+    $evidenceEW      = $body['evidence_eyewitnesses'] ?? 'None';
+    $evidenceOther   = $body['evidence_other']        ?? 'None';
+    $evidenceSummary = $body['evidence_summary']      ?? 'None';
+
+    // ── Auto-escalate: evidence present → For Summons, else → Pending ───────
+    $derivedStatus = ($hasEvidence && $evidenceSummary !== 'None') ? 'For Summons' : 'Pending';
+    $priority      = $body['priority'] ?? 'Normal';
+
+    $stmt = $conn->prepare("
+        INSERT INTO blotter_cases (
+            case_no, case_title, category, status, priority,
+            incident_date, incident_time, location, summary, description,
+            reporter_name, reporter_contact, reporter_email, reporter_address,
+            persons_involved, witnesses,
+            has_evidence, evidence_cctv, evidence_eyewitnesses,
+            evidence_other, evidence_summary,
+            summon_count,
+            date_reported, created_at, updated_at
+        ) VALUES (
+            ?, ?, ?, ?, ?,
+            ?, ?, ?, ?, ?,
+            ?, ?, ?, ?,
+            ?, ?,
+            ?, ?, ?,
+            ?, ?,
+            0,
+            NOW(), NOW(), NOW()
+        )
+    ");
+
+    $stmt->bind_param(
+        'ssssssssssssssssissss',
+        $caseNo,
+        $body['case_title'],
+        $body['category'],
+        $derivedStatus,
+        $priority,
+        $body['incident_date'],
+        $body['incident_time'],
+        $body['location'],
+        $body['summary'],
+        $body['description'],
+        $body['reporter_name'],
+        $body['reporter_contact'],
+        $body['reporter_email'],
+        $body['reporter_address'],
+        $body['persons_involved'],
+        $body['witnesses'],
+        $hasEvidence,
+        $evidenceCCTV,
+        $evidenceEW,
+        $evidenceOther,
+        $evidenceSummary
+    );
+
+    if ($stmt->execute()) {
+        echo json_encode([
+            'success' => true,
+            'id'      => $conn->insert_id,
+            'case_no' => $caseNo,
+            'status'  => $derivedStatus,
+        ]);
+    } else {
+        echo json_encode(['success' => false, 'message' => $conn->error]);
+    }
+    exit();
+}
+
+// ============================================================
+// PUT — update blotter case (staff/admin only)
+// ?action=summon    — issue/increment a summon
+// ?action=testimony — append a staff testimony note
+// (default)         — general case field update
+// ============================================================
+if ($method === 'PUT') {
+    if (!$id) {
+        echo json_encode(['success' => false, 'message' => 'ID required']);
+        exit();
+    }
+
+    $body   = json_decode(file_get_contents('php://input'), true);
+    $action = isset($_GET['action']) ? $_GET['action'] : 'update';
+
+    // ── ACTION: Issue a summon ───────────────────────────────────────────────
+    if ($action === 'summon') {
+        $cur = $conn->prepare("SELECT summon_count, status FROM blotter_cases WHERE id = ?");
+        $cur->bind_param('i', $id);
+        $cur->execute();
+        $row = $cur->get_result()->fetch_assoc();
+        if (!$row) { echo json_encode(['success' => false, 'message' => 'Case not found']); exit(); }
+
+        $newCount    = intval($row['summon_count']) + 1;
+        $hearingDate = !empty($body['next_hearing_date']) ? $body['next_hearing_date'] : null;
+        $schedLoc    = isset($body['schedule_location']) ? $body['schedule_location'] : null;
+        $notes       = isset($body['notes'])             ? $body['notes']             : null;
+        $investigator= isset($body['investigator_name']) ? $body['investigator_name'] : null;
+
+        // Status progression
+        $statusMap = [1 => '1st Summon Issued', 2 => '2nd Summon Issued', 3 => '3rd Summon Issued'];
+        $newStatus = isset($statusMap[$newCount]) ? $statusMap[$newCount] : 'Referred to Police';
+        if (!empty($body['status'])) $newStatus = $body['status'];
+
+        $stmt = $conn->prepare("
+            UPDATE blotter_cases SET
+                summon_count      = ?,
+                status            = ?,
+                next_hearing_date = ?,
+                schedule_location = ?,
+                notes             = COALESCE(?, notes),
+                investigator_name = COALESCE(?, investigator_name),
+                updated_at        = NOW()
+            WHERE id = ?
+        ");
+        $stmt->bind_param('isssssi', $newCount, $newStatus, $hearingDate, $schedLoc, $notes, $investigator, $id);
+
+        if ($stmt->execute()) {
+            echo json_encode([
+                'success'      => true,
+                'message'      => 'Summon #' . $newCount . ' issued.',
+                'summon_count' => $newCount,
+                'status'       => $newStatus,
+            ]);
+        } else {
+            echo json_encode(['success' => false, 'message' => $conn->error]);
+        }
+        exit();
+    }
+
+    // ── ACTION: Staff appends a testimony / follow-up note ───────────────────
+    if ($action === 'testimony') {
+        $noteText = trim(isset($body['note'])     ? $body['note']     : '');
+        $noteBy   = trim(isset($body['noted_by']) ? $body['noted_by'] : $authUser['name']);
+        $noteDate = date('Y-m-d H:i');
+
+        if (!$noteText) {
+            echo json_encode(['success' => false, 'message' => 'Note text is required']);
+            exit();
+        }
+
+        $fetch = $conn->prepare("SELECT testimony_log FROM blotter_cases WHERE id = ?");
+        $fetch->bind_param('i', $id);
+        $fetch->execute();
+        $existing = $fetch->get_result()->fetch_assoc();
+        $log      = json_decode(isset($existing['testimony_log']) ? $existing['testimony_log'] : '[]', true);
+        if (!is_array($log)) $log = [];
+        $log[] = ['date' => $noteDate, 'by' => $noteBy, 'note' => $noteText];
+        $logJson = json_encode($log, JSON_UNESCAPED_UNICODE);
+
+        $stmt = $conn->prepare("UPDATE blotter_cases SET testimony_log = ?, updated_at = NOW() WHERE id = ?");
+        $stmt->bind_param('si', $logJson, $id);
+
+        if ($stmt->execute()) {
+            echo json_encode(['success' => true, 'message' => 'Testimony note added.', 'log' => $log]);
+        } else {
+            echo json_encode(['success' => false, 'message' => $conn->error]);
+        }
+        exit();
+    }
+
+    // ── DEFAULT: General case update ─────────────────────────────────────────
+    $caseTitle    = isset($body['case_title'])        ? $body['case_title']        : null;
+    $category     = isset($body['category'])          ? $body['category']          : null;
+    $status       = isset($body['status'])            ? $body['status']            : null;
+    $priority     = isset($body['priority'])          ? $body['priority']          : null;
+    $location     = isset($body['location'])          ? $body['location']          : null;
+    $investigator = isset($body['investigator_name']) ? $body['investigator_name'] : null;
+    $hearingDate  = !empty($body['next_hearing_date'])? $body['next_hearing_date'] : null;
+    $notes        = isset($body['notes'])             ? $body['notes']             : null;
+    $schedLoc     = isset($body['schedule_location']) ? $body['schedule_location'] : null;
+
+    $stmt = $conn->prepare("
+        UPDATE blotter_cases SET
+            case_title        = COALESCE(?, case_title),
+            category          = COALESCE(?, category),
+            status            = COALESCE(?, status),
+            priority          = COALESCE(?, priority),
+            location          = COALESCE(?, location),
+            investigator_name = COALESCE(?, investigator_name),
+            next_hearing_date = ?,
+            notes             = COALESCE(?, notes),
+            schedule_location = COALESCE(?, schedule_location),
+            updated_at        = NOW()
+        WHERE id = ?
+    ");
+    $stmt->bind_param('sssssssssi', $caseTitle, $category, $status, $priority, $location,
+                      $investigator, $hearingDate, $notes, $schedLoc, $id);
+
+    if ($stmt->execute()) {
+        echo json_encode(['success' => true, 'message' => 'Case updated']);
+    } else {
+        echo json_encode(['success' => false, 'message' => $conn->error]);
+    }
+    exit();
+}
+
+// ============================================================
+// DELETE — remove blotter case
+// ============================================================
+if ($method === 'DELETE') {
+    if (!$id) {
+        echo json_encode(['success' => false, 'message' => 'ID required']);
+        exit();
+    }
+
+    $stmt = $conn->prepare("DELETE FROM blotter_cases WHERE id = ?");
+    $stmt->bind_param('i', $id);
+
+    if ($stmt->execute()) {
+        echo json_encode(['success' => true, 'message' => 'Case deleted']);
+    } else {
+        echo json_encode(['success' => false, 'message' => $conn->error]);
+    }
+    exit();
+}
+
+echo json_encode(['success' => false, 'message' => 'Method not allowed']);

@@ -5,6 +5,61 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>File a Report - Barangay 853</title>
   <link rel="stylesheet" href="public.css">
+  <style>
+    /* ── Evidence Section ─────────────────────────────────────── */
+    .evidence-toggle-group { display: flex; gap: 1rem; flex-wrap: wrap; margin-top: 0.5rem; }
+    .evidence-toggle-opt {
+      display: flex; align-items: center; gap: 0.5rem;
+      padding: 0.6rem 1.1rem; border-radius: 0.6rem;
+      border: 2px solid #e2e8f0; cursor: pointer;
+      font-size: 0.9rem; font-weight: 600; color: #374151;
+      transition: border-color 0.15s, background 0.15s;
+    }
+    .evidence-toggle-opt:has(input:checked) {
+      border-color: #1d4ed8; background: #eff6ff; color: #1d4ed8;
+    }
+    .evidence-toggle-opt input { accent-color: #1d4ed8; width:16px; height:16px; }
+    .evidence-notice {
+      display: flex; gap: 0.85rem; align-items: flex-start;
+      background: #fefce8; border: 1px solid #fde047;
+      border-radius: 0.75rem; padding: 0.9rem 1.1rem;
+      margin-bottom: 1.25rem; font-size: 0.855rem; color: #713f12;
+    }
+    .evidence-notice-icon { font-size: 1.2rem; flex-shrink: 0; margin-top: 1px; }
+    .evidence-notice strong { display: block; margin-bottom: 0.2rem; }
+    .evidence-check-group { margin-top: 0.4rem; }
+    .evidence-check {
+      display: flex; align-items: center; gap: 0.6rem;
+      font-size: 0.88rem; cursor: pointer;
+    }
+    .evidence-check input { accent-color: #1d4ed8; width:16px; height:16px; }
+    .eyewitness-row {
+      display: grid; grid-template-columns: 1fr 1fr auto;
+      gap: 0.5rem; margin-bottom: 0.5rem; align-items: center;
+    }
+    .ew-remove-btn {
+      background: #fee2e2; border: none; border-radius: 0.4rem;
+      width: 30px; height: 30px; font-size: 0.8rem;
+      cursor: pointer; color: #dc2626; flex-shrink: 0;
+    }
+    .ew-remove-btn:hover { background: #fca5a5; }
+    .btn-add-witness {
+      background: none; border: 1.5px dashed #93c5fd;
+      border-radius: 0.5rem; padding: 0.45rem 1rem;
+      color: #1d4ed8; font-size: 0.82rem; font-weight: 600;
+      cursor: pointer; margin-top: 0.3rem; transition: background 0.15s;
+    }
+    .btn-add-witness:hover { background: #eff6ff; }
+
+    /* ── Case status badge shown in confirmation modal ── */
+    .case-status-badge {
+      display: inline-block; padding: 0.3rem 0.9rem;
+      border-radius: 999px; font-size: 0.8rem; font-weight: 700;
+      margin-top: 0.5rem;
+    }
+    .status-pending    { background:#fef9c3; color:#713f12; }
+    .status-summons    { background:#dbeafe; color:#1e40af; }
+  </style>
 </head>
 <body class="public-page">
 
@@ -18,6 +73,7 @@
         <li><a href="index.html">Home</a></li>
         <li><a href="documents.html">Documents</a></li>
         <li><a href="announcements.html">Announcements</a></li>
+        <li><a href="expenses.html">Transparency</a></li>
         <li><a href="report.html" class="active">Report</a></li>
         <li><a href="about.html">About</a></li>
         <li id="nav-auth"></li>
@@ -159,6 +215,73 @@
               </div>
             </div>
 
+
+            <div class="form-section" id="evidence-section">
+              <h4>Evidence & Witnesses</h4>
+              <p class="form-subtitle" style="margin-bottom:1rem">
+                Providing evidence may result in a formal summons being issued to the involved party.
+                Leave blank if you have none.
+              </p>
+
+              <div class="form-group">
+                <label>Do you have evidence to submit?</label>
+                <div class="evidence-toggle-group">
+                  <label class="evidence-toggle-opt">
+                    <input type="radio" name="hasEvidence" value="no" checked onchange="toggleEvidenceFields(this.value)">
+                    <span>No — record only</span>
+                  </label>
+                  <label class="evidence-toggle-opt">
+                    <input type="radio" name="hasEvidence" value="yes" onchange="toggleEvidenceFields(this.value)">
+                    <span>Yes — I have evidence</span>
+                  </label>
+                </div>
+              </div>
+
+              <div id="evidence-fields" style="display:none">
+
+                <div class="evidence-notice">
+                  <span class="evidence-notice-icon">⚠️</span>
+                  <div>
+                    <strong>A formal summons may be issued.</strong>
+                    By submitting evidence, barangay staff may escalate this case and summon the involved party for mediation.
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label>CCTV / Video Footage</label>
+                  <div class="evidence-check-group">
+                    <label class="evidence-check">
+                      <input type="checkbox" name="hasCCTV" value="yes">
+                      <span>I have CCTV or video footage of the incident</span>
+                    </label>
+                  </div>
+                  <div id="cctv-detail-wrap" style="display:none;margin-top:0.6rem">
+                    <input type="text" name="cctvDetail" id="cctvDetail" class="input"
+                           placeholder="Describe footage location, timestamp, who holds it, etc.">
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label>Eyewitness Testimonies</label>
+                  <div id="eyewitness-list">
+                    <div class="eyewitness-row">
+                      <input type="text" name="eyewitnessName[]" class="input ew-name" placeholder="Witness full name">
+                      <input type="text" name="eyewitnessContact[]" class="input ew-contact" placeholder="Contact number (optional)">
+                      <button type="button" class="ew-remove-btn" onclick="removeWitness(this)" style="display:none">✕</button>
+                    </div>
+                  </div>
+                  <button type="button" class="btn-add-witness" onclick="addWitnessRow()">+ Add another witness</button>
+                </div>
+
+                <div class="form-group">
+                  <label>Other Evidence</label>
+                  <input type="text" name="otherEvidence" class="input"
+                         placeholder="e.g. Photos, written statements, physical items, medical certificate…">
+                </div>
+
+              </div>
+            </div>
+
             <div class="form-section">
               <div class="form-group">
                 <label class="checkbox-label">
@@ -183,7 +306,8 @@
     <div class="modal" onclick="event.stopPropagation()">
       <div class="modal-success-icon">✓</div>
       <h3>Report Submitted Successfully</h3>
-      <p>Your incident report has been received. A barangay official will review your report and contact you if additional information is needed.</p>
+      <p id="confirm-msg">Your incident report has been received. A barangay official will review your report and contact you if additional information is needed.</p>
+      <p id="confirm-status-wrap" style="margin-top:0.25rem"></p>
       <p><strong>Reference Number:</strong> <span id="ref-number" style="font-family:monospace;color:#1d4ed8;font-weight:700;"></span></p>
       <div class="modal-footer">
         <button class="btn primary" onclick="closeConfirmModal()">Close</button>
@@ -195,7 +319,7 @@
     <div class="container">
       <div class="footer-content">
         <div class="footer-section"><h4>Barangay 853</h4><p>Serving the community with dedication and transparency</p></div>
-        <div class="footer-section"><h4>Quick Links</h4><ul><li><a href="index.html">Home</a></li><li><a href="documents.html">Documents</a></li><li><a href="announcements.html">Announcements</a></li><li><a href="about.html">About</a></li></ul></div>
+        <div class="footer-section"><h4>Quick Links</h4><ul><li><a href="index.html">Home</a></li><li><a href="documents.html">Documents</a></li><li><a href="announcements.html">Announcements</a></li><li><a href="transparency.html">Transparency</a></li><li><a href="about.html">About</a></li></ul></div>
         <div class="footer-section"><h4>Contact Us</h4><p>Email: barangay853@example.com</p><p>Phone: (02) 1234-5678</p></div>
       </div>
       <div class="footer-bottom"><p>&copy; 2025 Barangay 853. All rights reserved.</p></div>
@@ -246,6 +370,78 @@
       return valid;
     }
 
+    // ── Evidence field toggling ─────────────────────────────────────────────
+    function toggleEvidenceFields(val) {
+      document.getElementById('evidence-fields').style.display = val === 'yes' ? 'block' : 'none';
+    }
+
+    document.querySelector('input[name="hasCCTV"]').addEventListener('change', function () {
+      document.getElementById('cctv-detail-wrap').style.display = this.checked ? 'block' : 'none';
+    });
+
+    function addWitnessRow() {
+      const list = document.getElementById('eyewitness-list');
+      const div = document.createElement('div');
+      div.className = 'eyewitness-row';
+      div.innerHTML = `
+        <input type="text" name="eyewitnessName[]" class="input ew-name" placeholder="Witness full name">
+        <input type="text" name="eyewitnessContact[]" class="input ew-contact" placeholder="Contact number (optional)">
+        <button type="button" class="ew-remove-btn" onclick="removeWitness(this)">✕</button>`;
+      list.appendChild(div);
+    }
+
+    function removeWitness(btn) {
+      btn.closest('.eyewitness-row').remove();
+    }
+
+    // ── Build the POST payload including evidence ────────────────────────────
+    function buildPayload(form) {
+      const hasEvidence = form.hasEvidence.value === 'yes';
+
+      // Collect eyewitnesses
+      const ewNames    = [...document.querySelectorAll('input[name="eyewitnessName[]"]')].map(i => i.value.trim()).filter(Boolean);
+      const ewContacts = [...document.querySelectorAll('input[name="eyewitnessContact[]"]')].map(i => i.value.trim());
+      const eyewitnesses = ewNames.map((n, i) => n + (ewContacts[i] ? ' (' + ewContacts[i] + ')' : '')).join('; ');
+
+      const hasCCTV       = document.querySelector('input[name="hasCCTV"]').checked;
+      const cctvDetail    = document.getElementById('cctvDetail').value.trim();
+      const otherEvidence = form.otherEvidence ? form.otherEvidence.value.trim() : '';
+
+      // Build evidence summary string
+      const evidenceParts = [];
+      if (hasCCTV)       evidenceParts.push('CCTV/Video' + (cctvDetail ? ': ' + cctvDetail : ''));
+      if (eyewitnesses)  evidenceParts.push('Eyewitnesses: ' + eyewitnesses);
+      if (otherEvidence) evidenceParts.push('Other: ' + otherEvidence);
+      const evidenceSummary = evidenceParts.join(' | ') || 'None';
+
+      // Auto-escalate: if evidence present → For Summons, else → Pending
+      const statusDerived = hasEvidence && evidenceParts.length > 0 ? 'For Summons' : 'Pending';
+
+      return {
+        case_title:        form.incidentType.value + ' — ' + form.reporterName.value,
+        category:          form.incidentType.value,
+        summary:           form.incidentSummary.value,
+        reporter_name:     form.reporterName.value,
+        reporter_contact:  form.reporterContact.value,
+        reporter_email:    form.reporterEmail.value || '',
+        reporter_address:  form.reporterAddress.value,
+        incident_date:     form.incidentDate.value,
+        incident_time:     form.incidentTime.value,
+        location:          form.incidentLocation.value,
+        description:       form.incidentDescription.value,
+        persons_involved:  form.personsInvolved.value || 'None',
+        witnesses:         form.witnesses.value || 'None',
+        // evidence fields
+        has_evidence:      hasEvidence,
+        evidence_cctv:     hasCCTV,
+        evidence_eyewitnesses: eyewitnesses || 'None',
+        evidence_other:    otherEvidence || 'None',
+        evidence_summary:  evidenceSummary,
+        status:            statusDerived,
+        priority:          'Normal',
+      };
+    }
+
     async function submitReport(e) {
       e.preventDefault();
       const form = e.target;
@@ -279,27 +475,20 @@
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${token}`   // FIX #4
           },
-          body: JSON.stringify({
-            case_title: form.incidentType.value + ' - ' + form.reporterName.value,
-            category: form.incidentType.value,
-            summary: form.incidentSummary.value,
-            reporter_name: form.reporterName.value,
-            reporter_contact: form.reporterContact.value,
-            reporter_email: form.reporterEmail.value || '',
-            reporter_address: form.reporterAddress.value,
-            incident_date: form.incidentDate.value,
-            incident_time: form.incidentTime.value,
-            location: form.incidentLocation.value,
-            description: form.incidentDescription.value,
-            persons_involved: form.personsInvolved.value || 'None',
-            witnesses: form.witnesses.value || 'None',
-            status: 'Pending',
-            priority: 'Normal'
-          })
+          body: JSON.stringify(buildPayload(form))
         });
         const data = await res.json();
         if (data.success) {
           document.getElementById('ref-number').textContent = data.case_no;
+          // Show status badge
+          const st = data.status || 'Pending';
+          const isForSummons = st === 'For Summons';
+          document.getElementById('confirm-msg').textContent = isForSummons
+            ? 'Your report has been received and evidence noted. Barangay staff will review and may issue a formal summons to the involved party.'
+            : 'Your report has been recorded. A barangay official will review your report and contact you if needed.';
+          document.getElementById('confirm-status-wrap').innerHTML =
+            'Case Status: <span class="case-status-badge ' + (isForSummons ? 'status-summons' : 'status-pending') + '">'
+            + st + '</span>';
           document.getElementById('confirm-modal').style.display = 'flex';
           form.reset();
           // Re-fill user info after reset

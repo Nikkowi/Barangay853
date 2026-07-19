@@ -5,6 +5,359 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Documents - Barangay 853</title>
   <link rel="stylesheet" href="public.css">
+  <style>
+    /* ── Page Header (matches dashboard expenses tab style) ── */
+    .doc-page-header {
+      padding: 2rem 0 1.25rem;
+      border-bottom: 1px solid #e2e8f0;
+      margin-bottom: 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    .doc-page-header h1 {
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: #0f172a;
+      margin: 0 0 .2rem;
+    }
+    .doc-page-header p {
+      color: #64748b;
+      margin: 0;
+      font-size: .95rem;
+    }
+
+    /* ── Category Section ── */
+    .doc-category {
+      margin-bottom: 2.5rem;
+    }
+    .doc-category-label {
+      font-size: .72rem;
+      font-weight: 700;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: #94a3b8;
+      margin-bottom: .75rem;
+      padding-left: .25rem;
+    }
+
+    /* ── Accordion Item ── */
+    .doc-item {
+      border: 1px solid #e2e8f0;
+      border-radius: 1rem;
+      background: #fff;
+      margin-bottom: .65rem;
+      overflow: hidden;
+      transition: box-shadow .2s;
+    }
+    .doc-item:hover {
+      box-shadow: 0 2px 12px rgba(0,0,0,.06);
+    }
+    .doc-item.open {
+      border-color: #bfdbfe;
+      box-shadow: 0 4px 18px rgba(37,99,235,.08);
+    }
+
+    /* ── Accordion Trigger ── */
+    .doc-trigger {
+      width: 100%;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 1.1rem 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      text-align: left;
+    }
+    .doc-trigger:focus-visible {
+      outline: 2px solid #2563eb;
+      outline-offset: -2px;
+    }
+    .doc-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: .75rem;
+      background: #eff6ff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.3rem;
+      flex-shrink: 0;
+    }
+    .doc-trigger-text {
+      flex: 1;
+    }
+    .doc-trigger-title {
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: #0f172a;
+      display: block;
+      line-height: 1.3;
+    }
+    .doc-trigger-desc {
+      font-size: .875rem;
+      color: #64748b;
+      display: block;
+      margin-top: .15rem;
+    }
+    .doc-trigger-meta {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: .3rem;
+      flex-shrink: 0;
+    }
+    .doc-fee {
+      font-size: .8rem;
+      font-weight: 600;
+      color: #0b2250;
+      background: #eff6ff;
+      border-radius: 999px;
+      padding: .2rem .65rem;
+    }
+    .doc-days {
+      font-size: .75rem;
+      color: #94a3b8;
+    }
+    .doc-chevron {
+      width: 20px;
+      height: 20px;
+      color: #94a3b8;
+      flex-shrink: 0;
+      transition: transform .25s;
+    }
+    .doc-item.open .doc-chevron {
+      transform: rotate(180deg);
+      color: #2563eb;
+    }
+
+    /* ── Accordion Panel ── */
+    .doc-panel {
+      display: none;
+      border-top: 1px solid #e2e8f0;
+      padding: 0 1.25rem 1.25rem;
+      animation: slideDown .2s ease;
+    }
+    .doc-item.open .doc-panel {
+      display: block;
+    }
+    @keyframes slideDown {
+      from { opacity: 0; transform: translateY(-6px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── Steps: What to Bring ── */
+    .steps-label {
+      font-size: .72rem;
+      font-weight: 700;
+      letter-spacing: .07em;
+      text-transform: uppercase;
+      color: #64748b;
+      margin: 1rem 0 .6rem;
+    }
+    .step-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      gap: .5rem;
+    }
+    .step-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: .75rem;
+      font-size: .95rem;
+      color: #374151;
+      line-height: 1.45;
+    }
+    .step-num {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: #2563eb;
+      color: #fff;
+      font-size: .75rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-top: .05rem;
+    }
+    .step-check {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: #dcfce7;
+      color: #166534;
+      font-size: .85rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-top: .05rem;
+    }
+
+    /* ── Info Pills Row ── */
+    .doc-info-row {
+      display: flex;
+      gap: .6rem;
+      flex-wrap: wrap;
+      margin: 1rem 0;
+    }
+    .doc-pill {
+      display: flex;
+      align-items: center;
+      gap: .4rem;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 999px;
+      padding: .35rem .9rem;
+      font-size: .82rem;
+      color: #374151;
+      font-weight: 500;
+    }
+    .doc-pill .pill-icon { font-size: .95rem; }
+
+    /* ── Action Button Row ── */
+    .doc-action-row {
+      display: flex;
+      gap: .75rem;
+      margin-top: 1.1rem;
+      flex-wrap: wrap;
+    }
+    .btn-apply {
+      flex: 1;
+      min-width: 140px;
+      background: #1d4ed8;
+      color: #fff;
+      border: none;
+      border-radius: .75rem;
+      padding: .8rem 1.25rem;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background .15s, transform .1s;
+    }
+    .btn-apply:hover { background: #1e40af; transform: translateY(-1px); }
+    .btn-apply:active { transform: translateY(0); }
+
+    /* ── Quick Request Button (top right) ── */
+    .btn-request-all {
+      background: #0b2250;
+      color: #fff;
+      border: none;
+      border-radius: .75rem;
+      padding: .7rem 1.4rem;
+      font-size: .95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background .15s;
+      text-decoration: none;
+      display: inline-block;
+    }
+    .btn-request-all:hover { background: #1d4ed8; }
+
+    /* ── Docs section container ── */
+    .docs-section {
+      padding-bottom: 4rem;
+    }
+
+    /* ── Modal adjustments ── */
+    .modal-backdrop { display:none; position:fixed; inset:0; background:rgba(15,23,42,.45); z-index:1000; align-items:center; justify-content:center; }
+    .modal-backdrop.open { display:flex; }
+    .modal-box {
+      background: #fff;
+      border-radius: 1.25rem;
+      padding: 2rem;
+      max-width: 560px;
+      width: 92%;
+      max-height: 90vh;
+      overflow-y: auto;
+      position: relative;
+      box-shadow: 0 20px 60px rgba(0,0,0,.18);
+    }
+    .modal-box h3 {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: #0f172a;
+      margin: 0 0 1.5rem;
+    }
+    .modal-close-btn {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      background: #f1f5f9;
+      border: none;
+      border-radius: 50%;
+      width: 32px;
+      height: 32px;
+      font-size: 1.1rem;
+      cursor: pointer;
+      color: #64748b;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal-close-btn:hover { background: #e2e8f0; }
+    .form-field { margin-bottom: 1rem; }
+    .form-field label { display: block; font-size: .88rem; font-weight: 600; color: #374151; margin-bottom: .4rem; }
+    .form-field input,
+    .form-field select,
+    .form-field textarea {
+      width: 100%;
+      border: 1.5px solid #e2e8f0;
+      border-radius: .65rem;
+      padding: .7rem .9rem;
+      font-size: .95rem;
+      color: #0f172a;
+      background: #f8fafc;
+      box-sizing: border-box;
+      transition: border-color .15s;
+    }
+    .form-field input:focus,
+    .form-field select:focus,
+    .form-field textarea:focus { outline: none; border-color: #2563eb; background: #fff; }
+    .modal-actions { display: flex; gap: .75rem; margin-top: 1.5rem; }
+    .modal-actions .btn-cancel {
+      background: #f1f5f9;
+      color: #374151;
+      border: none;
+      border-radius: .75rem;
+      padding: .75rem 1.25rem;
+      font-size: .95rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .modal-actions .btn-submit {
+      flex: 1;
+      background: #1d4ed8;
+      color: #fff;
+      border: none;
+      border-radius: .75rem;
+      padding: .75rem 1.25rem;
+      font-size: .95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background .15s;
+    }
+    .modal-actions .btn-submit:hover { background: #1e40af; }
+    .modal-actions .btn-submit:disabled { opacity: .6; cursor: not-allowed; }
+    .alert { border-radius: .65rem; padding: .85rem 1rem; font-size: .9rem; margin-bottom: 1rem; }
+    .alert-error { background: #fee2e2; color: #991b1b; }
+    .alert-success { background: #dcfce7; color: #166534; }
+    small.warn { color: #dc2626; font-size: .8rem; display: none; }
+
+    /* Responsive */
+    @media (max-width: 600px) {
+      .doc-page-header { flex-direction: column; align-items: flex-start; }
+      .doc-trigger-meta { display: none; }
+    }
+  </style>
 </head>
 <body class="public-page">
 
@@ -18,6 +371,7 @@
         <li><a href="index.html">Home</a></li>
         <li><a href="documents.html" class="active">Documents</a></li>
         <li><a href="announcements.html">Announcements</a></li>
+        <li><a href="expenses.html">Transparency</a></li>
         <li><a href="report.html">Report</a></li>
         <li><a href="about.html">About</a></li>
         <li id="nav-auth"></li>
@@ -25,222 +379,426 @@
     </div>
   </nav>
 
-  <section class="page-header">
+  <section class="docs-section">
     <div class="container">
-      <h1>Document Services</h1>
-      <p>Request and manage your barangay documents online</p>
-    </div>
-  </section>
 
-  <section class="documents-section">
-    <div class="container">
-      <div class="section-header" style="display:flex;justify-content:space-between;align-items:center;text-align:left">
+      <!-- Page Header — same style as dashboard expenses tab -->
+      <div class="doc-page-header">
         <div>
-          <h2>Available Documents</h2>
+          <h1>📄 Document Services</h1>
+          <p>Tap any document below to see what to bring and how to apply</p>
         </div>
-        <a href="login.html" class="btn primary" id="request-btn">Request a Document</a>
+        <button class="btn-request-all" onclick="openRequestModal('')">+ Request a Document</button>
       </div>
 
-      <!-- Barangay Clearances -->
-      <div class="document-category">
-        <h3>Barangay Clearances</h3>
-        <div class="document-grid">
-          <div class="document-card">
-            <div class="document-icon">📄</div>
-            <h4>Barangay Clearance</h4>
-            <p>Required for employment, business permits, and other legal purposes</p>
-            <div class="document-actions">
-              <button class="btn primary" onclick="openModal('clearance-requirements')">View Requirements</button>
-              <button class="btn secondary" onclick="requestDocument('Barangay Clearance')">Apply Now</button>
+      <!-- ═══════════════════════════════════════════════════════ -->
+      <!-- CATEGORY 1: Barangay Clearances                        -->
+      <!-- ═══════════════════════════════════════════════════════ -->
+      <div class="doc-category">
+        <div class="doc-category-label">🔷 Barangay Clearances</div>
+
+        <!-- Barangay Clearance -->
+        <div class="doc-item" id="item-clearance">
+          <button class="doc-trigger" onclick="toggleItem('item-clearance')" aria-expanded="false">
+            <div class="doc-icon">📄</div>
+            <div class="doc-trigger-text">
+              <span class="doc-trigger-title">Barangay Clearance</span>
+              <span class="doc-trigger-desc">Required for employment, business permits, and other legal purposes</span>
+            </div>
+            <div class="doc-trigger-meta">
+              <span class="doc-fee">₱50.00</span>
+              <span class="doc-days">3–5 working days</span>
+            </div>
+            <svg class="doc-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+          </button>
+          <div class="doc-panel">
+            <div class="doc-info-row">
+              <span class="doc-pill"><span class="pill-icon">💰</span> Fee: ₱50.00</span>
+              <span class="doc-pill"><span class="pill-icon">📅</span> 3–5 working days</span>
+              <span class="doc-pill"><span class="pill-icon">🕗</span> Mon–Fri, 8AM–5PM</span>
+            </div>
+            <div class="steps-label">📋 What to Bring</div>
+            <ul class="step-list">
+              <li><span class="step-check">✓</span> Valid Government-issued ID</li>
+              <li><span class="step-check">✓</span> Proof of Address (utility bill or lease contract)</li>
+              <li><span class="step-check">✓</span> 1×1 ID Picture — 2 copies</li>
+              <li><span class="step-check">✓</span> Cedula or Community Tax Certificate</li>
+              <li><span class="step-check">✓</span> Processing fee of ₱50.00</li>
+            </ul>
+            <div class="steps-label" style="margin-top:1.1rem">🪜 How to Apply — Step by Step</div>
+            <ul class="step-list">
+              <li><span class="step-num">1</span> Go to the Barangay Hall and proceed to the Secretary's window</li>
+              <li><span class="step-num">2</span> Fill out the request form and submit your documents</li>
+              <li><span class="step-num">3</span> Pay the processing fee at the cashier</li>
+              <li><span class="step-num">4</span> Wait for your name to be called or return on the release date</li>
+            </ul>
+            <div class="doc-action-row">
+              <button class="btn-apply" onclick="openRequestModal('Barangay Clearance')">Apply Online Now</button>
             </div>
           </div>
-          <div class="document-card">
-            <div class="document-icon">🏪</div>
-            <h4>Business Clearance</h4>
-            <p>Needed for business registration and renewal</p>
-            <div class="document-actions">
-              <button class="btn primary" onclick="openModal('business-requirements')">View Requirements</button>
-              <button class="btn secondary" onclick="requestDocument('Business Clearance')">Apply Now</button>
+        </div>
+
+        <!-- Business Clearance -->
+        <div class="doc-item" id="item-business">
+          <button class="doc-trigger" onclick="toggleItem('item-business')" aria-expanded="false">
+            <div class="doc-icon">🏪</div>
+            <div class="doc-trigger-text">
+              <span class="doc-trigger-title">Business Clearance</span>
+              <span class="doc-trigger-desc">Needed for business registration and renewal</span>
+            </div>
+            <div class="doc-trigger-meta">
+              <span class="doc-fee">₱200.00</span>
+              <span class="doc-days">5–7 working days</span>
+            </div>
+            <svg class="doc-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+          </button>
+          <div class="doc-panel">
+            <div class="doc-info-row">
+              <span class="doc-pill"><span class="pill-icon">💰</span> Fee: ₱200.00</span>
+              <span class="doc-pill"><span class="pill-icon">📅</span> 5–7 working days</span>
+              <span class="doc-pill"><span class="pill-icon">🕗</span> Mon–Fri, 8AM–5PM</span>
+            </div>
+            <div class="steps-label">📋 What to Bring</div>
+            <ul class="step-list">
+              <li><span class="step-check">✓</span> DTI or SEC Registration papers</li>
+              <li><span class="step-check">✓</span> Valid ID of the Business Owner</li>
+              <li><span class="step-check">✓</span> Proof of Business Location (lease or title)</li>
+              <li><span class="step-check">✓</span> Personal Barangay Clearance</li>
+              <li><span class="step-check">✓</span> Processing fee of ₱200.00</li>
+            </ul>
+            <div class="steps-label" style="margin-top:1.1rem">🪜 How to Apply — Step by Step</div>
+            <ul class="step-list">
+              <li><span class="step-num">1</span> Prepare all required documents listed above</li>
+              <li><span class="step-num">2</span> Submit documents at the Business Desk in the Barangay Hall</li>
+              <li><span class="step-num">3</span> Pay the ₱200.00 fee at the cashier window</li>
+              <li><span class="step-num">4</span> Claim your clearance on the stated release date</li>
+            </ul>
+            <div class="doc-action-row">
+              <button class="btn-apply" onclick="openRequestModal('Business Clearance')">Apply Online Now</button>
             </div>
           </div>
-          <div class="document-card">
-            <div class="document-icon">🏗️</div>
-            <h4>Construction Clearance</h4>
-            <p>Required before starting any construction project</p>
-            <div class="document-actions">
-              <button class="btn primary" onclick="openModal('construction-requirements')">View Requirements</button>
-              <button class="btn secondary" onclick="requestDocument('Construction Clearance')">Apply Now</button>
+        </div>
+
+        <!-- Construction Clearance -->
+        <div class="doc-item" id="item-construction">
+          <button class="doc-trigger" onclick="toggleItem('item-construction')" aria-expanded="false">
+            <div class="doc-icon">🏗️</div>
+            <div class="doc-trigger-text">
+              <span class="doc-trigger-title">Construction Clearance</span>
+              <span class="doc-trigger-desc">Required before starting any construction project</span>
+            </div>
+            <div class="doc-trigger-meta">
+              <span class="doc-fee">₱500.00</span>
+              <span class="doc-days">7–10 working days</span>
+            </div>
+            <svg class="doc-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+          </button>
+          <div class="doc-panel">
+            <div class="doc-info-row">
+              <span class="doc-pill"><span class="pill-icon">💰</span> Fee: ₱500.00</span>
+              <span class="doc-pill"><span class="pill-icon">📅</span> 7–10 working days</span>
+              <span class="doc-pill"><span class="pill-icon">🕗</span> Mon–Fri, 8AM–5PM</span>
+            </div>
+            <div class="steps-label">📋 What to Bring</div>
+            <ul class="step-list">
+              <li><span class="step-check">✓</span> Building Permit from City Hall</li>
+              <li><span class="step-check">✓</span> Approved Building Plans (signed by architect/engineer)</li>
+              <li><span class="step-check">✓</span> Valid ID of the Property Owner</li>
+              <li><span class="step-check">✓</span> Land Title or Tax Declaration</li>
+              <li><span class="step-check">✓</span> Processing fee of ₱500.00</li>
+            </ul>
+            <div class="steps-label" style="margin-top:1.1rem">🪜 How to Apply — Step by Step</div>
+            <ul class="step-list">
+              <li><span class="step-num">1</span> Secure a Building Permit from City Hall first</li>
+              <li><span class="step-num">2</span> Submit complete documents to the Barangay Hall</li>
+              <li><span class="step-num">3</span> Barangay inspector may visit the site — be available</li>
+              <li><span class="step-num">4</span> Pay the fee and collect your clearance on release date</li>
+            </ul>
+            <div class="doc-action-row">
+              <button class="btn-apply" onclick="openRequestModal('Construction Clearance')">Apply Online Now</button>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Certificates -->
-      <div class="document-category">
-        <h3>Certificates and Endorsements</h3>
-        <div class="document-grid">
-          <div class="document-card">
-            <div class="document-icon">🏠</div>
-            <h4>Certificate of Residency</h4>
-            <p>Proof of residence within the barangay</p>
-            <div class="document-actions">
-              <button class="btn primary" onclick="openModal('residency-requirements')">Learn More</button>
-              <button class="btn secondary" onclick="requestDocument('Certificate of Residency')">Request Certificate</button>
+      <!-- ═══════════════════════════════════════════════════════ -->
+      <!-- CATEGORY 2: Certificates and Endorsements              -->
+      <!-- ═══════════════════════════════════════════════════════ -->
+      <div class="doc-category">
+        <div class="doc-category-label">📜 Certificates and Endorsements</div>
+
+        <!-- Certificate of Residency -->
+        <div class="doc-item" id="item-residency">
+          <button class="doc-trigger" onclick="toggleItem('item-residency')" aria-expanded="false">
+            <div class="doc-icon">🏠</div>
+            <div class="doc-trigger-text">
+              <span class="doc-trigger-title">Certificate of Residency</span>
+              <span class="doc-trigger-desc">Proof of residence within the barangay</span>
+            </div>
+            <div class="doc-trigger-meta">
+              <span class="doc-fee">₱30.00</span>
+              <span class="doc-days">2–3 working days</span>
+            </div>
+            <svg class="doc-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+          </button>
+          <div class="doc-panel">
+            <div class="doc-info-row">
+              <span class="doc-pill"><span class="pill-icon">💰</span> Fee: ₱30.00</span>
+              <span class="doc-pill"><span class="pill-icon">📅</span> 2–3 working days</span>
+              <span class="doc-pill"><span class="pill-icon">🕗</span> Mon–Fri, 8AM–5PM</span>
+            </div>
+            <div class="steps-label">📋 What to Bring</div>
+            <ul class="step-list">
+              <li><span class="step-check">✓</span> Valid Government-issued ID</li>
+              <li><span class="step-check">✓</span> Proof of Address (utility bill or lease contract)</li>
+              <li><span class="step-check">✓</span> 1×1 ID Picture — 1 copy</li>
+              <li><span class="step-check">✓</span> Processing fee of ₱30.00</li>
+            </ul>
+            <div class="steps-label" style="margin-top:1.1rem">🪜 How to Apply — Step by Step</div>
+            <ul class="step-list">
+              <li><span class="step-num">1</span> Bring your ID and proof of address to the Barangay Hall</li>
+              <li><span class="step-num">2</span> Fill out the residency request form at the front desk</li>
+              <li><span class="step-num">3</span> Pay ₱30.00 at the cashier and get your claim slip</li>
+              <li><span class="step-num">4</span> Return on the release date to pick up your certificate</li>
+            </ul>
+            <div class="doc-action-row">
+              <button class="btn-apply" onclick="openRequestModal('Certificate of Residency')">Request Online Now</button>
             </div>
           </div>
-          <div class="document-card">
-            <div class="document-icon">💰</div>
-            <h4>Certificate of Indigency</h4>
-            <p>For financial assistance and medical purposes</p>
-            <div class="document-actions">
-              <button class="btn primary" onclick="openModal('indigency-requirements')">Learn More</button>
-              <button class="btn secondary" onclick="requestDocument('Certificate of Indigency')">Request Certificate</button>
+        </div>
+
+        <!-- Certificate of Indigency -->
+        <div class="doc-item" id="item-indigency">
+          <button class="doc-trigger" onclick="toggleItem('item-indigency')" aria-expanded="false">
+            <div class="doc-icon">💰</div>
+            <div class="doc-trigger-text">
+              <span class="doc-trigger-title">Certificate of Indigency</span>
+              <span class="doc-trigger-desc">For financial assistance and medical purposes</span>
+            </div>
+            <div class="doc-trigger-meta">
+              <span class="doc-fee" style="background:#dcfce7;color:#166534">FREE</span>
+              <span class="doc-days">3–5 working days</span>
+            </div>
+            <svg class="doc-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+          </button>
+          <div class="doc-panel">
+            <div class="doc-info-row">
+              <span class="doc-pill"><span class="pill-icon">✅</span> No Fee — Free of Charge</span>
+              <span class="doc-pill"><span class="pill-icon">📅</span> 3–5 working days</span>
+              <span class="doc-pill"><span class="pill-icon">🕗</span> Mon–Fri, 8AM–5PM</span>
+            </div>
+            <div class="steps-label">📋 What to Bring</div>
+            <ul class="step-list">
+              <li><span class="step-check">✓</span> Valid ID</li>
+              <li><span class="step-check">✓</span> Proof of Income (if employed — payslip or ITR)</li>
+              <li><span class="step-check">✓</span> Medical Certificate (if for medical assistance)</li>
+              <li><span class="step-check">✓</span> Barangay Clearance</li>
+              <li><span class="step-check">✓</span> No fee required — this document is free</li>
+            </ul>
+            <div class="steps-label" style="margin-top:1.1rem">🪜 How to Apply — Step by Step</div>
+            <ul class="step-list">
+              <li><span class="step-num">1</span> Visit the Barangay Hall and approach the Social Welfare Desk</li>
+              <li><span class="step-num">2</span> Explain your situation and purpose to the officer</li>
+              <li><span class="step-num">3</span> Submit your ID and any supporting documents</li>
+              <li><span class="step-num">4</span> Receive your certificate — no payment needed</li>
+            </ul>
+            <div class="doc-action-row">
+              <button class="btn-apply" onclick="openRequestModal('Certificate of Indigency')">Request Online Now</button>
             </div>
           </div>
-          <div class="document-card">
-            <div class="document-icon">👥</div>
-            <h4>Good Moral Certificate</h4>
-            <p>Character reference for employment or school</p>
-            <div class="document-actions">
-              <button class="btn primary" onclick="openModal('moral-requirements')">Learn More</button>
-              <button class="btn secondary" onclick="requestDocument('Good Moral Certificate')">Request Certificate</button>
+        </div>
+
+        <!-- Good Moral Certificate -->
+        <div class="doc-item" id="item-moral">
+          <button class="doc-trigger" onclick="toggleItem('item-moral')" aria-expanded="false">
+            <div class="doc-icon">👥</div>
+            <div class="doc-trigger-text">
+              <span class="doc-trigger-title">Good Moral Certificate</span>
+              <span class="doc-trigger-desc">Character reference for employment or school admission</span>
+            </div>
+            <div class="doc-trigger-meta">
+              <span class="doc-fee">₱50.00</span>
+              <span class="doc-days">3–5 working days</span>
+            </div>
+            <svg class="doc-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+          </button>
+          <div class="doc-panel">
+            <div class="doc-info-row">
+              <span class="doc-pill"><span class="pill-icon">💰</span> Fee: ₱50.00</span>
+              <span class="doc-pill"><span class="pill-icon">📅</span> 3–5 working days</span>
+              <span class="doc-pill"><span class="pill-icon">🕗</span> Mon–Fri, 8AM–5PM</span>
+            </div>
+            <div class="steps-label">📋 What to Bring</div>
+            <ul class="step-list">
+              <li><span class="step-check">✓</span> Valid Government-issued ID</li>
+              <li><span class="step-check">✓</span> Personal Barangay Clearance</li>
+              <li><span class="step-check">✓</span> 1×1 ID Picture — 1 copy</li>
+              <li><span class="step-check">✓</span> Letter of Request stating your purpose</li>
+              <li><span class="step-check">✓</span> Processing fee of ₱50.00</li>
+            </ul>
+            <div class="steps-label" style="margin-top:1.1rem">🪜 How to Apply — Step by Step</div>
+            <ul class="step-list">
+              <li><span class="step-num">1</span> Prepare a short letter stating why you need this certificate</li>
+              <li><span class="step-num">2</span> Bring all documents to the Barangay Hall secretary</li>
+              <li><span class="step-num">3</span> Pay the ₱50.00 fee and get your receipt</li>
+              <li><span class="step-num">4</span> Return to claim your certificate on the release date</li>
+            </ul>
+            <div class="doc-action-row">
+              <button class="btn-apply" onclick="openRequestModal('Good Moral Certificate')">Request Online Now</button>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Frequently Requested -->
-      <div class="document-category">
-        <h3>Frequently Requested Documents</h3>
-        <div class="document-grid">
-          <div class="document-card">
-            <div class="document-icon">🆔</div>
-            <h4>Barangay ID</h4>
-            <p>Official identification for residents</p>
-            <button class="btn primary" onclick="requestDocument('Barangay ID')">Request Now</button>
+      <!-- ═══════════════════════════════════════════════════════ -->
+      <!-- CATEGORY 3: Frequently Requested                       -->
+      <!-- ═══════════════════════════════════════════════════════ -->
+      <div class="doc-category">
+        <div class="doc-category-label">⚡ Frequently Requested</div>
+
+        <!-- Barangay ID -->
+        <div class="doc-item" id="item-id">
+          <button class="doc-trigger" onclick="toggleItem('item-id')" aria-expanded="false">
+            <div class="doc-icon">🆔</div>
+            <div class="doc-trigger-text">
+              <span class="doc-trigger-title">Barangay ID</span>
+              <span class="doc-trigger-desc">Official identification card for residents of Barangay 853</span>
+            </div>
+            <div class="doc-trigger-meta">
+              <span class="doc-fee">₱50.00</span>
+              <span class="doc-days">5–7 working days</span>
+            </div>
+            <svg class="doc-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+          </button>
+          <div class="doc-panel">
+            <div class="doc-info-row">
+              <span class="doc-pill"><span class="pill-icon">💰</span> Fee: ₱50.00</span>
+              <span class="doc-pill"><span class="pill-icon">📅</span> 5–7 working days</span>
+              <span class="doc-pill"><span class="pill-icon">🕗</span> Mon–Fri, 8AM–5PM</span>
+            </div>
+            <div class="steps-label">📋 What to Bring</div>
+            <ul class="step-list">
+              <li><span class="step-check">✓</span> Any valid ID or Birth Certificate</li>
+              <li><span class="step-check">✓</span> Proof of Address within Barangay 853</li>
+              <li><span class="step-check">✓</span> 1×1 ID Picture — 2 copies</li>
+              <li><span class="step-check">✓</span> Processing fee of ₱50.00</li>
+            </ul>
+            <div class="steps-label" style="margin-top:1.1rem">🪜 How to Apply — Step by Step</div>
+            <ul class="step-list">
+              <li><span class="step-num">1</span> Visit the Barangay Hall and go to the ID section</li>
+              <li><span class="step-num">2</span> Submit your documents and have your photo taken on-site</li>
+              <li><span class="step-num">3</span> Pay the ₱50.00 fee and receive your claim stub</li>
+              <li><span class="step-num">4</span> Return when your ID is ready for pickup</li>
+            </ul>
+            <div class="doc-action-row">
+              <button class="btn-apply" onclick="openRequestModal('Barangay ID')">Request Online Now</button>
+            </div>
           </div>
-          <div class="document-card">
-            <div class="document-icon">📋</div>
-            <h4>Community Tax Certificate (Cedula)</h4>
-            <p>Annual tax certificate for residents</p>
-            <button class="btn primary" onclick="requestDocument('Community Tax Certificate (Cedula)')">Request Now</button>
+        </div>
+
+        <!-- Cedula -->
+        <div class="doc-item" id="item-cedula">
+          <button class="doc-trigger" onclick="toggleItem('item-cedula')" aria-expanded="false">
+            <div class="doc-icon">📋</div>
+            <div class="doc-trigger-text">
+              <span class="doc-trigger-title">Community Tax Certificate (Cedula)</span>
+              <span class="doc-trigger-desc">Annual tax certificate required for many transactions</span>
+            </div>
+            <div class="doc-trigger-meta">
+              <span class="doc-fee">₱5.00+</span>
+              <span class="doc-days">Same day</span>
+            </div>
+            <svg class="doc-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+          </button>
+          <div class="doc-panel">
+            <div class="doc-info-row">
+              <span class="doc-pill"><span class="pill-icon">💰</span> Fee: ₱5.00 + income-based</span>
+              <span class="doc-pill"><span class="pill-icon">📅</span> Issued same day</span>
+              <span class="doc-pill"><span class="pill-icon">🕗</span> Mon–Fri, 8AM–5PM</span>
+            </div>
+            <div class="steps-label">📋 What to Bring</div>
+            <ul class="step-list">
+              <li><span class="step-check">✓</span> Valid Government-issued ID</li>
+              <li><span class="step-check">✓</span> Previous year's Cedula (for renewal)</li>
+              <li><span class="step-check">✓</span> Basic fee of ₱5.00 (plus amount based on income)</li>
+            </ul>
+            <div class="steps-label" style="margin-top:1.1rem">🪜 How to Apply — Step by Step</div>
+            <ul class="step-list">
+              <li><span class="step-num">1</span> Go to the cashier's window at the Barangay Hall</li>
+              <li><span class="step-num">2</span> Present your ID and state your gross income if asked</li>
+              <li><span class="step-num">3</span> Pay the corresponding fee</li>
+              <li><span class="step-num">4</span> Receive your Cedula — usually issued on the same day</li>
+            </ul>
+            <div class="doc-action-row">
+              <button class="btn-apply" onclick="openRequestModal('Community Tax Certificate (Cedula)')">Request Online Now</button>
+            </div>
           </div>
-          <div class="document-card">
-            <div class="document-icon">📑</div>
-            <h4>First-Time Jobseeker Certificate</h4>
-            <p>For first-time employment seekers</p>
-            <button class="btn primary" onclick="requestDocument('First-Time Jobseeker Certificate')">Request Now</button>
+        </div>
+
+        <!-- First-Time Jobseeker -->
+        <div class="doc-item" id="item-jobseeker">
+          <button class="doc-trigger" onclick="toggleItem('item-jobseeker')" aria-expanded="false">
+            <div class="doc-icon">📑</div>
+            <div class="doc-trigger-text">
+              <span class="doc-trigger-title">First-Time Jobseeker Certificate</span>
+              <span class="doc-trigger-desc">Exempts first-time jobseekers from government document fees</span>
+            </div>
+            <div class="doc-trigger-meta">
+              <span class="doc-fee" style="background:#dcfce7;color:#166534">FREE</span>
+              <span class="doc-days">1–2 working days</span>
+            </div>
+            <svg class="doc-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+          </button>
+          <div class="doc-panel">
+            <div class="doc-info-row">
+              <span class="doc-pill"><span class="pill-icon">✅</span> No Fee — Free under RA 11261</span>
+              <span class="doc-pill"><span class="pill-icon">📅</span> 1–2 working days</span>
+              <span class="doc-pill"><span class="pill-icon">🕗</span> Mon–Fri, 8AM–5PM</span>
+            </div>
+            <div class="steps-label">📋 What to Bring</div>
+            <ul class="step-list">
+              <li><span class="step-check">✓</span> PSA Birth Certificate</li>
+              <li><span class="step-check">✓</span> School diploma or TOR (Transcript of Records)</li>
+              <li><span class="step-check">✓</span> Valid ID or any proof of identity</li>
+              <li><span class="step-check">✓</span> Sworn declaration that you have never been employed</li>
+              <li><span class="step-check">✓</span> No fee — this certificate is completely free</li>
+            </ul>
+            <div class="steps-label" style="margin-top:1.1rem">🪜 How to Apply — Step by Step</div>
+            <ul class="step-list">
+              <li><span class="step-num">1</span> Bring your documents to the Barangay Hall</li>
+              <li><span class="step-num">2</span> Fill out and sign the sworn declaration form</li>
+              <li><span class="step-num">3</span> Submit documents to the Barangay Secretary</li>
+              <li><span class="step-num">4</span> Receive your certificate — no payment required (Republic Act 11261)</li>
+            </ul>
+            <div class="doc-action-row">
+              <button class="btn-apply" onclick="openRequestModal('First-Time Jobseeker Certificate')">Request Online Now</button>
+            </div>
           </div>
         </div>
       </div>
-    </div>
+
+    </div><!-- /container -->
   </section>
 
-  <!-- Requirements Modal -->
-  <div class="modal-backdrop" id="req-modal" style="display:none" onclick="closeModal()">
-    <div class="modal" onclick="event.stopPropagation()">
-      <button class="modal-close" onclick="closeModal()">&times;</button>
-      <h3 id="modal-title"></h3>
-      <div class="modal-body" id="modal-body"></div>
-      <div class="modal-footer">
-        <button class="btn secondary" onclick="closeModal()">Close</button>
-        <button class="btn primary" onclick="closeModal();showRequestForm()">Apply Now</button>
+  <!-- ══════════════════════════════════════════════════════════════ -->
+  <!-- REQUEST FORM MODAL                                            -->
+  <!-- ══════════════════════════════════════════════════════════════ -->
+  <div class="modal-backdrop" id="request-modal" onclick="handleBackdropClick(event)">
+    <div class="modal-box" onclick="event.stopPropagation()">
+      <button class="modal-close-btn" onclick="closeRequestModal()" title="Close">✕</button>
+      <h3>📝 Submit a Document Request</h3>
+
+      <div class="alert alert-error" id="req-error" style="display:none"></div>
+      <div class="alert alert-success" id="req-success" style="display:none"></div>
+
+      <div class="form-field">
+        <label>Full Name *</label>
+        <input type="text" id="req-name" placeholder="Your full name" required>
       </div>
-    </div>
-  </div>
-
-  <!-- Request Form Modal -->
-  <div class="modal-backdrop" id="request-modal" style="display:none" onclick="closeRequestModal()">
-    <div class="modal" style="max-width:600px;width:90%" onclick="event.stopPropagation()">
-      <button class="modal-close" onclick="closeRequestModal()">&times;</button>
-      <h3>Request Document</h3>
-      <div id="request-form-content">
-        <div class="error-msg" id="req-error" style="display:none"></div>
-        <div class="success-msg" id="req-success" style="display:none"></div>
-        <div class="form-group">
-          <label>Full Name *</label>
-          <input type="text" class="input" id="req-name" required>
-        </div>
-        <div class="form-group">
-          <label>Document Type *</label>
-          <select class="input" id="req-doctype" style="border:1px solid #d1d5db;border-radius:.5rem;padding:.75rem;width:100%;font-size:.95rem"></select>
-        </div>
-        <div class="form-group">
-          <label>Purpose *</label>
-          <!-- FIX #7: Purpose resets on close -->
-          <textarea class="input" id="req-purpose" rows="3" placeholder="State the purpose for requesting this document" required></textarea>
-        </div>
-        <div class="form-group">
-          <label>Contact Number *</label>
-          <!-- FIX #5: numbers only, max 11, starts with 09 -->
-          <input type="tel" class="input" id="req-contact" placeholder="09XXXXXXXXX" maxlength="11" inputmode="numeric" required>
-          <small id="req-contact-warning" style="color:#dc2626;display:none;font-size:0.8rem;margin-top:0.25rem;">
-            Must be exactly 11 digits and start with 09
-          </small>
-        </div>
-        <div class="form-group">
-          <label>Email Address</label>
-          <input type="email" class="input" id="req-email">
-        </div>
-        <div class="form-group">
-          <label>Complete Address *</label>
-          <!-- FIX #7: Address resets on close -->
-          <textarea class="input" id="req-address" rows="2" placeholder="Lot/Block, Street, Zone, Barangay" required></textarea>
-        </div>
-        <div class="modal-footer">
-          <button class="btn secondary" onclick="closeRequestModal()">Cancel</button>
-          <button class="btn primary" id="req-submit-btn" onclick="submitRequest()">Submit Request</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <footer class="footer">
-    <div class="container">
-      <div class="footer-content">
-        <div class="footer-section"><h4>Barangay 853</h4><p>Serving the community with dedication and transparency</p></div>
-        <div class="footer-section"><h4>Quick Links</h4><ul><li><a href="index.html">Home</a></li><li><a href="documents.html">Documents</a></li><li><a href="announcements.html">Announcements</a></li><li><a href="about.html">About</a></li></ul></div>
-        <div class="footer-section"><h4>Contact Us</h4><p>Email: barangay853@example.com</p><p>Phone: (02) 1234-5678</p></div>
-      </div>
-      <div class="footer-bottom"><p>&copy; 2025 Barangay 853. All rights reserved.</p></div>
-    </div>
-  </footer>
-
-  <script>
-    const requirements = {
-      'clearance-requirements': { title: 'Barangay Clearance Requirements', content: `<ul class="requirements-list"><li>Valid ID (Government-issued)</li><li>Barangay Residency Certificate or Proof of Address</li><li>1x1 ID Picture (2 copies)</li><li>Cedula or Community Tax Certificate</li><li>Processing Fee: ₱50.00</li></ul><p><strong>Processing Time:</strong> 3-5 working days</p>` },
-      'business-requirements': { title: 'Business Clearance Requirements', content: `<ul class="requirements-list"><li>DTI/SEC Registration</li><li>Valid ID of Business Owner</li><li>Proof of Business Location</li><li>Barangay Clearance (Personal)</li><li>Processing Fee: ₱200.00</li></ul><p><strong>Processing Time:</strong> 5-7 working days</p>` },
-      'construction-requirements': { title: 'Construction Clearance Requirements', content: `<ul class="requirements-list"><li>Building Permit from City Hall</li><li>Approved Building Plans</li><li>Valid ID of Property Owner</li><li>Land Title or Tax Declaration</li><li>Processing Fee: ₱500.00</li></ul><p><strong>Processing Time:</strong> 7-10 working days</p>` },
-      'residency-requirements': { title: 'Certificate of Residency Requirements', content: `<ul class="requirements-list"><li>Valid ID (Government-issued)</li><li>Proof of Address (Utility Bill, Lease Contract)</li><li>1x1 ID Picture (1 copy)</li><li>Processing Fee: ₱30.00</li></ul><p><strong>Processing Time:</strong> 2-3 working days</p>` },
-      'indigency-requirements': { title: 'Certificate of Indigency Requirements', content: `<ul class="requirements-list"><li>Valid ID</li><li>Proof of Income (if employed)</li><li>Medical Certificate (if for medical assistance)</li><li>Barangay Clearance</li><li>Processing Fee: Free</li></ul><p><strong>Processing Time:</strong> 3-5 working days</p>` },
-      'moral-requirements': { title: 'Good Moral Certificate Requirements', content: `<ul class="requirements-list"><li>Valid ID</li><li>Barangay Clearance</li><li>1x1 ID Picture (1 copy)</li><li>Letter of Request stating purpose</li><li>Processing Fee: ₱50.00</li></ul><p><strong>Processing Time:</strong> 3-5 working days</p>` }
-    };
-
-    let selectedDocType = '';
-
-    function openModal(type) {
-      const req = requirements[type];
-      if (!req) return;
-      document.getElementById('modal-title').textContent = req.title;
-      document.getElementById('modal-body').innerHTML = req.content;
-      document.getElementById('req-modal').style.display = 'flex';
-    }
-
-    function closeModal() {
-      document.getElementById('req-modal').style.display = 'none';
-    }
-
-    function requestDocument(docType) {
-      selectedDocType = docType;
-      const user = JSON.parse(localStorage.getItem('user') || 'null');
-      if (!user) { window.location.href = 'login.html'; return; }
-      const sel = document.getElementById('req-doctype');
-      if (docType) {
-        sel.innerHTML = `<option value="${docType}">${docType}</option>`;
-        sel.disabled = true;
-      } else {
-        sel.innerHTML = `
-          <option value="">-- Select Document Type --</option>
+      <div class="form-field">
+        <label>Document Type *</label>
+        <select id="req-doctype">
+          <option value="">-- Select a Document --</option>
           <option>Barangay Clearance</option>
           <option>Business Clearance</option>
           <option>Construction Clearance</option>
@@ -249,48 +807,112 @@
           <option>Good Moral Certificate</option>
           <option>Barangay ID</option>
           <option>Community Tax Certificate (Cedula)</option>
-          <option>First-Time Jobseeker Certificate</option>`;
-        sel.disabled = false;
+          <option>First-Time Jobseeker Certificate</option>
+        </select>
+      </div>
+      <div class="form-field">
+        <label>Purpose *</label>
+        <textarea id="req-purpose" rows="3" placeholder="Why do you need this document? e.g. For employment, for school enrollment…"></textarea>
+      </div>
+      <div class="form-field">
+        <label>Contact Number *</label>
+        <input type="tel" id="req-contact" placeholder="09XXXXXXXXX" maxlength="11" inputmode="numeric">
+        <small class="warn" id="req-contact-warning">Must be exactly 11 digits and start with 09</small>
+      </div>
+      <div class="form-field">
+        <label>Email Address</label>
+        <input type="email" id="req-email" placeholder="yourname@email.com">
+      </div>
+      <div class="form-field">
+        <label>Complete Address *</label>
+        <textarea id="req-address" rows="2" placeholder="Lot/Block, Street, Zone, Barangay 853"></textarea>
+      </div>
+      <div class="modal-actions">
+        <button class="btn-cancel" onclick="closeRequestModal()">Cancel</button>
+        <button class="btn-submit" id="req-submit-btn" onclick="submitRequest()">Submit Request</button>
+      </div>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-content">
+        <div class="footer-section"><h4>Barangay 853</h4><p>Serving the community with dedication and transparency</p></div>
+        <div class="footer-section"><h4>Quick Links</h4><ul><li><a href="index.html">Home</a></li><li><a href="documents.html">Documents</a></li><li><a href="announcements.html">Announcements</a></li><li><a href="transparency.html">Transparency</a></li><li><a href="about.html">About</a></li></ul></div>
+        <div class="footer-section"><h4>Contact Us</h4><p>Email: barangay853@example.com</p><p>Phone: (02) 1234-5678</p></div>
+      </div>
+      <div class="footer-bottom"><p>&copy; 2025 Barangay 853. All rights reserved.</p></div>
+    </div>
+  </footer>
+
+  <script>
+    // ── Accordion ──────────────────────────────────────────────────────────────
+    function toggleItem(id) {
+      const item = document.getElementById(id);
+      const isOpen = item.classList.contains('open');
+      // Close all
+      document.querySelectorAll('.doc-item').forEach(el => {
+        el.classList.remove('open');
+        el.querySelector('.doc-trigger').setAttribute('aria-expanded', 'false');
+      });
+      // Open clicked if it was closed
+      if (!isOpen) {
+        item.classList.add('open');
+        item.querySelector('.doc-trigger').setAttribute('aria-expanded', 'true');
+        // Smooth scroll into view
+        setTimeout(() => item.scrollIntoView({ behavior:'smooth', block:'nearest' }), 50);
       }
-      // Pre-fill name and email from user
-      document.getElementById('req-name').value = user.name || '';
-      document.getElementById('req-email').value = user.email || '';
-      // FIX #7: Always clear purpose and address when opening
+    }
+
+    // ── Request Modal ──────────────────────────────────────────────────────────
+    function openRequestModal(docType) {
+      const user = JSON.parse(localStorage.getItem('user') || 'null');
+      if (!user) { window.location.href = 'login.html'; return; }
+
+      // Pre-fill
+      document.getElementById('req-name').value    = user.name  || '';
+      document.getElementById('req-email').value   = user.email || '';
       document.getElementById('req-purpose').value = '';
       document.getElementById('req-address').value = '';
-      // Reset contact field and validation state
       document.getElementById('req-contact').value = '';
       document.getElementById('req-contact').style.borderColor = '';
       document.getElementById('req-contact-warning').style.display = 'none';
-      // Clear any previous messages
-      document.getElementById('req-error').style.display = 'none';
+      document.getElementById('req-error').style.display   = 'none';
       document.getElementById('req-success').style.display = 'none';
 
-      document.getElementById('request-modal').style.display = 'flex';
-    }
+      const sel = document.getElementById('req-doctype');
+      if (docType) {
+        sel.value = docType;
+        // If exact match doesn't exist, add it
+        if (sel.value !== docType) {
+          const opt = document.createElement('option');
+          opt.value = docType; opt.textContent = docType;
+          sel.appendChild(opt);
+          sel.value = docType;
+        }
+      }
 
-    function showRequestForm() {
-      const user = JSON.parse(localStorage.getItem('user') || 'null');
-      if (!user) { window.location.href = 'login.html'; return; }
-      requestDocument('');
+      document.getElementById('request-modal').classList.add('open');
     }
 
     function closeRequestModal() {
-      document.getElementById('request-modal').style.display = 'none';
-      // FIX #7: Reset purpose and address on close
+      document.getElementById('request-modal').classList.remove('open');
       document.getElementById('req-purpose').value = '';
       document.getElementById('req-address').value = '';
       document.getElementById('req-contact').value = '';
       document.getElementById('req-contact').style.borderColor = '';
       document.getElementById('req-contact-warning').style.display = 'none';
-      document.getElementById('req-error').style.display = 'none';
+      document.getElementById('req-error').style.display   = 'none';
       document.getElementById('req-success').style.display = 'none';
     }
 
-    // FIX #5: Phone validation for document request contact field
+    function handleBackdropClick(e) {
+      if (e.target === document.getElementById('request-modal')) closeRequestModal();
+    }
+
+    // ── Phone validation ───────────────────────────────────────────────────────
     const reqContact = document.getElementById('req-contact');
     const reqContactWarning = document.getElementById('req-contact-warning');
-
     reqContact.addEventListener('input', function () {
       this.value = this.value.replace(/\D/g, '').slice(0, 11);
       validateReqContact();
@@ -299,23 +921,16 @@
       const allowed = ['Backspace','Delete','Tab','ArrowLeft','ArrowRight','Home','End'];
       if (!allowed.includes(e.key) && !/^\d$/.test(e.key)) e.preventDefault();
     });
-
     function validateReqContact() {
       const val = reqContact.value;
       const valid = /^09\d{9}$/.test(val);
-      if (val.length === 0) {
-        reqContactWarning.style.display = 'none';
-        reqContact.style.borderColor = '';
-      } else if (!valid) {
-        reqContactWarning.style.display = 'block';
-        reqContact.style.borderColor = '#dc2626';
-      } else {
-        reqContactWarning.style.display = 'none';
-        reqContact.style.borderColor = '#16a34a';
-      }
+      if (!val) { reqContactWarning.style.display='none'; reqContact.style.borderColor=''; }
+      else if (!valid) { reqContactWarning.style.display='block'; reqContact.style.borderColor='#dc2626'; }
+      else { reqContactWarning.style.display='none'; reqContact.style.borderColor='#16a34a'; }
       return valid;
     }
 
+    // ── Submit ─────────────────────────────────────────────────────────────────
     async function submitRequest() {
       const name    = document.getElementById('req-name').value.trim();
       const docType = document.getElementById('req-doctype').value;
@@ -326,27 +941,16 @@
       const errEl   = document.getElementById('req-error');
       const sucEl   = document.getElementById('req-success');
       const btn     = document.getElementById('req-submit-btn');
-
-      errEl.style.display = 'none';
-      sucEl.style.display = 'none';
-
+      errEl.style.display = 'none'; sucEl.style.display = 'none';
       if (!name || !docType || !purpose || !contact || !address) {
         errEl.textContent = 'Please fill in all required fields.';
-        errEl.style.display = 'block';
-        return;
+        errEl.style.display = 'block'; return;
       }
-
-      // FIX #5: Validate phone before submitting
       if (!validateReqContact()) {
         errEl.textContent = 'Contact number must be exactly 11 digits and start with 09.';
-        errEl.style.display = 'block';
-        reqContact.focus();
-        return;
+        errEl.style.display = 'block'; reqContact.focus(); return;
       }
-
-      btn.disabled = true;
-      btn.textContent = 'Submitting...';
-
+      btn.disabled = true; btn.textContent = 'Submitting…';
       try {
         const res = await fetch(`${API}/documents/index.php`, {
           method: 'POST',
@@ -355,27 +959,23 @@
         });
         const data = await res.json();
         if (data.success) {
-          // FIX #6: Show success immediately, close modal right away (no 10-sec email delay visible)
-          sucEl.innerHTML = `✅ Request submitted!<br><strong>Reference No: ${data.reference_no}</strong><br><small>Save this number to track your request.</small>`;
+          sucEl.innerHTML = `✅ Request submitted!<br><strong>Reference No: ${data.reference_no}</strong><br><small>Please save this number to track your request at the Barangay Hall.</small>`;
           sucEl.style.display = 'block';
-          // FIX #7: Clear purpose and address after success
           document.getElementById('req-purpose').value = '';
           document.getElementById('req-address').value = '';
           document.getElementById('req-contact').value = '';
           document.getElementById('req-contact').style.borderColor = '';
           reqContactWarning.style.display = 'none';
-          // Close after 2.5 seconds (user can read the ref number)
-          setTimeout(() => closeRequestModal(), 2500);
+          setTimeout(() => closeRequestModal(), 3000);
         } else {
-          errEl.textContent = data.message || 'Submission failed.';
+          errEl.textContent = data.message || 'Submission failed. Please try again.';
           errEl.style.display = 'block';
         }
       } catch (err) {
-        errEl.textContent = 'Cannot connect to server. Make sure XAMPP is running.';
+        errEl.textContent = 'Cannot connect to server. Please make sure you are logged in and try again.';
         errEl.style.display = 'block';
       } finally {
-        btn.disabled = false;
-        btn.textContent = 'Submit Request';
+        btn.disabled = false; btn.textContent = 'Submit Request';
       }
     }
   </script>
